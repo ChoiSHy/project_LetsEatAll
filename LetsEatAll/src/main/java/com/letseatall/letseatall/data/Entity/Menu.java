@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -17,10 +19,19 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-
     @ManyToOne
     @JoinColumn(name="restaurant_id")
     @ToString.Exclude
     private Restaurant restaurant;
+
+    @Column(nullable = false)
+    String name;
+    @Column
+    int price;
+    @Column
+    int category;
+
+    @OneToMany(mappedBy = "Menu", fetch = FetchType.EAGER)
+    @ToString.Exclude
+    private List<Review> reviews= new ArrayList<>();
 }

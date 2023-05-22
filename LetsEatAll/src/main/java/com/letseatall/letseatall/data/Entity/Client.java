@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="Client")
+@Table(name="client")
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +24,5 @@ public class Client {
     @Column(nullable = false)
     private LocalDate birthDate;
     @Column(nullable = false)
-    @ColumnDefault("50")
     private int score;
 }

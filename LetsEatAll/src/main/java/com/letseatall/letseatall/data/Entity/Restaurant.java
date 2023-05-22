@@ -30,7 +30,4 @@ public class Restaurant {
     private int category;
     @Column
     private int fid;       // franchise id
-    @OneToMany(mappedBy = "menu", fetch=FetchType.EAGER)
-    @ToString.Exclude
-    private List<Menu> menus = new ArrayList<>();
 }
