@@ -14,9 +14,9 @@ import javax.persistence.*;
 public class Franchise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @Column(nullable = false)
-    String name;
+    private String name;
     @Column
-    int category;
+    private int category;
 }

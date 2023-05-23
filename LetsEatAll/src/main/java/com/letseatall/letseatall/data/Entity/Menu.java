@@ -19,19 +19,13 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name="restaurant_id")
-    @ToString.Exclude
-    private Restaurant restaurant;
+    @Column(nullable = false)
+    private Long rid;
 
     @Column(nullable = false)
-    String name;
+    private String name;
     @Column
-    int price;
+    private int price;
     @Column
-    int category;
-
-    @OneToMany(mappedBy = "Menu", fetch = FetchType.EAGER)
-    @ToString.Exclude
-    private List<Review> reviews= new ArrayList<>();
+    private int category;
 }

@@ -12,21 +12,21 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="review")
+@Table(name = "review")
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @Column(nullable = false)
-    Long cid;   // writer client id
+    private Long cid;   // writer client id
     @Column(nullable = false)
-    String title;
+    private String title;
     @Column
-    String content;
+    private String content;
     @Column(nullable = false)
-    int score;
+    private int score;
     @Column(nullable = false)
-    int recCnt;
+    private int recCnt;
     @Column
-    Long pid;   // photo id
+    private Long pid;   // photo id
 }
