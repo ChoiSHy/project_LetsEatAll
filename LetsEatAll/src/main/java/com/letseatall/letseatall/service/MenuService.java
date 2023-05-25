@@ -1,4 +1,13 @@
 package com.letseatall.letseatall.service;
 
-public class MenuService {
+import com.letseatall.letseatall.data.dto.Menu.MenuDto;
+import com.letseatall.letseatall.data.dto.Menu.MenuElement;
+import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
+
+public interface MenuService {
+    MenuResponseDto saveMenu(MenuDto menuDto);
+    MenuResponseDto getMenu(Long id);
+    MenuResponseDto changeMenuPrice(Long id, int price);
+    MenuElement getMenuElement(Long id);
+    void deleteMenu(Long id);
 }

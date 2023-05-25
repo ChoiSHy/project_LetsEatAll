@@ -1,4 +1,8 @@
 package com.letseatall.letseatall.data.repository;
 
-public class YoutubeRepository {
+import com.letseatall.letseatall.data.Entity.Youtube;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface YoutubeRepository extends JpaRepository<Youtube, Long> {
+    Youtube findByMid(Long mid);
 }
