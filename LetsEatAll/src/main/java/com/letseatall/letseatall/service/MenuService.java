@@ -7,7 +7,7 @@ import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 public interface MenuService {
     MenuResponseDto saveMenu(MenuDto menuDto);
     MenuResponseDto getMenu(Long id);
-    MenuResponseDto changeMenuPrice(Long id, int price);
+    boolean changeMenuPrice(Long id, int price);
     MenuElement getMenuElement(Long id);
     void deleteMenu(Long id);
 }

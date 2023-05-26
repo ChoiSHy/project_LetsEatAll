@@ -20,6 +20,8 @@ public class Review {
     @Column(nullable = false)
     private Long cid;   // writer client id
     @Column(nullable = false)
+    private Long mid;
+    @Column(nullable = false)
     private String title;
     @Column
     private String content;

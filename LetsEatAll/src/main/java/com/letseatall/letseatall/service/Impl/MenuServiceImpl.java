@@ -99,16 +99,14 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public MenuResponseDto changeMenuPrice(Long id, int price) {
+    public boolean changeMenuPrice(Long id, int price) {
         Menu foundMenu = menuRepository.findById(id).get();
         foundMenu.setPrice(price);
         Menu chagedMenu = menuRepository.save(foundMenu);
 
-
-
-
-
-        return null;
+        if (chagedMenu.getPrice() != price)
+            return false;
+        return true;
     }
 
     @Override

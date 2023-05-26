@@ -26,3 +26,4 @@ public class Login {
     @Column(nullable = false)
     private Long uid;
 }
+
