@@ -1,6 +1,6 @@
 package com.letseatall.letseatall.service.Impl;
 
-import com.letseatall.letseatall.data.Entity.Client;
+import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.Entity.Menu;
 import com.letseatall.letseatall.data.Entity.Review;
 import com.letseatall.letseatall.data.Entity.Youtube;
@@ -8,7 +8,7 @@ import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuElement;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewElement;
-import com.letseatall.letseatall.data.repository.ClientRepository;
+import com.letseatall.letseatall.data.repository.UserRepository;
 import com.letseatall.letseatall.data.repository.MenuRepository;
 import com.letseatall.letseatall.data.repository.ReviewRepository;
 import com.letseatall.letseatall.data.repository.YoutubeRepository;
@@ -25,17 +25,17 @@ public class MenuServiceImpl implements MenuService {
     MenuRepository menuRepository;
     ReviewRepository reviewRepository;
     YoutubeRepository youtubeRepository;
-    ClientRepository clientRepository;
+    UserRepository UserRepository;
 
     @Autowired
     public MenuServiceImpl(MenuRepository menuRepository,
                            ReviewRepository reviewRepository,
                            YoutubeRepository youtubeRepository,
-                           ClientRepository clientRepository) {
+                           UserRepository UserRepository) {
         this.menuRepository = menuRepository;
         this.reviewRepository = reviewRepository;
         this.youtubeRepository = youtubeRepository;
-        this.clientRepository = clientRepository;
+        this.UserRepository = UserRepository;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class MenuServiceImpl implements MenuService {
         List<Review> reviews = reviewRepository.findAllByMid(id);
         List<ReviewElement> reviewElements = new ArrayList<>();
         for (Review review : reviews){
-            Client client = clientRepository.findById(review.getCid()).get();
+            User User = UserRepository.findById(review.getUid()).get();
 
             ReviewElement element = ReviewElement.builder()
                     .id(review.getId())
@@ -70,8 +70,8 @@ public class MenuServiceImpl implements MenuService {
                     .img(review.getPid())
                     .score(review.getScore())
                     .count(review.getRecCnt())
-                    .cid(review.getCid())
-                    .writer(client.getName())
+                    .uid(review.getUid())
+                    .writer(User.getName())
                     .build();
             reviewElements.add(element);
         }

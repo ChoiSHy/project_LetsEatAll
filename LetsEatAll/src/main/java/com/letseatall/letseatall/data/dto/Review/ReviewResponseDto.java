@@ -7,8 +7,8 @@ public class ReviewResponseDto {
     private Long img;
     private int score;
     private int count;
-    private Long cid;
-    private String writer;
     private Long mid;
+    private String writer;
+    private Long uid;
     private String menu;
 }

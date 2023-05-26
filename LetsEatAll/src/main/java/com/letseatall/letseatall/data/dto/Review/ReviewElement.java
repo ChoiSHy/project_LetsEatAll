@@ -10,6 +10,6 @@ public class ReviewElement {
     private Long img;
     private int score;
     private int count;
-    private Long cid;
+    private Long uid;
     private String writer;
 }

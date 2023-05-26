@@ -29,5 +29,5 @@ public class Restaurant {
     @Column
     private int category;
     @Column
-    private int fid;       // franchise id
+    private Long fid;       // franchise id
 }

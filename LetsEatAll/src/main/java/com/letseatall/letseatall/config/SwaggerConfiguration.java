@@ -24,7 +24,7 @@ public class SwaggerConfiguration {
     }
     private ApiInfo apiInfo(){
         return new ApiInfoBuilder()
-                .title("Swagger client API Test")
+                .title("Swagger User API Test")
                 .description("...")
                 .version("1.0.0")
                 .build();

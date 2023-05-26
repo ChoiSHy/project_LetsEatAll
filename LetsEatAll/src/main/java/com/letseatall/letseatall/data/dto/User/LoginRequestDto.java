@@ -1,4 +1,4 @@
-package com.letseatall.letseatall.data.dto.Client;
+package com.letseatall.letseatall.data.dto.User;
 
 import lombok.Getter;
 

@@ -1,17 +1,20 @@
-package com.letseatall.letseatall.data.dto.Client;
+package com.letseatall.letseatall.data.dto.User;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import java.time.LocalDate;
 
 @Getter
 @Setter
-public class ClientDto {
+@Builder
+public class UserResponseDto {
+    private Long id;
     private String name;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
-    private String id;
-    private String pw;
+    private int score;
 }

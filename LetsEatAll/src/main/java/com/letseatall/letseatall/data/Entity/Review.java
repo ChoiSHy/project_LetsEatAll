@@ -18,7 +18,7 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private Long cid;   // writer client id
+    private Long uid;   // writer User id
     @Column(nullable = false)
     private Long mid;
     @Column(nullable = false)
