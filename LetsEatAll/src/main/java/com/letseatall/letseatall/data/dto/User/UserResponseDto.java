@@ -1,6 +1,7 @@
 package com.letseatall.letseatall.data.dto.User;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.letseatall.letseatall.data.Entity.User;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

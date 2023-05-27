@@ -10,5 +10,5 @@ public interface UserService {
     UserResponseDto getUser(Long id);
     UserResponseDto saveUser(UserDto UserDto);
     UserResponseDto tryLogin(LoginRequestDto loginRequestDto);
-    String deleteUser(Long id);
+    void deleteUser(String id);
 }

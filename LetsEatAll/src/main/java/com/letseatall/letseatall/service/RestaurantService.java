@@ -7,7 +7,7 @@ import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
 
 public interface RestaurantService {
     RestaurantResponseDto saveRestaurant(RestaurantDto restaurantDto);
-    RestaurantResponseDto getResponse(Long id);
+    RestaurantResponseDto getRestaurant(Long id);
 
     FranchiseResponseDto saveFranchise(FranchiseDto franchiseDto);
     FranchiseResponseDto getFranchise(Long id);

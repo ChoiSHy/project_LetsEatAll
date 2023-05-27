@@ -8,20 +8,14 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Builder
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "login")
-public class Login {
+@NoArgsConstructor
+@Builder
+public class Category {
     @Id
-    private String id;
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    int id;
     @Column(nullable = false)
-    private String pw;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
-    private User user;
+    String name;
 }
-

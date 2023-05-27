@@ -39,21 +39,22 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto saveUser(UserDto userDto) {
         if (loginRepository.existsById(userDto.getId()))
             return UserResponseDto.builder().name("id_duplication").score(-101).build();
+
         User user = User.builder()
                 .name(userDto.getName())
                 .birthDate(userDto.getBirthDate())
                 .score(50)
                 .build();
         User savedUser = userRepository.save(user);
+
         System.out.println(savedUser.getId());
 
         Login login = Login.builder()
                 .id(userDto.getId())
                 .pw(userDto.getPw())
-                .uid(savedUser.getId())
+                .user(savedUser)
                 .build();
         loginRepository.save(login);
-
 
         return UserResponseDto.builder()
                 .id(savedUser.getId())
@@ -66,34 +67,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto tryLogin(LoginRequestDto loginRequestDto) {
         Login foundLogin = loginRepository.findById(loginRequestDto.getId()).get();
-        System.out.println(foundLogin.getId());
-        System.out.println("loginRequestDto: "+loginRequestDto.getPw());
-        System.out.println("foundLogin: "+foundLogin.getPw());
-        if (foundLogin == null)
+        if(foundLogin == null)
             return null;
 
-        else if (loginRequestDto.getPw().compareTo(foundLogin.getPw())!=0){
-            return UserResponseDto.builder()
-                    .id(-400L)
-                    .build();}
-        else{
-            User foundUser = userRepository.findById(foundLogin.getUid()).get();
+        if (foundLogin.getPw().compareTo(loginRequestDto.getPw()) != 0)
+            return UserResponseDto.builder().id(-400L).name("id_duplication").build();
 
-            return UserResponseDto.builder()
+        else{
+            User foundUser = foundLogin.getUser();
+            UserResponseDto responseDto = UserResponseDto.builder()
                     .id(foundUser.getId())
                     .name(foundUser.getName())
-                    .score(foundUser.getScore())
                     .birthDate(foundUser.getBirthDate())
+                    .score(foundUser.getScore())
                     .build();
+            return responseDto;
         }
     }
 
     @Override
-    public String deleteUser(Long uid) {
-        userRepository.deleteById(uid);
-        String id = loginRepository.findIdByUid(uid);
+    public void deleteUser(String id) {
         loginRepository.deleteById(id);
-
-        return id;
     }
 }

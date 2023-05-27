@@ -18,12 +18,16 @@ public class Menu {
     private Long id;
 
     @Column(nullable = false)
-    private Long rid;
-
-    @Column(nullable = false)
     private String name;
     @Column
     private int price;
     @Column
     private int category;
+    @Column(nullable = false)
+    private int score;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="restaurant_id")
+    @ToString.Exclude
+    private Restaurant restaurant;
 }

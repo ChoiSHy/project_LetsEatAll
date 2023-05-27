@@ -14,24 +14,24 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/User")
 public class UserController {
 
-    private final UserService UserService;
+    private final UserService userService;
 
     @Autowired
     /* 생성자 */
     public UserController(UserService UserService){
-        this.UserService = UserService;
+        this.userService = UserService;
     }
 
     @GetMapping()
     /* 회원 정보 요구 */
     public ResponseEntity<UserResponseDto> getUser(Long id){
-        UserResponseDto returnUser = UserService.getUser(id);
+        UserResponseDto returnUser = userService.getUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(returnUser);
     }
     @PostMapping()
     /* 회원 가입 */
     public ResponseEntity<UserResponseDto> register(@RequestBody UserDto UserDto){
-        UserResponseDto returnUser = UserService.saveUser(UserDto);
+        UserResponseDto returnUser = userService.saveUser(UserDto);
         if(returnUser.getScore() == -101)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(returnUser);
         else if (returnUser != null)
@@ -42,7 +42,7 @@ public class UserController {
     @PostMapping("/login")
     /* 로그인 시도 */
     public ResponseEntity<UserResponseDto> tryLogin(@RequestBody LoginRequestDto loginRequestDto){
-        UserResponseDto returnUser = UserService.tryLogin(loginRequestDto);
+        UserResponseDto returnUser = userService.tryLogin(loginRequestDto);
         if(returnUser == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         else if (returnUser.getId()== -400L){
@@ -54,9 +54,8 @@ public class UserController {
 
     @DeleteMapping()
     /* 회원정보 삭제 */
-    public ResponseEntity<String> deleteUser(Long id) throws Exception{
-        String deletedId = UserService.deleteUser(id);
-
-        return ResponseEntity.status(HttpStatus.OK).body("ID: "+ deletedId + "삭제 완료되었습니다.");
+    public ResponseEntity<String> deleteUser(String id) throws Exception{
+        userService.deleteUser(id);
+        return ResponseEntity.status(HttpStatus.OK).body("["+id+"] 삭제되었습니다.");
     }
 }

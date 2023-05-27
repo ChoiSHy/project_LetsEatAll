@@ -19,10 +19,6 @@ public class Restaurant {
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)
-    private double xpos;
-    @Column(nullable = false)
-    private double ypos;
-    @Column(nullable = false)
     private int score;
     @Column
     private String addr;
@@ -30,4 +26,10 @@ public class Restaurant {
     private int category;
     @Column
     private Long fid;       // franchise id
+
+    @OneToMany(mappedBy = "restaurant",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER)
+    @ToString.Exclude
+    private List<Menu> menus = new ArrayList<>();
 }
