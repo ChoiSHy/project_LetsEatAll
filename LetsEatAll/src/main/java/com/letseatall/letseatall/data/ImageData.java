@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.awt.*;
 
-
+@Entity
 public class ImageData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(nullable = false)
-    Image img;
+    String img;
 
 
 }
