@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.data.Entity;
 
+import com.letseatall.letseatall.data.dto.Restaurant.FranchiseDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,14 +23,11 @@ public class Restaurant {
     private int score;
     @Column
     private String addr;
-    @Column
-    private int category;
-    @Column
-    private Long fid;       // franchise id
-
-    @OneToMany(mappedBy = "restaurant",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER)
+    @ManyToOne
+    @JoinColumn(name="category_id")
+    private Category category;
+    @ManyToOne
+    @JoinColumn(name="franchise_id")
     @ToString.Exclude
-    private List<Menu> menus = new ArrayList<>();
+    private Franchise franchise;
 }

@@ -1,22 +1,32 @@
 package com.letseatall.letseatall.data.Entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="franchise")
+@Builder
+@Table(name = "franchise")
 public class Franchise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String name;
-    @Column
-    private int category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+/*
+    @OneToMany(mappedBy = "restaurant")
+    @ToString.Exclude
+    private List<Restaurant> chains = new ArrayList<>();
+
+    public void addChain(final Restaurant restaurant){
+        chains.add(restaurant);
+    }*/
 }

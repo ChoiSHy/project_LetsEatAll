@@ -12,11 +12,4 @@ public class MenuElement {
     private String name;
     private int price;
     private int category;
-
-    public MenuElement(Menu menu){
-        this.id= menu.getId();
-        this.name=menu.getName();
-        this.price= menu.getPrice();
-        this.category= menu.getCategory();
-    }
 }

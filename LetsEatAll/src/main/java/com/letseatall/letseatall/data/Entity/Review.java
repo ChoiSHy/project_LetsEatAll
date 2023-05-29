@@ -1,9 +1,6 @@
 package com.letseatall.letseatall.data.Entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
@@ -12,15 +9,20 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "review")
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    private Long uid;   // writer User id
-    @Column(nullable = false)
-    private Long mid;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    private User writer;
+    @ManyToOne
+    @JoinColumn(name="menu_id")
+    @ToString.Exclude
+    private Menu menu;
     @Column(nullable = false)
     private String title;
     @Column
@@ -30,5 +32,5 @@ public class Review {
     @Column(nullable = false)
     private int recCnt;
     @Column
-    private Long pid;   // photo id
+    private String pid;   // photo id
 }

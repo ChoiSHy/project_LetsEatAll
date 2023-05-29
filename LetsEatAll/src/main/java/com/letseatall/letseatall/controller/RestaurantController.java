@@ -1,7 +1,10 @@
 package com.letseatall.letseatall.controller;
 
+import com.letseatall.letseatall.data.dto.Restaurant.FranchiseDto;
+import com.letseatall.letseatall.data.dto.Restaurant.FranchiseResponseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
+import com.letseatall.letseatall.service.MenuService;
 import com.letseatall.letseatall.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +17,8 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
     @Autowired
     public RestaurantController(RestaurantService restaurantService){
-        this.restaurantService=restaurantService;}
+        this.restaurantService=restaurantService;
+    }
 
     @GetMapping("/restaurant")
     public ResponseEntity<RestaurantResponseDto> getRestaurant(Long id){
@@ -24,10 +28,34 @@ public class RestaurantController {
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
-    @PostMapping("/restaurant/add")
+    @GetMapping("/franchise")
+    public ResponseEntity<FranchiseResponseDto> getFranchise(Long id){
+        FranchiseResponseDto responseDto = restaurantService.getFranchise(id);
+        if(responseDto == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+    @PostMapping("/restaurant/save")
     public ResponseEntity<RestaurantResponseDto> saveRestaurant(@RequestBody RestaurantDto restaurantDto){
         RestaurantResponseDto responseDto = restaurantService.saveRestaurant(restaurantDto);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+    @DeleteMapping("/restaurant/remove")
+    public ResponseEntity<String> deleteRestaurant(Long id){
+        restaurantService.deleteRestaurant(id);
+        return ResponseEntity.status(HttpStatus.OK).body("삭제 완료되었습니다.");
+    }
+
+
+    @PostMapping("/franchise/save")
+    public ResponseEntity<FranchiseResponseDto> saveFranchise(@RequestBody FranchiseDto franchiseDto){
+        FranchiseResponseDto savedDto = restaurantService.saveFranchise(franchiseDto);
+        return ResponseEntity.status(HttpStatus.OK).body(savedDto);
+    }
+    @DeleteMapping("/franchise/delete")
+    public ResponseEntity<String> deleteFranchise(Long id){
+        restaurantService.deleteFranchise(id);
+        return ResponseEntity.status(HttpStatus.OK).body("삭제 되었습니다.");
     }
 
 }

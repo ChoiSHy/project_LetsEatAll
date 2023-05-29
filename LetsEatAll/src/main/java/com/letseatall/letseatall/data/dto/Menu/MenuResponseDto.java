@@ -13,9 +13,6 @@ public class MenuResponseDto {
     private Long rid;
     private String name;
     private int price;
-    private int category;
+    private String category;
     private int score;
-    //private List<ReviewElement> reviews;
-    private String Yurl;    //youtube url
-    private String Ysum;    //YouTube summary
 }

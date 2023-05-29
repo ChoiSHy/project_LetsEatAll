@@ -10,15 +10,11 @@ import java.util.List;
 @Builder
 @Data
 public class RestaurantResponseDto {
+    private Long id;
     private String name;
     private String addr;
-    private int category;
+    private String category;
     private int score;
-    private Long fid;
-    private List<MenuElement> menus= new ArrayList<>();
-
-    public void add(Menu menu){
-        menus.add(new MenuElement(menu));
-    }
+    private String franchise;
 
 }

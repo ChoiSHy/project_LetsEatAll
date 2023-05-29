@@ -1,6 +1,7 @@
 package com.letseatall.letseatall.service.Impl;
 
 import com.letseatall.letseatall.data.Entity.*;
+import com.letseatall.letseatall.data.dto.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuElement;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
@@ -18,35 +19,41 @@ import java.util.Optional;
 public class MenuServiceImpl implements MenuService {
     RestaurantRepository restaurantRepository;
     MenuRepository menuRepository;
-    ReviewRepository reviewRepository;
     YoutubeRepository youtubeRepository;
-    UserRepository UserRepository;
-
+    UserRepository userRepository;
+    CategoryRepository categoryRepository;
+    FranchiseRepository franchiseRepository;
     @Autowired
-    public MenuServiceImpl(
-            RestaurantRepository restaurantRepository
-            , MenuRepository menuRepository,
-            ReviewRepository reviewRepository,
-            YoutubeRepository youtubeRepository,
-            UserRepository UserRepository)
+    public MenuServiceImpl(RestaurantRepository restaurantRepository,
+                           MenuRepository menuRepository,
+                           YoutubeRepository youtubeRepository,
+                           UserRepository userRepository,
+                           CategoryRepository categoryRepository,
+                           FranchiseRepository franchiseRepository)
     {
         this.restaurantRepository=restaurantRepository;
         this.menuRepository = menuRepository;
-        this.reviewRepository = reviewRepository;
         this.youtubeRepository = youtubeRepository;
-        this.UserRepository = UserRepository;
+        this.userRepository = userRepository;
+        this.categoryRepository=categoryRepository;
+        this.franchiseRepository=franchiseRepository;
     }
 
     @Override
     /* 메뉴 정보 저장 */
     public MenuResponseDto saveMenu(MenuDto menuDto) {
         Restaurant foundRest = restaurantRepository.findById(menuDto.getRid()).get();
+        Category category = categoryRepository.findById(menuDto.getCategory()).get();
+        Franchise franchise=null;
+        if (foundRest.getFranchise()!= null)
+            franchise = franchiseRepository.findById( foundRest.getFranchise().getId() ).get();
         Menu menu = Menu.builder()
                 .name(menuDto.getName())
                 .price(menuDto.getPrice())
-                .category(menuDto.getCategory())
                 .score(0)
                 .restaurant(foundRest)
+                .category(category)
+                .franchise(franchise)
                 .build();
         Menu savedMenu = menuRepository.save(menu);
 
@@ -55,72 +62,42 @@ public class MenuServiceImpl implements MenuService {
                 .name(savedMenu.getName())
                 .price(savedMenu.getPrice())
                 .score(savedMenu.getScore())
-                .category(savedMenu.getCategory())
-                .Yurl(null)
-                .Ysum(null)
+                .category(savedMenu.getCategory().getName())
                 .build();
         return menuResponseDto;
     }
-
-    /* 리뷰 정보 불러오기 */
-    private List<ReviewElement> getReviewElements(Long id) {
-        List<Review> reviews = reviewRepository.findAllByMid(id);
-        List<ReviewElement> reviewElements = new ArrayList<>();
-        for (Review review : reviews) {
-            User User = UserRepository.findById(review.getUid()).get();
-
-            ReviewElement element = ReviewElement.builder()
-                    .id(review.getId())
-                    .title(review.getTitle())
-                    .content(review.getContent())
-                    .img(review.getPid())
-                    .score(review.getScore())
-                    .count(review.getRecCnt())
-                    .uid(review.getUid())
-                    .writer(User.getName())
-                    .build();
-            reviewElements.add(element);
-        }
-        return reviewElements;
-    }
-
     @Override
+    /* 메뉴 정보 요청 */
     public MenuResponseDto getMenu(Long id) {
         Menu foundMenu = menuRepository.findById(id).get();
-        if (foundMenu == null)
-            return null;
 
-        List<ReviewElement> elements = getReviewElements(foundMenu.getId());
-        Youtube youtube = youtubeRepository.findByMid(foundMenu.getId());
-
-        MenuResponseDto menuResponseDto = MenuResponseDto.builder()
+        MenuResponseDto responseDto = MenuResponseDto.builder()
+                .rid(foundMenu.getRestaurant().getId())
                 .name(foundMenu.getName())
                 .price(foundMenu.getPrice())
-                .category(foundMenu.getCategory())
-                .Yurl(youtube.getUrl())
-                .Ysum(youtube.getContent())
+                .score(foundMenu.getScore())
+                .category(foundMenu.getCategory().getName())
                 .build();
-        return menuResponseDto;
+        return responseDto;
     }
 
     @Override
-    public boolean changeMenuPrice(Long id, int price) {
-        Menu foundMenu = menuRepository.findById(id).get();
-        foundMenu.setPrice(price);
-        Menu chagedMenu = menuRepository.save(foundMenu);
+    public boolean changeMenuPrice(IntChangeDto changeDto) {
+        Optional<Menu> foundMenu= menuRepository.findById(changeDto.getId());
+        Menu fMenu = null;
+        if (foundMenu.isPresent()){
+            fMenu = foundMenu.get();
+            fMenu.setPrice(changeDto.getValue());
+        }
+        Menu chagedMenu = menuRepository.save(fMenu);
 
-        if (chagedMenu.getPrice() != price)
+        if (chagedMenu.getPrice() != changeDto.getValue())
             return false;
         return true;
     }
 
     @Override
-    public MenuElement getMenuElement(Long id) {
-        return null;
-    }
-
-    @Override
     public void deleteMenu(Long id) {
-
+        menuRepository.deleteById(id);
     }
 }
