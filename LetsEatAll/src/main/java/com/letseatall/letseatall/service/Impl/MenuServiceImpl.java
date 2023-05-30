@@ -100,4 +100,25 @@ public class MenuServiceImpl implements MenuService {
     public void deleteMenu(Long id) {
         menuRepository.deleteById(id);
     }
+
+    @Override
+    public List<MenuResponseDto> getAllMenu(Long rid) {
+        List<Menu> menuList = menuRepository.findAllByRestaurantId(rid);
+        List<MenuResponseDto> responseDtoList=new ArrayList<>();
+
+        for(Menu menu : menuList){
+            MenuResponseDto responseDto = MenuResponseDto.builder()
+                    .rid(rid)
+                    .name(menu.getName())
+                    .price(menu.getPrice())
+                    .score(menu.getScore())
+                    .build();
+            Category category = menu.getCategory();
+            if(category != null)
+                responseDto.setCategory(category.getName());
+            responseDtoList.add(responseDto);
+        }
+        return responseDtoList;
+
+    }
 }

@@ -22,7 +22,7 @@ public class Menu {
     private String name;
     @Column
     private int price;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="category_id")
     @ToString.Exclude
     private Category category;

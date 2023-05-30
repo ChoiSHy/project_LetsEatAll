@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/menu")
 public class MenuController {
@@ -43,6 +45,12 @@ public class MenuController {
     public ResponseEntity<String> delete(Long id){
         menuService.deleteMenu(id);
         return ResponseEntity.status(HttpStatus.OK).body("삭제되었습니다.");
+    }
+
+    @GetMapping("/restaurant/all")
+    public ResponseEntity<List<MenuResponseDto>> getAllMenus(Long rid){
+        List<MenuResponseDto> rList = menuService.getAllMenu(rid);
+        return ResponseEntity.status(HttpStatus.OK).body(rList);
     }
 
 }
