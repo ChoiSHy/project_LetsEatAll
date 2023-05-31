@@ -3,6 +3,7 @@ package com.letseatall.letseatall.service.Impl;
 import com.letseatall.letseatall.data.Entity.Menu;
 import com.letseatall.letseatall.data.Entity.Review;
 import com.letseatall.letseatall.data.Entity.User;
+import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
@@ -13,6 +14,9 @@ import com.letseatall.letseatall.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,9 +39,9 @@ public class ReviewServiceImpl implements ReviewService {
         Optional<Menu> oMenu = menuRepository.findById(reviewDto.getMid());
         Optional<User> oUser = userRepository.findById(reviewDto.getUid());
 
-        if(!oMenu.isPresent())
+        if (!oMenu.isPresent())
             return null;
-        if(!oUser.isPresent())
+        if (!oUser.isPresent())
             return null;
         Menu menu = oMenu.get();
         User user = oUser.get();
@@ -59,24 +63,28 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewResponseDto getReview(Long id) {
         Optional<Review> oReview = reviewRepository.findById(id);
-        if(oReview.isPresent()){
+        if (oReview.isPresent()) {
             Review review = oReview.get();
 
             return getReviewResponseDto(review);
         }
-         return null;   
+        return null;
     }
 
     @Override
+    @Transactional
     public ReviewResponseDto modifyReview(ReviewModifyDto rmd) {
-        Optional<Review> oReview=reviewRepository.findById(rmd.getId());
-        if(oReview.isPresent()){
+        Optional<Review> oReview = reviewRepository.findById(rmd.getId());
+        if (oReview.isPresent()) {
             Review review = oReview.get();
+
             review.setTitle(rmd.getTitle());
             review.setContent(rmd.getContent());
             review.setScore(rmd.getScore());
             review.setPid(rmd.getImg());
-            
+            review.getMenu();
+            review.getWriter();
+
             Review modifiedReview = reviewRepository.save(review);
 
             return getReviewResponseDto(modifiedReview);
@@ -90,7 +98,8 @@ public class ReviewServiceImpl implements ReviewService {
         reviewRepository.deleteById(id);
         return id;
     }
-    private ReviewResponseDto getReviewResponseDto(Review review){
+
+    private ReviewResponseDto getReviewResponseDto(Review review) {
         ReviewResponseDto rrd = ReviewResponseDto.builder()
                 .id(review.getId())
                 .title(review.getTitle())
@@ -98,21 +107,48 @@ public class ReviewServiceImpl implements ReviewService {
                 .img(review.getPid())
                 .score(review.getScore())
                 .count(review.getRecCnt())
-                .mid(review.getMenu().getId())
-                .menu(review.getMenu().getName())
-                .writer(review.getWriter().getName())
-                .uid(review.getWriter().getId())
                 .build();
         Menu menu = review.getMenu();
         User writer = review.getWriter();
-        if(menu != null){
+        if (menu != null) {
             rrd.setMenu(menu.getName());
             rrd.setMid(menu.getId());
         }
-        if(writer!=null){
+        if (writer != null) {
             rrd.setWriter(writer.getName());
             rrd.setUid(writer.getId());
         }
         return rrd;
+    }
+
+    @Transactional
+    public List<ReviewResponseDto> getAllReviewsInMenu(Long mid) {
+        List<Review> reviewList = reviewRepository.findAllByMenu(mid);
+        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
+        for (Review ent : reviewList) {
+            ReviewResponseDto rrd = getReviewResponseDto(ent);
+            responseDtoList.add(rrd);
+        }
+        return responseDtoList;
+    }
+
+    @Transactional
+    public List<ReviewResponseDto> getAllReviewsInRestaurant(Long rid){
+        List<Review> reviewList = reviewRepository.findAllByRestaurant(rid);
+        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
+        for (Review ent : reviewList){
+            ReviewResponseDto rrd = getReviewResponseDto(ent);
+            responseDtoList.add(rrd);
+        }
+        return responseDtoList;
+    }
+    @Transactional
+    public List<ReviewResponseDto> getAllReviewsInFranchise(Long fid){
+        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
+        reviewRepository.findAllByFranchise(fid)
+                .forEach(rev -> responseDtoList.add(
+                        getReviewResponseDto(rev))
+                );
+        return responseDtoList;
     }
 }

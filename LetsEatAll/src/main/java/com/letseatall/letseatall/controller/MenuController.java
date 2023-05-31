@@ -35,7 +35,7 @@ public class MenuController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
     @PutMapping()
-    public ResponseEntity<String> changeMenePrice(@RequestBody IntChangeDto intChangeDto){
+    public ResponseEntity<String> changeMenuPrice(@RequestBody IntChangeDto intChangeDto){
         boolean res = menuService.changeMenuPrice(intChangeDto);
         if(!res)
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body("수정 실패하였습니다.");

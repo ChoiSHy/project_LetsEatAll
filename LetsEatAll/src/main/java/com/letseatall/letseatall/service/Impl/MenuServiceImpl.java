@@ -23,13 +23,15 @@ public class MenuServiceImpl implements MenuService {
     UserRepository userRepository;
     CategoryRepository categoryRepository;
     FranchiseRepository franchiseRepository;
+    ReviewRepository reviewRepository;
     @Autowired
     public MenuServiceImpl(RestaurantRepository restaurantRepository,
                            MenuRepository menuRepository,
                            YoutubeRepository youtubeRepository,
                            UserRepository userRepository,
                            CategoryRepository categoryRepository,
-                           FranchiseRepository franchiseRepository)
+                           FranchiseRepository franchiseRepository,
+                           ReviewRepository reviewRepository)
     {
         this.restaurantRepository=restaurantRepository;
         this.menuRepository = menuRepository;
@@ -37,6 +39,7 @@ public class MenuServiceImpl implements MenuService {
         this.userRepository = userRepository;
         this.categoryRepository=categoryRepository;
         this.franchiseRepository=franchiseRepository;
+        this.reviewRepository=reviewRepository;
     }
 
     @Override
@@ -98,6 +101,9 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public void deleteMenu(Long id) {
+        List<Long> reviewList = new ArrayList<>();
+        reviewRepository.findAllByMenu(id).forEach(r -> reviewList.add(r.getId()));
+        reviewRepository.deleteAllByIdInBatch(reviewList);
         menuRepository.deleteById(id);
     }
 
@@ -119,6 +125,5 @@ public class MenuServiceImpl implements MenuService {
             responseDtoList.add(responseDto);
         }
         return responseDtoList;
-
     }
 }

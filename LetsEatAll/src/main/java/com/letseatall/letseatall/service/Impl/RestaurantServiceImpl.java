@@ -8,10 +8,7 @@ import com.letseatall.letseatall.data.dto.Restaurant.FranchiseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.FranchiseResponseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
-import com.letseatall.letseatall.data.repository.CategoryRepository;
-import com.letseatall.letseatall.data.repository.FranchiseRepository;
-import com.letseatall.letseatall.data.repository.MenuRepository;
-import com.letseatall.letseatall.data.repository.RestaurantRepository;
+import com.letseatall.letseatall.data.repository.*;
 import com.letseatall.letseatall.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,17 +23,20 @@ public class RestaurantServiceImpl implements RestaurantService {
     FranchiseRepository franchiseRepository;
     CategoryRepository categoryRepository;
     MenuRepository menuRepository;
+    ReviewRepository reviewRepository;
 
     @Autowired
     /* 생성자 */
     public RestaurantServiceImpl(RestaurantRepository restaurantRepository,
                                  FranchiseRepository franchiseRepository,
                                  CategoryRepository categoryRepository,
-                                 MenuRepository menuRepository) {
+                                 MenuRepository menuRepository,
+                                 ReviewRepository reviewRepository) {
         this.restaurantRepository = restaurantRepository;
         this.franchiseRepository = franchiseRepository;
         this.categoryRepository = categoryRepository;
         this.menuRepository = menuRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @Override
@@ -160,14 +160,15 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     /* 음식점 정보 삭제 */
     public void deleteRestaurant(Long id) {
-        List<Menu> menus = menuRepository.findAllByRestaurantId(id);
-        List<Long> ids = new ArrayList<>();
+        List<Long> rvids = reviewRepository.findIdAllByRestaurant(id);
+        List<Long> mids = new ArrayList<>();
+
+        menuRepository.findAllByRestaurantId(id).forEach(m -> mids.add(m.getId()));
+
         System.out.println("menu delete start");
 
-        for (Menu menu : menus)
-            ids.add(menu.getId());
-
-        menuRepository.deleteAllByIdInBatch(ids);
+        reviewRepository.deleteAllByIdInBatch(rvids);
+        menuRepository.deleteAllByIdInBatch(mids);
         System.out.println("menu delete end");
         restaurantRepository.deleteById(id);
 
@@ -177,8 +178,10 @@ public class RestaurantServiceImpl implements RestaurantService {
     /* 프랜차이즈 정보 삭제 */
     public void deleteFranchise(Long id) {
         List<Long> rids = restaurantRepository.findIdAllByFranchiseId(id);
-        List<Long> mids = menuRepository.findIdAllByFranchise_Id(id);
+        List<Long> mids = menuRepository.findIdAllByFranchiseId(id);
+        List<Long> rvids = reviewRepository.findIdAllByFranchise(id);
 
+        reviewRepository.deleteAllByIdInBatch(rvids);
         menuRepository.deleteAllByIdInBatch(mids);
         restaurantRepository.deleteAllByIdInBatch(rids);
         franchiseRepository.deleteById(id);

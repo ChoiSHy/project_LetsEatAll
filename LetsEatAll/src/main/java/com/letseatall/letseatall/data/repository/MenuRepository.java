@@ -20,6 +20,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     List<Menu> findAllByRestaurantId(List<Long> ids);
 
     @Query("select m.id from Menu m where m.franchise.id = ?1")
-    List<Long> findIdAllByFranchise_Id(Long id);
+    List<Long> findIdAllByFranchiseId(Long id);
 
 }

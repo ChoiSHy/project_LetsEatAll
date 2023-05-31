@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/review")
 public class ReviewController {
@@ -41,5 +43,15 @@ public class ReviewController {
     public ResponseEntity<String> deleteReview(Long id) {
         Long del_id = reviewService.deleteReview(id);
         return ResponseEntity.status(HttpStatus.OK).body(del_id + "게시글 삭제되었습니다.");
+    }
+    @GetMapping("/menu/reviews")
+    public ResponseEntity<List<ReviewResponseDto>> getAllReviewsAboutMenu(Long mid){
+        List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsInMenu(mid);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
+    }
+    @GetMapping("/restaurant/reviews")
+    public ResponseEntity<List<ReviewResponseDto> > getAllReviewsAboutRestaurant(Long rid){
+        List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsInRestaurant(rid);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
     }
 }
