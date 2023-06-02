@@ -1,4 +1,4 @@
-package com.letseatall.letseatall.data.repository;
+package com.letseatall.letseatall.data.repository.custom;
 
 import com.letseatall.letseatall.data.Entity.Category;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class CategoryBulkRepository {
+public class CategoryBulkRepositoryImpl implements CategoryBulkRepository{
     private final JdbcTemplate jdbcTemplate;
 
     @Transactional

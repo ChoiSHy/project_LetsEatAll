@@ -1,6 +1,5 @@
 package com.letseatall.letseatall.data.Entity;
 
-import com.letseatall.letseatall.data.dto.Restaurant.FranchiseDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -9,9 +8,6 @@ import java.util.List;
 
 @Entity
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name="menu")
 public class Menu {
     @Id
@@ -23,7 +19,6 @@ public class Menu {
     @Column
     private int price;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="category_id")
     @ToString.Exclude
     private Category category;
 
@@ -31,12 +26,41 @@ public class Menu {
     private int score;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="restaurant_id")
     @ToString.Exclude
     private Restaurant restaurant;
 
+    public void setRestaurant(Restaurant restaurant){
+        if (restaurant!=null)
+            restaurant.removeMenu(this);
+        this.restaurant=restaurant;
+        restaurant.addMenu(this);
+    }
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="franchise_id")
     @ToString.Exclude
     private Franchise franchise;
+
+    public void setFranchise(Franchise franchise){
+        if(franchise != null)
+            franchise.removeMenu(this);
+        this.franchise=franchise;
+        this.franchise.addMenu(this);
+    }
+    @OneToMany(mappedBy = "menu",cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Review> reviewList=new ArrayList<>();
+
+    public void addReview(Review review){
+        reviewList.add(review);
+    }
+    public void removeReview(Review review){
+        reviewList.remove(review);
+    }
+
+    public Menu(){}
+    public Menu(String name, int price, int score, Category category){
+        this.name=name;
+        this.price=price;
+        this.score=score;
+        this.category=category;
+    }
 }

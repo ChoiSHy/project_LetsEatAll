@@ -50,14 +50,13 @@ public class MenuServiceImpl implements MenuService {
         Franchise franchise=null;
         if (foundRest.getFranchise()!= null)
             franchise = franchiseRepository.findById( foundRest.getFranchise().getId() ).get();
-        Menu menu = Menu.builder()
-                .name(menuDto.getName())
-                .price(menuDto.getPrice())
-                .score(0)
-                .restaurant(foundRest)
-                .category(category)
-                .franchise(franchise)
-                .build();
+        Menu menu = new Menu();
+                menu.setName(menuDto.getName());
+                menu.setPrice(menuDto.getPrice());
+                menu.setScore(0);
+                menu.setRestaurant(foundRest);
+                menu.setCategory(category);
+                menu.setFranchise(franchise);
         Menu savedMenu = menuRepository.save(menu);
 
         MenuResponseDto menuResponseDto = MenuResponseDto.builder()

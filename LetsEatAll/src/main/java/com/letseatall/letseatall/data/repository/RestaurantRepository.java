@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.data.repository;
 
+import com.letseatall.letseatall.data.Entity.Franchise;
 import com.letseatall.letseatall.data.Entity.Restaurant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

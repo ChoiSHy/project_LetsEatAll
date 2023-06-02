@@ -40,14 +40,12 @@ public class UserServiceImpl implements UserService {
         if (loginRepository.existsById(userDto.getId()))
             return UserResponseDto.builder().name("id_duplication").score(-101).build();
 
-        User user = User.builder()
-                .name(userDto.getName())
-                .birthDate(userDto.getBirthDate())
-                .score(50)
-                .build();
-        User savedUser = userRepository.save(user);
+        User user = new User();
+        user.setName(userDto.getName());
+        user.setBirthDate(userDto.getBirthDate());
+        user.setScore(50);
 
-        System.out.println(savedUser.getId());
+        User savedUser = userRepository.save(user);
 
         Login login = Login.builder()
                 .id(userDto.getId())
@@ -67,13 +65,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto tryLogin(LoginRequestDto loginRequestDto) {
         Login foundLogin = loginRepository.findById(loginRequestDto.getId()).get();
-        if(foundLogin == null)
+        if (foundLogin == null)
             return null;
 
         if (foundLogin.getPw().compareTo(loginRequestDto.getPw()) != 0)
             return UserResponseDto.builder().id(-400L).name("id_duplication").build();
 
-        else{
+        else {
             User foundUser = foundLogin.getUser();
             UserResponseDto responseDto = UserResponseDto.builder()
                     .id(foundUser.getId())

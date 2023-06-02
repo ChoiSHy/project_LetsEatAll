@@ -24,10 +24,19 @@ public class Restaurant {
     @Column
     private String addr;
     @ManyToOne
-    @JoinColumn(name="category_id")
     private Category category;
     @ManyToOne
-    @JoinColumn(name="franchise_id")
-    @ToString.Exclude
     private Franchise franchise;
+    public void setFranchise(Franchise franchise){
+        if (franchise!= null)
+            franchise.removeChain(this);
+        this.franchise=franchise;
+        franchise.addChain(this);
+    }
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Menu> menus = new ArrayList<>();
+    public void addMenu(Menu menu){menus.add(menu);}
+    public void removeMenu(Menu menu){menus.remove(menu);}
 }

@@ -8,9 +8,8 @@ import java.util.List;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
 @Table(name = "franchise")
 public class Franchise {
     @Id
@@ -19,14 +18,37 @@ public class Franchise {
     @Column(nullable = false)
     private String name;
     @ManyToOne
-    @JoinColumn(name = "category_id")
     private Category category;
-/*
-    @OneToMany(mappedBy = "restaurant")
+
+    @OneToMany(mappedBy = "franchise", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Restaurant> chains = new ArrayList<>();
 
-    public void addChain(final Restaurant restaurant){
+    public Franchise() {
+    }
+
+    public Franchise(String name, Category category) {
+        this.name = name;
+        this.category = category;
+    }
+
+    public void addChain(Restaurant restaurant) {
         chains.add(restaurant);
-    }*/
+    }
+
+    public void removeChain(Restaurant restaurant) {
+        chains.remove(restaurant);
+    }
+
+    @OneToMany(mappedBy = "franchise", cascade = CascadeType.ALL)
+    private List<Menu> menus = new ArrayList<>();
+
+    public void addMenu(Menu menu) {
+        menus.add(menu);
+    }
+
+    public void removeMenu(Menu menu) {
+        menus.remove(menu);
+    }
+
 }

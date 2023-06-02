@@ -82,14 +82,13 @@ public class RestaurantServiceImpl implements RestaurantService {
         if (restaurant.isPresent())
             for (Menu fMenu : foundMenus) {
                 System.out.println(fMenu);
-                Menu newMenu = Menu.builder()
-                        .name(fMenu.getName())
-                        .price(fMenu.getPrice())
-                        .category(fMenu.getCategory())
-                        .score(0)
-                        .restaurant(restaurant.get())
-                        .franchise(fMenu.getFranchise())
-                        .build();
+                Menu newMenu = new Menu();
+                newMenu.setName(fMenu.getName());
+                newMenu.setPrice(fMenu.getPrice());
+                newMenu.setCategory(fMenu.getCategory());
+                newMenu.setScore(0);
+                newMenu.setRestaurant(restaurant.get());
+                newMenu.setFranchise(fMenu.getFranchise());
                 saveMenus.add(newMenu);
             }
         menuRepository.saveAll(saveMenus);

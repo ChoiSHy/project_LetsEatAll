@@ -16,13 +16,21 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @ToString.Exclude
     private User writer;
+    public void setWriter(User writer){
+        if(this.writer!=null)
+            writer.removeReview(this);
+        this.writer=writer;
+        writer.addReview(this);
+    }
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="menu_id")
-    @ToString.Exclude
     private Menu menu;
+    public void setMenu(Menu menu){
+        if(this.menu!=null)
+            menu.removeReview(this);
+        this.menu=menu;
+        menu.addReview(this);
+    }
     @Column(nullable = false)
     private String title;
     @Column
@@ -33,4 +41,7 @@ public class Review {
     private int recCnt;
     @Column
     private String pid;   // photo id
+
+
+
 }

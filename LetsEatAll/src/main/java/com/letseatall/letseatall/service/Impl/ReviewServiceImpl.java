@@ -57,8 +57,9 @@ public class ReviewServiceImpl implements ReviewService {
                 .build();
         Review savedReview = reviewRepository.save(newReview);
         return getReviewResponseDto(savedReview);
-
     }
+
+
 
     @Override
     public ReviewResponseDto getReview(Long id) {
@@ -150,5 +151,29 @@ public class ReviewServiceImpl implements ReviewService {
                         getReviewResponseDto(rev))
                 );
         return responseDtoList;
+    }
+
+    @Override
+    public ReviewResponseDto saveReview2(ReviewDto reviewDto) {
+        Menu menu = null;
+        User user = null;
+        Optional<Menu> oMenu = menuRepository.findById(reviewDto.getMid());
+        Optional<User> oUser = userRepository.findById(reviewDto.getUid());
+        if (oMenu.isPresent())
+            menu=oMenu.get();
+        if (oUser.isPresent())
+            user=oUser. get();
+
+        Review newReview = Review.builder()
+                .title(reviewDto.getTitle())
+                .content(reviewDto.getContent())
+                .score(reviewDto.getScore())
+                .recCnt(0)
+                .pid(reviewDto.getImg())
+                .build();
+        menu.addReview(newReview);
+        user.addReview(newReview);
+        Review savedReview = reviewRepository.save(newReview);
+        return getReviewResponseDto(savedReview);
     }
 }

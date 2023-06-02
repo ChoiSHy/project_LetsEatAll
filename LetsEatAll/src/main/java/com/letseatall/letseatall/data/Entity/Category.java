@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class Category {
     @Id
@@ -18,4 +17,6 @@ public class Category {
     int id;
     @Column(nullable = false)
     String name;
+
+    public Category(){ };
 }
