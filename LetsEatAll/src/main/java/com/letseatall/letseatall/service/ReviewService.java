@@ -19,7 +19,4 @@ public interface ReviewService {
     List<ReviewResponseDto> getAllReviewsInRestaurant(Long rid);
     List<ReviewResponseDto> getAllReviewsInFranchise(Long fid);
 
-    /* for testing */
-    ReviewResponseDto saveReview2(ReviewDto reviewDto);
-
 }

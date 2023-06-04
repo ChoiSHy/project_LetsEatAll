@@ -41,6 +41,7 @@ public class Franchise {
     }
 
     @OneToMany(mappedBy = "franchise", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Menu> menus = new ArrayList<>();
 
     public void addMenu(Menu menu) {

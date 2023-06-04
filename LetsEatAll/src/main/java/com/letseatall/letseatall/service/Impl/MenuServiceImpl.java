@@ -3,12 +3,12 @@ package com.letseatall.letseatall.service.Impl;
 import com.letseatall.letseatall.data.Entity.*;
 import com.letseatall.letseatall.data.dto.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
-import com.letseatall.letseatall.data.dto.Menu.MenuElement;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
-import com.letseatall.letseatall.data.dto.Review.ReviewElement;
 import com.letseatall.letseatall.data.repository.*;
 import com.letseatall.letseatall.service.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -100,29 +100,46 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public void deleteMenu(Long id) {
-        List<Long> reviewList = new ArrayList<>();
-        reviewRepository.findAllByMenu(id).forEach(r -> reviewList.add(r.getId()));
-        reviewRepository.deleteAllByIdInBatch(reviewList);
+        List<Long> ids = new ArrayList<>();
+        Optional<Menu> oMenu = menuRepository.findById(id);
+        if(oMenu.isPresent()){
+            oMenu.get().getReviewList().forEach(review ->{
+                ids.add(review.getId());
+            });
+        }
+        reviewRepository.deleteAllByIdInBatch(ids);
         menuRepository.deleteById(id);
     }
-
     @Override
     public List<MenuResponseDto> getAllMenu(Long rid) {
-        List<Menu> menuList = menuRepository.findAllByRestaurantId(rid);
-        List<MenuResponseDto> responseDtoList=new ArrayList<>();
-
-        for(Menu menu : menuList){
+        List<MenuResponseDto> responseDtoList = new ArrayList<>();
+        menuRepository.findAllByRestaurantId(rid).forEach(m->{
             MenuResponseDto responseDto = MenuResponseDto.builder()
-                    .rid(rid)
-                    .name(menu.getName())
-                    .price(menu.getPrice())
-                    .score(menu.getScore())
+                    .rid(m.getRestaurant().getId())
+                    .name(m.getName())
+                    .price(m.getPrice())
+                    .score(m.getScore())
                     .build();
-            Category category = menu.getCategory();
-            if(category != null)
-                responseDto.setCategory(category.getName());
+            if(m.getCategory()!=null)
+                responseDto.setCategory(m.getCategory().getName());
             responseDtoList.add(responseDto);
-        }
+        });
+        return responseDtoList;
+    }
+
+    public List<MenuResponseDto> getAllMenu(int start, int size){
+        List<MenuResponseDto> responseDtoList = new ArrayList<>();
+        menuRepository.findAll(PageRequest.of(start, size)).forEach(m->{
+            MenuResponseDto responseDto = MenuResponseDto.builder()
+                    .rid(m.getRestaurant().getId())
+                    .name(m.getName())
+                    .price(m.getPrice())
+                    .score(m.getScore())
+                    .build();
+            if(m.getCategory()!=null)
+                responseDto.setCategory(m.getCategory().getName());
+            responseDtoList.add(responseDto);
+        });
         return responseDtoList;
     }
 }

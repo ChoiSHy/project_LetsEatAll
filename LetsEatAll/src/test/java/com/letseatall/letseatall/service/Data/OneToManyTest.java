@@ -150,12 +150,12 @@ public class OneToManyTest {
 
         System.out.println("[review]");
         reviews.forEach(r -> System.out.println(r));
-        System.out.println("[menu]");
-        menus.forEach(m-> System.out.println(m));
         System.out.println("[user]");
         users.forEach(u-> System.out.println(u));
         System.out.println("[restaurant]");
         rests.forEach(r-> System.out.println(r));
+        System.out.println("[menu]");
+        menus.forEach( m -> System.out.println(m) );
 
     }
     @Test

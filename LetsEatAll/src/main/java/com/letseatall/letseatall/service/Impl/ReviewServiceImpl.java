@@ -33,34 +33,6 @@ public class ReviewServiceImpl implements ReviewService {
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
     }
-
-    @Override
-    public ReviewResponseDto saveReview(ReviewDto reviewDto) {
-        Optional<Menu> oMenu = menuRepository.findById(reviewDto.getMid());
-        Optional<User> oUser = userRepository.findById(reviewDto.getUid());
-
-        if (!oMenu.isPresent())
-            return null;
-        if (!oUser.isPresent())
-            return null;
-        Menu menu = oMenu.get();
-        User user = oUser.get();
-
-        Review newReview = Review.builder()
-                .title(reviewDto.getTitle())
-                .content(reviewDto.getContent())
-                .score(reviewDto.getScore())
-                .recCnt(0)
-                .pid(reviewDto.getImg())
-                .menu(menu)
-                .writer(user)
-                .build();
-        Review savedReview = reviewRepository.save(newReview);
-        return getReviewResponseDto(savedReview);
-    }
-
-
-
     @Override
     public ReviewResponseDto getReview(Long id) {
         Optional<Review> oReview = reviewRepository.findById(id);
@@ -154,7 +126,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public ReviewResponseDto saveReview2(ReviewDto reviewDto) {
+    public ReviewResponseDto saveReview(ReviewDto reviewDto) {
         Menu menu = null;
         User user = null;
         Optional<Menu> oMenu = menuRepository.findById(reviewDto.getMid());
@@ -164,15 +136,15 @@ public class ReviewServiceImpl implements ReviewService {
         if (oUser.isPresent())
             user=oUser. get();
 
-        Review newReview = Review.builder()
-                .title(reviewDto.getTitle())
-                .content(reviewDto.getContent())
-                .score(reviewDto.getScore())
-                .recCnt(0)
-                .pid(reviewDto.getImg())
-                .build();
-        menu.addReview(newReview);
-        user.addReview(newReview);
+        Review newReview = new Review();
+        newReview.setTitle(reviewDto.getTitle());
+        newReview.setContent(reviewDto.getContent());
+        newReview.setScore(reviewDto.getScore());
+        newReview.setRecCnt(0);
+        newReview.setMenu(menu);
+        newReview.setWriter(user);
+        newReview.setPid(reviewDto.getImg());
+
         Review savedReview = reviewRepository.save(newReview);
         return getReviewResponseDto(savedReview);
     }

@@ -26,7 +26,6 @@ public class Menu {
     private int score;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ToString.Exclude
     private Restaurant restaurant;
 
     public void setRestaurant(Restaurant restaurant){

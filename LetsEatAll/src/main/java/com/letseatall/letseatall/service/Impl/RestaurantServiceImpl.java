@@ -1,9 +1,6 @@
 package com.letseatall.letseatall.service.Impl;
 
-import com.letseatall.letseatall.data.Entity.Category;
-import com.letseatall.letseatall.data.Entity.Franchise;
-import com.letseatall.letseatall.data.Entity.Menu;
-import com.letseatall.letseatall.data.Entity.Restaurant;
+import com.letseatall.letseatall.data.Entity.*;
 import com.letseatall.letseatall.data.dto.Restaurant.FranchiseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.FranchiseResponseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantDto;
@@ -43,15 +40,16 @@ public class RestaurantServiceImpl implements RestaurantService {
     /* 음식점 정보 저장 */
     public RestaurantResponseDto saveRestaurant(RestaurantDto restaurantDto) {
         Optional<Franchise> franchise = franchiseRepository.findById(restaurantDto.getFid());
-        Restaurant restaurant = Restaurant.builder()
-                .name(restaurantDto.getName())
-                .addr(restaurantDto.getAddr())
-                .score(0)
-                .build();
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(restaurantDto.getName());
+        restaurant.setAddr(restaurantDto.getAddr());
+        restaurant.setScore(0);
+
         if (franchise.isPresent()) {
             Franchise f = franchise.get();
             restaurant.setFranchise(f);
             restaurant.setCategory(f.getCategory());
+            addFranchiseMenus(f, restaurant);
         } else {
             Optional<Category> category = categoryRepository.findById(restaurantDto.getCategory());
             if (category.isPresent())
@@ -70,28 +68,19 @@ public class RestaurantServiceImpl implements RestaurantService {
             responseDto.setCategory(savedRestaurant.getCategory().getName());
         if (savedRestaurant.getFranchise() != null) {
             responseDto.setFranchise(savedRestaurant.getFranchise().getName());
-            addFranchiseMenus(savedRestaurant.getFranchise().getId(), savedRestaurant.getId());
         }
         return responseDto;
     }
 
-    private void addFranchiseMenus(Long id, Long rid) {
-        Optional<Restaurant> restaurant = restaurantRepository.findById(rid);
-        List<Menu> foundMenus = menuRepository.findAllByFranchiseId(id);
+    private void addFranchiseMenus(Franchise franchise, Restaurant restaurant) {
+        List<Menu> fMenus = franchise.getMenus();
         List<Menu> saveMenus = new ArrayList<>();
-        if (restaurant.isPresent())
-            for (Menu fMenu : foundMenus) {
-                System.out.println(fMenu);
-                Menu newMenu = new Menu();
-                newMenu.setName(fMenu.getName());
-                newMenu.setPrice(fMenu.getPrice());
-                newMenu.setCategory(fMenu.getCategory());
-                newMenu.setScore(0);
-                newMenu.setRestaurant(restaurant.get());
-                newMenu.setFranchise(fMenu.getFranchise());
-                saveMenus.add(newMenu);
-            }
-        menuRepository.saveAll(saveMenus);
+        for (Menu fMenu : fMenus) {
+            Menu newMenu = new Menu(fMenu.getName(), fMenu.getPrice(), fMenu.getScore(), fMenu.getCategory());
+            newMenu.setRestaurant(restaurant);
+            saveMenus.add(newMenu);
+        }
+        restaurantRepository.save(restaurant);
     }
 
     @Override
@@ -159,30 +148,28 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     /* 음식점 정보 삭제 */
     public void deleteRestaurant(Long id) {
-        List<Long> rvids = reviewRepository.findIdAllByRestaurant(id);
+        List<Long> rvids = new ArrayList<>();
         List<Long> mids = new ArrayList<>();
+        Optional<Restaurant> oRestaurant = restaurantRepository.findById(id);
 
-        menuRepository.findAllByRestaurantId(id).forEach(m -> mids.add(m.getId()));
-
-        System.out.println("menu delete start");
-
-        reviewRepository.deleteAllByIdInBatch(rvids);
-        menuRepository.deleteAllByIdInBatch(mids);
-        System.out.println("menu delete end");
+        if (oRestaurant.isPresent()) {
+            Restaurant restaurant = oRestaurant.get();
+            for (Menu menu : restaurant.getMenus()) {
+                for (Review review : menu.getReviewList())
+                    rvids.add(review.getId());
+                mids.add(menu.getId());
+            }
+        }
+        if(!rvids.isEmpty())
+            reviewRepository.deleteAllByIdInBatch(rvids);
+        if(!mids.isEmpty())
+            menuRepository.deleteAllByIdInBatch(mids);
         restaurantRepository.deleteById(id);
-
     }
 
     @Override
     /* 프랜차이즈 정보 삭제 */
     public void deleteFranchise(Long id) {
-        List<Long> rids = restaurantRepository.findIdAllByFranchiseId(id);
-        List<Long> mids = menuRepository.findIdAllByFranchiseId(id);
-        List<Long> rvids = reviewRepository.findIdAllByFranchise(id);
-
-        reviewRepository.deleteAllByIdInBatch(rvids);
-        menuRepository.deleteAllByIdInBatch(mids);
-        restaurantRepository.deleteAllByIdInBatch(rids);
         franchiseRepository.deleteById(id);
     }
 }

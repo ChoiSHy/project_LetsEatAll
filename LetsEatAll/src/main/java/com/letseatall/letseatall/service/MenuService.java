@@ -14,4 +14,5 @@ public interface MenuService {
     void deleteMenu(Long id);
 
     List<MenuResponseDto> getAllMenu(Long rid);
+    List<MenuResponseDto> getAllMenu(int start, int size);
 }

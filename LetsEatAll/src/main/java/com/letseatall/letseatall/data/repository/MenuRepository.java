@@ -3,6 +3,7 @@ package com.letseatall.letseatall.data.repository;
 import com.letseatall.letseatall.data.Entity.Franchise;
 import com.letseatall.letseatall.data.Entity.Menu;
 import com.letseatall.letseatall.data.repository.custom.MenuBulkRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
