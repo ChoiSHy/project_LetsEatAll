@@ -30,11 +30,11 @@ public class ReviewController {
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
-    
-    // 리뷰 조회(해당 레스토랑의 모든 리뷰 조회)
-    @GetMapping("/{restaurantId}")
-    public ResponseEntity<List<ReviewResponseDto>> getReviewsForRestaurant(@PathVariable Long restaurantId) {
-        List<ReviewResponseDto> reviews = (List<ReviewResponseDto>) reviewService.getReviewsForRestaurant(restaurantId);
+
+    // 리뷰 조회(해당 메뉴의 모든 리뷰 조회)
+    @GetMapping("/{menuId}")
+    public ResponseEntity<List<ReviewResponseDto>> getReviewsForMenu(@PathVariable Long menuId) {
+        List<ReviewResponseDto> reviews = (List<ReviewResponseDto>) reviewService.getReviewsForMenu(menuId);
         return ResponseEntity.status(HttpStatus.OK).body(reviews);
     }
 
