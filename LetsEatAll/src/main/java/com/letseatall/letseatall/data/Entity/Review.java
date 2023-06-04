@@ -5,32 +5,24 @@ import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 
+@Builder
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Table(name = "review")
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User writer;
-    public void setWriter(User writer){
-        if(this.writer!=null)
-            writer.removeReview(this);
-        this.writer=writer;
-        writer.addReview(this);
-    }
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Menu menu;
-    public void setMenu(Menu menu){
-        if(this.menu!=null)
-            menu.removeReview(this);
-        this.menu=menu;
-        menu.addReview(this);
-    }
+    @Column(nullable = false)
+    private Long uid;   // writer User id
+    @Column(nullable = false)
+    private String writer;
+    @Column(nullable = false)
+    private Long mid;
+    @Column(nullable = false)
+    private String menu;
     @Column(nullable = false)
     private String title;
     @Column
@@ -40,8 +32,6 @@ public class Review {
     @Column(nullable = false)
     private int recCnt;
     @Column
-    private String pid;   // photo id
-
-
+    private Long pid;   // photo id
 
 }
