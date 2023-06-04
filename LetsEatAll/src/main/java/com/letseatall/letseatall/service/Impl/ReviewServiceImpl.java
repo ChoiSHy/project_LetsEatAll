@@ -3,9 +3,7 @@ package com.letseatall.letseatall.service.Impl;
 import com.letseatall.letseatall.data.Entity.Menu;
 import com.letseatall.letseatall.data.Entity.Review;
 import com.letseatall.letseatall.data.Entity.User;
-import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewDto;
-import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
 import com.letseatall.letseatall.data.repository.MenuRepository;
 import com.letseatall.letseatall.data.repository.ReviewRepository;
@@ -14,7 +12,6 @@ import com.letseatall.letseatall.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,135 +30,158 @@ public class ReviewServiceImpl implements ReviewService {
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
     }
+
     @Override
     public ReviewResponseDto saveReview(ReviewDto reviewDto) {
-        Menu menu = null;
-        User user = null;
-        Optional<Menu> oMenu = menuRepository.findById(reviewDto.getMid());
-        Optional<User> oUser = userRepository.findById(reviewDto.getUid());
-        if (oMenu.isPresent())
-            menu=oMenu.get();
-        if (oUser.isPresent())
-            user=oUser. get();
+        Menu menu = menuRepository.findById(reviewDto.getMid()).get();
+        if(menu == null)
+            return null;
+        User user = userRepository.findById(reviewDto.getUid()).get();
+        if(user == null)
+            return null;
 
-        Review newReview = new Review();
-        newReview.setTitle(reviewDto.getTitle());
-        newReview.setContent(reviewDto.getContent());
-        newReview.setScore(reviewDto.getScore());
-        newReview.setRecCnt(0);
-        newReview.setMenu(menu);
-        newReview.setWriter(user);
-        newReview.setPid(reviewDto.getImg());
+        // Create a new Review entity from the ReviewDto
+        Review review = Review.builder()
+                .uid(reviewDto.getUid())
+                .writer(reviewDto.getWriter())
+                .mid(reviewDto.getMid())
+                .menu(reviewDto.getMenu())
+                .title(reviewDto.getTitle())
+                .content(reviewDto.getContent())
+                .score(reviewDto.getScore())
+                .pid(reviewDto.getImg())
+                .recCnt(0)
+                .build();
+        Review savedReview = reviewRepository.save(review);
 
-        Review savedReview = reviewRepository.save(newReview);
-        return getReviewResponseDto(savedReview);
+        return ReviewResponseDto.builder()
+                .uid(savedReview.getUid())
+                .mid(savedReview.getMid())
+                .title(savedReview.getTitle())
+                .content(savedReview.getContent())
+                .score(savedReview.getScore())
+                .img(savedReview.getPid())
+                .count(savedReview.getRecCnt())
+                .build();
     }
 
     // 리뷰 조회
     @Override
     public ReviewResponseDto getReview(Long id) {
-        Optional<Review> oReview = reviewRepository.findById(id);
-        if (oReview.isPresent()) {
-            Review review = oReview.get();
-
-            return getReviewResponseDto(review);
-        }
-        return null;
+        Review review = reviewRepository.getById(id);
+        ReviewResponseDto responseReview = ReviewResponseDto.builder()
+                .uid(review.getUid())
+                .writer(review.getWriter())
+                .mid(review.getMid())
+                .menu(review.getMenu())
+                .title(review.getTitle())
+                .content(review.getContent())
+                .score(review.getScore())
+                .img(review.getPid())
+                .count(review.getRecCnt())
+                .build();
+        return responseReview;
     }
+
     // 리뷰 조회(해당 메뉴의 모든 리뷰 조회)
     @Override
-    @Transactional
-    public List<ReviewResponseDto> getAllReviewsInMenu(Long mid) {
-        List<Review> reviewList = reviewRepository.findAllByMenu(mid);
-        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
-        for (Review ent : reviewList) {
-            ReviewResponseDto rrd = getReviewResponseDto(ent);
-            responseDtoList.add(rrd);
-        }
-        return responseDtoList;
-    }
-
-    @Override
-    public List<ReviewResponseDto> getReviewsForUser(Long id) {
-        List<Review> reviews = reviewRepository.findAllByWriterId(id);
+    public List<ReviewResponseDto> getReviewsForMenu(Long id) {
+        List<Review> reviews = reviewRepository.findAllByMid(id);
 
         List<ReviewResponseDto> responseDtos = new ArrayList<>();
-        /* 병합 과정에서 포함 못함. 추후에 작성*/
+        for (Review review : reviews) {
+            ReviewResponseDto responseDto = new ReviewResponseDto();
+            responseDto.setId(review.getId());
+            responseDto.setUid(review.getUid());
+            responseDto.setWriter(review.getWriter());
+            responseDto.setMid(review.getMid());
+            responseDto.setMenu(review.getMenu());
+            responseDto.setTitle(review.getTitle());
+            responseDto.setContent(review.getContent());
+            responseDto.setImg(review.getPid());
+            responseDto.setScore(review.getScore());
+            responseDto.setCount(review.getRecCnt());
+
+            responseDtos.add(responseDto);
+        }
+
+        return responseDtos;
+    }
+
+    // 리뷰 조회(해당 사용자가 작성한 모든 리뷰 조회)
+    @Override
+    public List<ReviewResponseDto> getReviewsForUser(Long id) {
+        List<Review> reviews = reviewRepository.findAllByUid(id);
+
+        List<ReviewResponseDto> responseDtos = new ArrayList<>();
+        for (Review review : reviews) {
+            ReviewResponseDto responseDto = new ReviewResponseDto();
+            responseDto.setId(review.getId());
+            responseDto.setUid(review.getUid());
+            responseDto.setWriter(review.getWriter());
+            responseDto.setMid(review.getMid());
+            responseDto.setMenu(review.getMenu());
+            responseDto.setTitle(review.getTitle());
+            responseDto.setContent(review.getContent());
+            responseDto.setImg(review.getPid());
+            responseDto.setScore(review.getScore());
+            responseDto.setCount(review.getRecCnt());
+
+            responseDtos.add(responseDto);
+        }
 
         // 변환된 ReviewResponseDto 리스트를 반환합니다.
         return responseDtos;
     }
+
+    //리뷰 수정
     @Override
-    @Transactional
-    public ReviewResponseDto modifyReview(ReviewModifyDto rmd) {
-        Optional<Review> oReview = reviewRepository.findById(rmd.getId());
-        if (oReview.isPresent()) {
-            Review review = oReview.get();
+    public ReviewResponseDto updateReview(Long id, ReviewDto reviewDto) {
+        Review review = reviewRepository.findById(id).get();
+        if(review == null)
+            return null;
 
-            review.setTitle(rmd.getTitle());
-            review.setContent(rmd.getContent());
-            review.setScore(rmd.getScore());
-            review.setPid(rmd.getImg());
-            review.getMenu();
-            review.getWriter();
+        // 리뷰 내용 수정
+        review.setTitle(reviewDto.getTitle());
+        review.setContent(reviewDto.getContent());
+        review.setScore(reviewDto.getScore());
+        review.setPid(reviewDto.getImg());
 
-            Review modifiedReview = reviewRepository.save(review);
+        Review updatedReview = reviewRepository.save(review);
 
-            return getReviewResponseDto(modifiedReview);
-        }
+        User user = userRepository.findById(updatedReview.getUid()).get();
+        if(user == null)
+            return null;
+        Menu menu = menuRepository.findById(updatedReview.getMid()).get();
+        if(menu == null)
+            return null;
 
-        return null;
+        ReviewResponseDto responseDto = new ReviewResponseDto();
+        responseDto.setId(updatedReview.getId());
+        responseDto.setUid(updatedReview.getUid());
+        responseDto.setWriter(updatedReview.getWriter());
+        responseDto.setMid(updatedReview.getMid());
+        responseDto.setMenu(updatedReview.getMenu());
+        responseDto.setTitle(updatedReview.getTitle());
+        responseDto.setContent(updatedReview.getContent());
+        responseDto.setImg(updatedReview.getPid());
+        responseDto.setScore(updatedReview.getScore());
+        responseDto.setCount(updatedReview.getRecCnt());
+
+        return responseDto;
     }
 
+    // 리뷰 삭제
     @Override
-    public Long deleteReview(Long id) {
-        reviewRepository.deleteById(id);
-        return id;
-    }
+    public void deleteReview(Long id) {
+        Optional<Review> optionalReview = reviewRepository.findById(id);
 
-    private ReviewResponseDto getReviewResponseDto(Review review) {
-        ReviewResponseDto rrd = ReviewResponseDto.builder()
-                .id(review.getId())
-                .title(review.getTitle())
-                .content(review.getContent())
-                .img(review.getPid())
-                .score(review.getScore())
-                .count(review.getRecCnt())
-                .build();
-        Menu menu = review.getMenu();
-        User writer = review.getWriter();
-        if (menu != null) {
-            rrd.setMenu(menu.getName());
-            rrd.setMid(menu.getId());
+        if (optionalReview.isPresent()) {
+            reviewRepository.deleteById(id);
+            System.out.println("리뷰" + id + "삭제 완료");
+        } else {
+            System.out.println("리뷰" + id + "찾을 수 없음");
+            throw new RuntimeException("Review not found with id " + id);
         }
-        if (writer != null) {
-            rrd.setWriter(writer.getName());
-            rrd.setUid(writer.getId());
-        }
-        return rrd;
     }
-
-
-
-    @Transactional
-    public List<ReviewResponseDto> getAllReviewsInRestaurant(Long rid){
-        List<Review> reviewList = reviewRepository.findAllByRestaurant(rid);
-        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
-        for (Review ent : reviewList){
-            ReviewResponseDto rrd = getReviewResponseDto(ent);
-            responseDtoList.add(rrd);
-        }
-        return responseDtoList;
-    }
-    @Transactional
-    public List<ReviewResponseDto> getAllReviewsInFranchise(Long fid){
-        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
-        reviewRepository.findAllByFranchise(fid)
-                .forEach(rev -> responseDtoList.add(
-                        getReviewResponseDto(rev))
-                );
-        return responseDtoList;
-    }
-
-
 }
