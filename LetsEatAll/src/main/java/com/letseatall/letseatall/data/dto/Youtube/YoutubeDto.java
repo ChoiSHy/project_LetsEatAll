@@ -13,4 +13,5 @@ import org.springframework.stereotype.Service;
 public class YoutubeDto {
     private String content;
     private String url;
+    private Long mid;
 }

@@ -9,9 +9,6 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "youtube")
 public class Youtube {
     @Id
@@ -25,4 +22,19 @@ public class Youtube {
     @ManyToOne
     @JoinColumn(name="menu_id")
     private Menu menu;
+
+    public void setMenu(Menu menu){
+        if(menu != null){
+            menu.removeYoutube(this);
+        }
+        this.menu=menu;
+        menu.addYoutube(this);
+    }
+
+    public Youtube(){}
+    public Youtube(String url, String content){
+        this.url=url;
+        this.content=content;
+    }
+
 }

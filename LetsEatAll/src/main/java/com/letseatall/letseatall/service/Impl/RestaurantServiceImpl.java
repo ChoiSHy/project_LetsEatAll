@@ -127,9 +127,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     /* 프랜차이즈 정보 저장 */
     public FranchiseResponseDto saveFranchise(FranchiseDto franchiseDto) {
         Optional<Category> category = categoryRepository.findById(franchiseDto.getCategory());
-        Franchise franchise = Franchise.builder()
-                .name(franchiseDto.getName())
-                .build();
+        Franchise franchise = new Franchise();
+        franchise.setName(franchise.getName());
         if (category.isPresent())
             franchise.setCategory(category.get());
 

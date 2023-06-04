@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/menu")
 public class MenuController {
-    MenuService menuService;
+    private MenuService menuService;
 
     @Autowired
     public MenuController(MenuService menuService){
