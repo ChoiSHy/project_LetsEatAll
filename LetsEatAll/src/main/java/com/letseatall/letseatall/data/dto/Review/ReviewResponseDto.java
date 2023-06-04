@@ -1,23 +1,23 @@
 package com.letseatall.letseatall.data.dto.Review;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Setter
-@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-@ToString
+@Data
 public class ReviewResponseDto {
     private Long id;
+    private Long uid;
+    private String writer;
+    private Long mid;
+    private String menu;
     private String title;
     private String content;
-    private String img;
+    private Long img;
     private int score;
     private int count;
-    private Long mid;
-    private String writer;
-    private Long uid;
-    private String menu;
 }
