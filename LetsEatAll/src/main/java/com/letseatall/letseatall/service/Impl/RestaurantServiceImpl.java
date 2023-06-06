@@ -8,6 +8,8 @@ import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
 import com.letseatall.letseatall.data.repository.*;
 import com.letseatall.letseatall.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -159,9 +161,9 @@ public class RestaurantServiceImpl implements RestaurantService {
                 mids.add(menu.getId());
             }
         }
-        if(!rvids.isEmpty())
+        if (!rvids.isEmpty())
             reviewRepository.deleteAllByIdInBatch(rvids);
-        if(!mids.isEmpty())
+        if (!mids.isEmpty())
             menuRepository.deleteAllByIdInBatch(mids);
         restaurantRepository.deleteById(id);
     }
@@ -170,5 +172,71 @@ public class RestaurantServiceImpl implements RestaurantService {
     /* 프랜차이즈 정보 삭제 */
     public void deleteFranchise(Long id) {
         franchiseRepository.deleteById(id);
+    }
+
+    @Override
+    public List<RestaurantResponseDto> getAll() {
+        List<RestaurantResponseDto> responseDtoList = new ArrayList<>();
+        restaurantRepository.findAll().forEach(r -> {
+            RestaurantResponseDto responseDto = makeDto(r);
+            responseDtoList.add(responseDto);
+        });
+        return null;
+    }
+
+    public List<RestaurantResponseDto> getAll(int start, int size) {
+        List<RestaurantResponseDto> responseDtoList = new ArrayList<>();
+        restaurantRepository.findAll(PageRequest.of(start, size)).forEach(r -> {
+            RestaurantResponseDto responseDto = RestaurantResponseDto.builder()
+                    .id(r.getId())
+                    .name(r.getName())
+                    .addr(r.getAddr())
+                    .score(r.getScore())
+                    .franchise(r.getFranchise().getName())
+                    .build();
+            if (r.getCategory() != null)
+                responseDto.setCategory(r.getCategory().getName());
+            responseDtoList.add(responseDto);
+        });
+        return responseDtoList;
+    }
+
+    public List<RestaurantResponseDto> findAllInCategory(int category, int start) {
+        List<RestaurantResponseDto> responseDtoList = new ArrayList<>();
+        List<Restaurant> rlist = restaurantRepository.findAllByCategoryId(category, PageRequest.of(start, 10)).getContent();
+        for (Restaurant r : rlist) {
+            System.out.println(r);
+            RestaurantResponseDto responseDto = makeDto(r);
+            responseDtoList.add(responseDto);
+        }
+        responseDtoList.forEach(r -> System.out.println(r));
+        return responseDtoList;
+    }
+
+    @Override
+    public List<RestaurantResponseDto> searchName(String name, int start) {
+        List<RestaurantResponseDto> responseDtoList = new ArrayList<>();
+        List<Restaurant> restaurantList = restaurantRepository.findAllByNameContainingIgnoreCase(name, PageRequest.of(start, 10)).getContent();
+        for (Restaurant restaurant : restaurantList) {
+            RestaurantResponseDto dto = makeDto(restaurant);
+            responseDtoList.add(dto);
+            System.out.println(restaurant);
+        }
+
+        return responseDtoList;
+    }
+    private RestaurantResponseDto makeDto(Restaurant restaurant){
+        RestaurantResponseDto dto = RestaurantResponseDto.builder()
+                .id(restaurant.getId())
+                .name(restaurant.getName())
+                .addr(restaurant.getAddr())
+                .score(restaurant.getScore())
+                .build();
+        if(restaurant.getCategory()!=null)
+            dto.setCategory(restaurant.getCategory().getName());
+        if(restaurant.getFranchise()!=null)
+            dto.setFranchise(restaurant.getFranchise().getName());
+
+        return dto;
     }
 }

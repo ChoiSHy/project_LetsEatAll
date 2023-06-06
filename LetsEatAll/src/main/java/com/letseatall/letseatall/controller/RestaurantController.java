@@ -9,9 +9,14 @@ import com.letseatall.letseatall.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+import java.util.List;
+import java.util.ListResourceBundle;
+
+@Controller
 @RequestMapping("/restaurant")
 public class RestaurantController {
     private final RestaurantService restaurantService;
@@ -19,6 +24,7 @@ public class RestaurantController {
     public RestaurantController(RestaurantService restaurantService){
         this.restaurantService=restaurantService;
     }
+
 
     @GetMapping("/restaurant")
     public ResponseEntity<RestaurantResponseDto> getRestaurant(Long id){
@@ -58,4 +64,14 @@ public class RestaurantController {
         return ResponseEntity.status(HttpStatus.OK).body("삭제 되었습니다.");
     }
 
+    @GetMapping("/restaurant/list/{start}")
+    public ResponseEntity<List<RestaurantResponseDto> > getRestaurantList(@PathVariable int start){
+        List<RestaurantResponseDto> responseDtoList = restaurantService.getAll(start, 10);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
+    }
+    @GetMapping("/restaurant/list")
+    public ResponseEntity<List<RestaurantResponseDto>> getRestaurantList(){
+        List<RestaurantResponseDto> responseDtoList = restaurantService.getAll();
+        return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
+    }
 }
