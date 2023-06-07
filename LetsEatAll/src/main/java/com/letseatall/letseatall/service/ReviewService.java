@@ -18,5 +18,5 @@ public interface ReviewService {
     List<ReviewResponseDto> getAllReviewsInMenu(Long mid);
     List<ReviewResponseDto> getAllReviewsInRestaurant(Long rid);
     List<ReviewResponseDto> getAllReviewsInFranchise(Long fid);
-
+    List<ReviewResponseDto> getReviewsForUser(Long uid);
 }

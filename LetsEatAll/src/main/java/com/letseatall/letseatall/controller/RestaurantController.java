@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.ListResourceBundle;
 
-@Controller
+@RestController
 @RequestMapping("/restaurant")
 public class RestaurantController {
     private final RestaurantService restaurantService;
@@ -24,8 +24,6 @@ public class RestaurantController {
     public RestaurantController(RestaurantService restaurantService){
         this.restaurantService=restaurantService;
     }
-
-
     @GetMapping("/restaurant")
     public ResponseEntity<RestaurantResponseDto> getRestaurant(Long id){
         RestaurantResponseDto responseDto = restaurantService.getRestaurant(id);

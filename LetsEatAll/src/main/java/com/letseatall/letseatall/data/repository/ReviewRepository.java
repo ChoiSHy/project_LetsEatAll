@@ -20,4 +20,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findAllByFranchise(Long id);
     @Query("select r.id from Review r where r.menu.franchise.id = ?1")
     List<Long> findIdAllByFranchise(Long id);
+
+    List<Review> findAllByWriterId(Long id);
 }

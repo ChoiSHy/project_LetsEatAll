@@ -21,9 +21,9 @@ import java.util.Optional;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
-    ReviewRepository reviewRepository;
-    MenuRepository menuRepository;
-    UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
+    private final MenuRepository menuRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public ReviewServiceImpl(ReviewRepository reviewRepository,
@@ -34,6 +34,31 @@ public class ReviewServiceImpl implements ReviewService {
         this.userRepository = userRepository;
     }
     @Override
+    public ReviewResponseDto saveReview(ReviewDto reviewDto) {
+        Menu menu = null;
+        User user = null;
+        Optional<Menu> oMenu = menuRepository.findById(reviewDto.getMid());
+        Optional<User> oUser = userRepository.findById(reviewDto.getUid());
+        if (oMenu.isPresent())
+            menu=oMenu.get();
+        if (oUser.isPresent())
+            user=oUser. get();
+
+        Review newReview = new Review();
+        newReview.setTitle(reviewDto.getTitle());
+        newReview.setContent(reviewDto.getContent());
+        newReview.setScore(reviewDto.getScore());
+        newReview.setRecCnt(0);
+        newReview.setMenu(menu);
+        newReview.setWriter(user);
+        newReview.setPid(reviewDto.getImg());
+
+        Review savedReview = reviewRepository.save(newReview);
+        return getReviewResponseDto(savedReview);
+    }
+
+    // 리뷰 조회
+    @Override
     public ReviewResponseDto getReview(Long id) {
         Optional<Review> oReview = reviewRepository.findById(id);
         if (oReview.isPresent()) {
@@ -43,7 +68,29 @@ public class ReviewServiceImpl implements ReviewService {
         }
         return null;
     }
+    // 리뷰 조회(해당 메뉴의 모든 리뷰 조회)
+    @Override
+    @Transactional
+    public List<ReviewResponseDto> getAllReviewsInMenu(Long mid) {
+        List<Review> reviewList = reviewRepository.findAllByMenu(mid);
+        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
+        for (Review ent : reviewList) {
+            ReviewResponseDto rrd = getReviewResponseDto(ent);
+            responseDtoList.add(rrd);
+        }
+        return responseDtoList;
+    }
 
+    @Override
+    public List<ReviewResponseDto> getReviewsForUser(Long id) {
+        List<Review> reviews = reviewRepository.findAllByWriterId(id);
+
+        List<ReviewResponseDto> responseDtos = new ArrayList<>();
+        /* 병합 과정에서 포함 못함. 추후에 작성*/
+
+        // 변환된 ReviewResponseDto 리스트를 반환합니다.
+        return responseDtos;
+    }
     @Override
     @Transactional
     public ReviewResponseDto modifyReview(ReviewModifyDto rmd) {
@@ -94,16 +141,7 @@ public class ReviewServiceImpl implements ReviewService {
         return rrd;
     }
 
-    @Transactional
-    public List<ReviewResponseDto> getAllReviewsInMenu(Long mid) {
-        List<Review> reviewList = reviewRepository.findAllByMenu(mid);
-        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
-        for (Review ent : reviewList) {
-            ReviewResponseDto rrd = getReviewResponseDto(ent);
-            responseDtoList.add(rrd);
-        }
-        return responseDtoList;
-    }
+
 
     @Transactional
     public List<ReviewResponseDto> getAllReviewsInRestaurant(Long rid){
@@ -125,27 +163,5 @@ public class ReviewServiceImpl implements ReviewService {
         return responseDtoList;
     }
 
-    @Override
-    public ReviewResponseDto saveReview(ReviewDto reviewDto) {
-        Menu menu = null;
-        User user = null;
-        Optional<Menu> oMenu = menuRepository.findById(reviewDto.getMid());
-        Optional<User> oUser = userRepository.findById(reviewDto.getUid());
-        if (oMenu.isPresent())
-            menu=oMenu.get();
-        if (oUser.isPresent())
-            user=oUser. get();
 
-        Review newReview = new Review();
-        newReview.setTitle(reviewDto.getTitle());
-        newReview.setContent(reviewDto.getContent());
-        newReview.setScore(reviewDto.getScore());
-        newReview.setRecCnt(0);
-        newReview.setMenu(menu);
-        newReview.setWriter(user);
-        newReview.setPid(reviewDto.getImg());
-
-        Review savedReview = reviewRepository.save(newReview);
-        return getReviewResponseDto(savedReview);
-    }
 }
