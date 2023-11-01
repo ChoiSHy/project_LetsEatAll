@@ -8,20 +8,19 @@ import com.letseatall.letseatall.data.dto.User.LoginRequestDto;
 import com.letseatall.letseatall.data.repository.UserRepository;
 import com.letseatall.letseatall.data.repository.LoginRepository;
 import com.letseatall.letseatall.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
+@RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-
+    private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final LoginRepository loginRepository;
-
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, LoginRepository loginRepository) {
-        this.userRepository = userRepository;
-        this.loginRepository = loginRepository;
-    }
 
     @Override
     public UserResponseDto getUser(Long id) {
@@ -86,5 +85,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(String id) {
         loginRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        LOGGER.info("[loadUserByUsername] loadUserByUsername 수행. username : {}", username);
+        return userRepository.getByUid(username);
     }
 }
