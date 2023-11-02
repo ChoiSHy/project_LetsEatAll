@@ -5,6 +5,8 @@ import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.dto.User.*;
 import com.letseatall.letseatall.service.LoginService;
 import com.letseatall.letseatall.service.UserService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,13 +15,16 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
+@Controller
 @RequestMapping("/user")
 public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
@@ -34,7 +39,10 @@ public class UserController {
         this.userService = userService;
         this.loginService = loginService;
     }
-
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="X-AUTH-TOKEN", value = "로그인 성공 후 받은 access_token",
+                    required = true, dataType = "String", paramType = "header")
+    })
     @GetMapping()
     /* 회원 정보 요구 */
     public ResponseEntity<UserResponseDto> getUser(Long id) {
@@ -73,9 +81,10 @@ public class UserController {
     }*/
     @PostMapping("/sign-in")
     /* 로그인 시도 */
-    public SignInResultDto signIn(
+    public String signIn(
             @ApiParam(value = "ID", required = true) @RequestParam String id,
-            @ApiParam(value = "Password", required = true) @RequestParam String password)
+            @ApiParam(value = "Password", required = true) @RequestParam String password,
+            Model model)
             throws RuntimeException {
         LOGGER.info("[signIn] 로그인을 시도하고 있습니다. id : {}, pw : ****", id);
         SignInResultDto signInResultDto = loginService.signIn(id, password);
@@ -84,7 +93,8 @@ public class UserController {
             LOGGER.info("[signIn] 정상적으로 로그인되었습니다. id : {}, token : {}", id,
                     signInResultDto.getToken());
         }
-        return signInResultDto;
+        model.addAttribute("data",signInResultDto);
+        return "/main/main";
     }
 
     /*

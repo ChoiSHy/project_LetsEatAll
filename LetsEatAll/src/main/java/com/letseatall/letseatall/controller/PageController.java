@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
+@RequestMapping("/page")
 public class PageController {
 
     private final RestaurantService restaurantService;
@@ -26,8 +27,13 @@ public class PageController {
         this.restaurantService=restaurantService;
         this.categoryRepository = categoryRepository;
     }
-    @RequestMapping("/")
-    public String home(Model model){
+    @GetMapping("/login")
+    public String index(Model model){
+        return "/login/Login";
+    }
+
+    @GetMapping("/main")
+    public String mainPage(Model model){
         String url_ = "http://localhost:8080/restaurant/";
         List<Category> categoryList = categoryRepository.findAll();
         List<CategoryDto> dtoList = new ArrayList<>();
@@ -42,7 +48,7 @@ public class PageController {
             System.out.println(dto);
         }
         model.addAttribute("categories", dtoList);
-        return "home";
+        return "/main/home";
     }
     @GetMapping("/restaurant/{category}/{start}")
     public String getCategoryRestaurant(@PathVariable int category, @PathVariable int start, Model model){
