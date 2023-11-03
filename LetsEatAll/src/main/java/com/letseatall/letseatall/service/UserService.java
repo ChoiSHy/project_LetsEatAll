@@ -12,6 +12,5 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 public interface UserService extends UserDetailsService {
     UserResponseDto getUser(Long id);
     UserResponseDto saveUser(UserDto UserDto);
-    UserResponseDto tryLogin(LoginRequestDto loginRequestDto);
     void deleteUser(String id);
 }

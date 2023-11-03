@@ -82,14 +82,15 @@ public class UserController {
     @PostMapping("/sign-in")
     /* 로그인 시도 */
     public SignInResultDto signIn(
-            @ApiParam(value = "ID", required = true) @RequestParam String id,
-            @ApiParam(value = "Password", required = true) @RequestParam String password)
-            throws RuntimeException {
-        LOGGER.info("[signIn] 로그인을 시도하고 있습니다. id : {}, pw : ****", id);
-        SignInResultDto signInResultDto = loginService.signIn(id, password);
+            @RequestBody SignInRequestDto dto
+            //@ApiParam(value = "ID", required = true) @RequestParam String id,
+            //@ApiParam(value = "Password", required = true) @RequestParam String password
+            ) throws RuntimeException {
+        LOGGER.info("[signIn] 로그인을 시도하고 있습니다. id : {}, pw : ****", dto.getId());
+        SignInResultDto signInResultDto = loginService.signIn(dto.getId(), dto.getPassword());
 
         if (signInResultDto.getCode() == 0) {
-            LOGGER.info("[signIn] 정상적으로 로그인되었습니다. id : {}, token : {}", id,
+            LOGGER.info("[signIn] 정상적으로 로그인되었습니다. id : {}, token : {}", dto.getId(),
                     signInResultDto.getToken());
         }
         return signInResultDto;

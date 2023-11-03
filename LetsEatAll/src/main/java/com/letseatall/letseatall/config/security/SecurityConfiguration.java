@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -13,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * 어플리케이션의 보안 설정
  */
 @Configuration
-//@EnableWebSecurity // Spring Security에 대한 디버깅 모드를 사용하기 위한 어노테이션 (default : false)
+@EnableWebSecurity // Spring Security에 대한 디버깅 모드를 사용하기 위한 어노테이션 (default : false)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -39,14 +40,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/user/sign-in",
                         "/user/sign-up",
                         "/user/exception",
-                        "/page/**", "/", "**/page"
+                        "/","/page/**"
                 ).permitAll() // 가입 및 로그인 주소는 허용
                 .antMatchers(HttpMethod.GET, "/menu/**").permitAll() // menu로 시작하는 Get 요청은 허용
 
                 .antMatchers("**exception**").permitAll()
 
                 .anyRequest().hasRole("ADMIN") // 나머지 요청은 인증된 ADMIN만 접근 가능
-
                 .and()
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())
                 .and()
@@ -68,6 +68,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity webSecurity) {
         webSecurity.ignoring().antMatchers( "/swagger-resources/**",
                 "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception",
-                "**/page/**");
+                "/page/**");
     }
 }

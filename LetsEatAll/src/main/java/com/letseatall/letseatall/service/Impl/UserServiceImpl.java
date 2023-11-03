@@ -62,27 +62,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto tryLogin(LoginRequestDto loginRequestDto) {
-        Login foundLogin = loginRepository.findById(loginRequestDto.getId()).get();
-        if (foundLogin == null)
-            return null;
-
-        if (foundLogin.getPw().compareTo(loginRequestDto.getPw()) != 0)
-            return UserResponseDto.builder().id(-400L).name("id_duplication").build();
-
-        else {
-            User foundUser = foundLogin.getUser();
-            UserResponseDto responseDto = UserResponseDto.builder()
-                    .id(foundUser.getId())
-                    .name(foundUser.getName())
-                    .birthDate(foundUser.getBirthDate())
-                    .score(foundUser.getScore())
-                    .build();
-            return responseDto;
-        }
-    }
-
-    @Override
     public void deleteUser(String id) {
         loginRepository.deleteById(id);
     }

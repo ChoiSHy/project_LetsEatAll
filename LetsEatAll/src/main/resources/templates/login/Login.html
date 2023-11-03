@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
@@ -16,38 +16,49 @@
                 </tr>
                 <tr>
                     <td>PW: </td>
-                    <td><input type="password" name="password"></td>
+                    <td><input type="password" name="password" ></td>
                 </tr>
                 <tr>
                     <td colspan="2" align="center">
-                        <input type="button" id="btn" value="로그인"
-                        onclick="tryLogin()">
+                        <input type="submit" id="btn" value="로그인">
                         <input type="button" onclick="location.href='/page/sign-up'" value="회원가입">
                     </td>
                 </tr>
             </table>
-
         </form>
 
     </div>
-<script>
-    const http = new XMLHttpRequest();;
-    const url = 'http://localhost:8080/user/sign-in';
+    <script th:inline="javascript">
+        const http = new XMLHttpRequest();
+        const address = "http://220.122.52.162:8080";
+        const url1 = "/user/sign-in";
+        const url2 = "/page/main";
 
-    function tryLogin(){
-        let formData = document.getElementById('data');
+        document.getElementById("data").onsubmit=function (){
+            let id = this.id.value;
+            let password = this.password.value;
 
-        let data = {"id":formData.getAttribute('id'),
-            "password":formData.getAttribute('password')}
-        alert(data)
-        http.open('POST', url);
-        http.send(JSON.parse(data.toString()));
+            console.log(id);
+            //console.log(url_);
+            //console.log(password);
 
-        http.onreadystatechange = (e) =>{
-            console.log(http.);
+            let dataJson = {'id':id, 'password':password};
+            console.log(dataJson)
+            http.onreadystatechange = function (){
+                if(http.readyState == XMLHttpRequest.DONE && http.status==200){
+                    console.log(http.responseText);
+
+                }
+            }
+            http.open('post', address+url1,true);
+            http.setRequestHeader('Content-Type', 'application/json');
+            http.send(JSON.stringify(dataJson) );
+
+            http.upload.onload = ()=>{
+                http.open("get", address+url2)
+                http.send();
+            }
         }
-    }
-
-</script>
+    </script>
 </body>
 </html>
