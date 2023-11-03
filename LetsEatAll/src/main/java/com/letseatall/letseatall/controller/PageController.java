@@ -3,14 +3,17 @@ package com.letseatall.letseatall.controller;
 import com.letseatall.letseatall.data.Entity.Category;
 import com.letseatall.letseatall.data.dto.Category.CategoryDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
+import com.letseatall.letseatall.data.dto.User.SignInResultDto;
 import com.letseatall.letseatall.data.repository.CategoryRepository;
 import com.letseatall.letseatall.service.RestaurantService;
+import io.swagger.annotations.ApiParam;
+import org.apache.coyote.Request;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/page")
 public class PageController {
+    private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     private final RestaurantService restaurantService;
     private final CategoryRepository categoryRepository;
@@ -30,6 +34,10 @@ public class PageController {
     @GetMapping("/login")
     public String index(Model model){
         return "/login/Login";
+    }
+    @GetMapping("/sign-up")
+    public String sign_up(Model model){
+        return "login/sign-up";
     }
 
     @GetMapping("/main")

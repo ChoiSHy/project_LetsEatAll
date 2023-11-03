@@ -39,7 +39,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/user/sign-in",
                         "/user/sign-up",
                         "/user/exception",
-                        "/page/**", "/"
+                        "/page/**", "/", "**/page"
                 ).permitAll() // 가입 및 로그인 주소는 허용
                 .antMatchers(HttpMethod.GET, "/menu/**").permitAll() // menu로 시작하는 Get 요청은 허용
 
@@ -51,11 +51,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class); // JWT Token 필터를 id/password 인증 필터 이전에 추가
+
+
     }
+
 
     /**
      * Swagger 페이지 접근에 대한 예외 처리
@@ -65,6 +67,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity webSecurity) {
         webSecurity.ignoring().antMatchers( "/swagger-resources/**",
-                "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception");
+                "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception",
+                "**/page/**");
     }
 }

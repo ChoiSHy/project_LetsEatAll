@@ -8,7 +8,7 @@
     <div align="center">
         <h2>로그인</h2>
         <hr>
-        <form action="/user/sign-in" method="post">
+        <form method="post" id="data">
             <table>
                 <tr>
                     <td>ID: </td>
@@ -20,7 +20,9 @@
                 </tr>
                 <tr>
                     <td colspan="2" align="center">
-                        <input type="submit" value="로그인">
+                        <input type="button" id="btn" value="로그인"
+                        onclick="tryLogin()">
+                        <input type="button" onclick="location.href='/page/sign-up'" value="회원가입">
                     </td>
                 </tr>
             </table>
@@ -28,5 +30,24 @@
         </form>
 
     </div>
+<script>
+    const http = new XMLHttpRequest();;
+    const url = 'http://localhost:8080/user/sign-in';
+
+    function tryLogin(){
+        let formData = document.getElementById('data');
+
+        let data = {"id":formData.getAttribute('id'),
+            "password":formData.getAttribute('password')}
+        alert(data)
+        http.open('POST', url);
+        http.send(JSON.parse(data.toString()));
+
+        http.onreadystatechange = (e) =>{
+            console.log(http.);
+        }
+    }
+
+</script>
 </body>
 </html>

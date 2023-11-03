@@ -20,8 +20,8 @@ INSERT INTO category VALUES(19, '햄버거');
 
 INSERT INTO franchise VALUES (1,'VIPS',11);
 
-INSERT INTO user VALUES(1, STR_TO_DATE('19990228','%Y%m%d'), 'ChoiSHy', 50);
-INSERT INTO login VALUES('tjdgus4697',1234,1);
+# INSERT INTO user VALUES(1, STR_TO_DATE('19990228','%Y%m%d'), 'ChoiSHy', 50);
+# INSERT INTO login VALUES('tjdgus4697',1234,1);
 
 INSERT INTO menu VALUES(1,'빕스 1997 스테이크 2인세트',52000,0,11,1,NULL);
 INSERT INTO menu VALUES(2, '스테이크 싱글플래터 1인 세트',23000,0,11,1,NULL);

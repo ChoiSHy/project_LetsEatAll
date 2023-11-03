@@ -87,9 +87,13 @@ public class OneToManyTest {
     @Transactional
     public void saveReviewTest() {
         /* user */
+        //User writer = userRepository.getByUid("tjdgus4697");
+        //System.out.println("writer: "+writer.toString());
         User writer = new User();
         writer.setName("최성현");
         writer.setBirthDate(LocalDate.of(1999, 02, 28));
+        writer.setUid("tjdgus4697");
+        writer.setPassword("1234");
         writer.setScore(50);
 
         /* restaurant */

@@ -24,7 +24,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/user")
 public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
@@ -60,7 +60,7 @@ public class UserController {
             @ApiParam(value = "비밀번호", required = true) @RequestParam String password,
             @ApiParam(value = "이름", required = true) @RequestParam String name,
             @DateTimeFormat(pattern="yyyy-MM-dd")
-            @ApiParam(value = "생년월일", required = true) @RequestParam LocalDate birthDate,
+            @ApiParam(value = "생년월일 (yyyy-MM-dd)", required = true) @RequestParam LocalDate birthDate,
             @ApiParam(value = "권한", required = true) @RequestParam String role) {
         LOGGER.info("[signUp] 회원가입을 수행합니다. id : {}, password : ****, name : {}, role : {}", id, name, role);
         SignUpResultDto signUpResultDto = loginService.signUp(id, password,name,birthDate, role);
@@ -81,10 +81,9 @@ public class UserController {
     }*/
     @PostMapping("/sign-in")
     /* 로그인 시도 */
-    public String signIn(
+    public SignInResultDto signIn(
             @ApiParam(value = "ID", required = true) @RequestParam String id,
-            @ApiParam(value = "Password", required = true) @RequestParam String password,
-            Model model)
+            @ApiParam(value = "Password", required = true) @RequestParam String password)
             throws RuntimeException {
         LOGGER.info("[signIn] 로그인을 시도하고 있습니다. id : {}, pw : ****", id);
         SignInResultDto signInResultDto = loginService.signIn(id, password);
@@ -93,8 +92,7 @@ public class UserController {
             LOGGER.info("[signIn] 정상적으로 로그인되었습니다. id : {}, token : {}", id,
                     signInResultDto.getToken());
         }
-        model.addAttribute("data",signInResultDto);
-        return "/main/main";
+        return signInResultDto;
     }
 
     /*
