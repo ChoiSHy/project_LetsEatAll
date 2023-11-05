@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.http.HttpResponse;
@@ -85,7 +86,31 @@ public class UserController {
             throw(new BadRequestException("변경 실패"));
         }
     }
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="X-AUTH-TOKEN", value="jwt token", required = true, dataType = "String", paramType = "header")
+    })
+    @PostMapping("/update")
+    public ResponseEntity updateUser(@RequestBody UserDto userDto){
+        String id = userDto.getId();
+        String name = userDto.getName();
+        LocalDate birthDate = userDto.getBirthDate();
+        LOGGER.info("[updateUser] : 요청으로부터 데이터 추출");
+        try{
+        UserResponseDto savedUser = userService.updateUser(id,name,birthDate);
 
+        if(savedUser != null){
+            LOGGER.info("[updateUser] : 데이터 저장 완료. savedUser: {}", savedUser.toString());
+            return ResponseEntity.status(HttpStatus.OK).body(savedUser);
+        }
+        else{
+            LOGGER.info("[updateUser] : 데이터 저장 실패.");
+            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED);
+        }
+        }catch (RuntimeException e){
+            throw new BadRequestException("계정 검색 불가");
+        }
+
+    }
     @PostMapping("/sign-up")
     /* 회원 가입 */
     public ResponseEntity signUp(@RequestBody SignUpRequestDto req) {

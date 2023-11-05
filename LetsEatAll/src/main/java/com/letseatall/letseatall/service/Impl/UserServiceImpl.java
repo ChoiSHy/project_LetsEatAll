@@ -4,6 +4,7 @@ import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.dto.User.UserResponseDto;
 import com.letseatall.letseatall.data.repository.UserRepository;
 import com.letseatall.letseatall.service.UserService;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @Service
@@ -44,5 +46,34 @@ public class UserServiceImpl implements UserService {
                 .score(user.getScore())
                 .build();
         return udto;
+    }
+    public UserResponseDto updateUser(String id, String name, LocalDate birthDate){
+        LOGGER.info("[updateUser] : user 데이터 탐색 시작");
+        User user = userRepository.getByUid(id);
+        if(user!=null){
+            LOGGER.info("[updateUser] : user 데이터 탐색 성공");
+            user.setName(name);
+            user.setBirthDate(birthDate);
+            LOGGER.info("[updateUser] : user 데이터 수정 시작");
+            User savedUser = userRepository.save(user);
+            if(savedUser != null){
+                LOGGER.info("[updateUser] : user 데이터 수정 성공");
+                UserResponseDto responseDto = UserResponseDto.builder()
+                        .id(savedUser.getUid())
+                        .name(savedUser.getName())
+                        .birthDate(savedUser.getBirthDate())
+                        .score(savedUser.getScore())
+                        .build();
+                return responseDto;
+            }
+            else{
+                LOGGER.info("[updateUser] : user 데이터 수정 실패");
+                return null;
+            }
+
+        }
+        else
+            LOGGER.info("[updateUser] : user 데이터 탐색 실패");
+        throw new RuntimeException();
     }
 }

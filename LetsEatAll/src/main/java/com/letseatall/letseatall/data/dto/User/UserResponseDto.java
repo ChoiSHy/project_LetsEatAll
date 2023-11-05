@@ -5,6 +5,7 @@ import com.letseatall.letseatall.data.Entity.User;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
+@ToString
 public class UserResponseDto {
     private String id;
     private String name;

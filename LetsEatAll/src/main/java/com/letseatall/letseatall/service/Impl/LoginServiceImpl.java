@@ -5,6 +5,7 @@ import com.letseatall.letseatall.config.security.JwtTokenProvider;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.dto.User.SignInResultDto;
 import com.letseatall.letseatall.data.dto.User.SignUpResultDto;
+import com.letseatall.letseatall.data.dto.User.UserResponseDto;
 import com.letseatall.letseatall.data.repository.UserRepository;
 import com.letseatall.letseatall.service.LoginService;
 import org.slf4j.Logger;
@@ -154,4 +155,5 @@ public class LoginServiceImpl implements LoginService {
             }
         }
     }
+
 }
