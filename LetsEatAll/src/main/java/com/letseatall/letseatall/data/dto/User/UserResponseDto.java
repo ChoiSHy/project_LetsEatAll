@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 @Builder
 public class UserResponseDto {
-    private Long id;
+    private String id;
     private String name;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthDate;

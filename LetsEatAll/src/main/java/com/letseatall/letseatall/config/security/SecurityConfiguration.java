@@ -36,25 +36,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .authorizeRequests() // 리퀘스트에 대한 사용권한 체크
-                .antMatchers("/v2/api-docs",
-                        "/user/sign-in",
-                        "/user/sign-up",
-                        "/user/exception",
-                        "/","/page/**"
-                ).permitAll() // 가입 및 로그인 주소는 허용
-                .antMatchers(HttpMethod.GET, "/menu/**").permitAll() // menu로 시작하는 Get 요청은 허용
-
+                .antMatchers(HttpMethod.GET, "/user").authenticated()
+                .antMatchers(HttpMethod.DELETE, "/user").authenticated()
+                //.antMatchers(HttpMethod.POST, "/user/password/**").authenticated()
                 .antMatchers("**exception**").permitAll()
+                .anyRequest().permitAll()
 
-                .anyRequest().hasRole("ADMIN") // 나머지 요청은 인증된 ADMIN만 접근 가능
                 .and()
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 .and()
+                .formLogin()
+                .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class); // JWT Token 필터를 id/password 인증 필터 이전에 추가
-
 
     }
 
@@ -66,7 +62,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(WebSecurity webSecurity) {
-        webSecurity.ignoring().antMatchers( "/swagger-resources/**",
+        webSecurity.ignoring().antMatchers("/swagger-resources/**",
                 "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception",
                 "/page/**");
     }

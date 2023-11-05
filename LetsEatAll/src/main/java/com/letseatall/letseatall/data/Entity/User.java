@@ -38,14 +38,14 @@ public class User implements UserDetails {
     @JsonProperty(access=Access.WRITE_ONLY)             // 로그인 비밀번호
     @Column(nullable = false)
     private String password;
-    @OneToMany(mappedBy = "writer",cascade = CascadeType.ALL)   
+    @OneToMany(mappedBy = "writer",cascade = CascadeType.ALL)
     @ToString.Exclude                                   // 리뷰 리스트
-    private List<Review> reviewList = new ArrayList<>();    
+    private List<Review> reviewList = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();     // 권한 목록
-    
+
     // 리뷰 추가
     public void addReview(Review review) {
         reviewList.add(review);

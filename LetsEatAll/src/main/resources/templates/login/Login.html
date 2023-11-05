@@ -8,7 +8,7 @@
     <div align="center">
         <h2>로그인</h2>
         <hr>
-        <form method="post" id="data">
+        <form method="post" id="data" action="/user/sign-in">
             <table>
                 <tr>
                     <td>ID: </td>
@@ -28,7 +28,7 @@
         </form>
 
     </div>
-    <script th:inline="javascript">
+    <!--script th:inline="javascript">
         const http = new XMLHttpRequest();
         const address = "http://220.122.52.162:8080";
         const url1 = "/user/sign-in";
@@ -59,6 +59,6 @@
                 http.send();
             }
         }
-    </script>
+    </script-->
 </body>
 </html>
