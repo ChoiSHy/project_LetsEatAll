@@ -38,7 +38,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests() // 리퀘스트에 대한 사용권한 체크
                 .antMatchers(HttpMethod.GET, "/user").authenticated()
                 .antMatchers(HttpMethod.DELETE, "/user").authenticated()
-                //.antMatchers(HttpMethod.POST, "/user/password/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/user/password/**").authenticated()
                 .antMatchers("**exception**").permitAll()
                 .anyRequest().permitAll()
 
@@ -50,7 +50,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .formLogin()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class); // JWT Token 필터를 id/password 인증 필터 이전에 추가
+                        UsernamePasswordAuthenticationFilter.class); // JWT Token 필터 추가
 
     }
 

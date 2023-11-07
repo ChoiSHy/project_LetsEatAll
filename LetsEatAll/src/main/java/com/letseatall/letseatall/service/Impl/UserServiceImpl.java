@@ -1,6 +1,7 @@
 package com.letseatall.letseatall.service.Impl;
 
 import com.letseatall.letseatall.data.Entity.User;
+import com.letseatall.letseatall.data.dto.User.BadRequestException;
 import com.letseatall.letseatall.data.dto.User.UserResponseDto;
 import com.letseatall.letseatall.data.repository.UserRepository;
 import com.letseatall.letseatall.service.UserService;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 
 @RequiredArgsConstructor
@@ -37,8 +39,21 @@ public class UserServiceImpl implements UserService {
         return userRepository.getByUid(username);
     }
 
-    public UserResponseDto getUser(String id){
-        User user = userRepository.getByUid(id);
+    public UserResponseDto getUser(String id, String token_username){
+        User user = null;
+
+        LOGGER.info("[ServiceImpl/getUser] : user 정보 검색 시작");
+        user = userRepository.getByUid(id);
+        if(user == null) {
+            LOGGER.info("[ServiceImpl/getUser] : user 정보 검색 실패");
+            throw new EntityNotFoundException();
+        }
+        try{
+            identityVerification(user.getUsername(), token_username);
+        }catch (BadRequestException e){
+            LOGGER.info("[ServiceImpl/getUser] : user 정보와 토큰 불일치");
+            throw e;
+        }
         UserResponseDto udto = UserResponseDto.builder()
                 .id(user.getUid())
                 .name(user.getName())
@@ -47,11 +62,19 @@ public class UserServiceImpl implements UserService {
                 .build();
         return udto;
     }
-    public UserResponseDto updateUser(String id, String name, LocalDate birthDate){
+    public UserResponseDto updateUser(String id, String name, LocalDate birthDate, String tokenName){
         LOGGER.info("[updateUser] : user 데이터 탐색 시작");
         User user = userRepository.getByUid(id);
         if(user!=null){
             LOGGER.info("[updateUser] : user 데이터 탐색 성공");
+            try {
+                LOGGER.info("[updateUser] : user 데이터와 토큰의 정보 비교");
+                identityVerification(user.getUsername(), tokenName);
+            }catch (BadRequestException e){
+                LOGGER.info("[updateUser] : user 데이터와 토큰의 정보 불일치");
+                throw e;
+            }
+            LOGGER.info("[updateUser] : user 데이터와 토큰의 정보 일치. id: {}",tokenName);
             user.setName(name);
             user.setBirthDate(birthDate);
             LOGGER.info("[updateUser] : user 데이터 수정 시작");
@@ -74,6 +97,14 @@ public class UserServiceImpl implements UserService {
         }
         else
             LOGGER.info("[updateUser] : user 데이터 탐색 실패");
-        throw new RuntimeException();
+        throw new EntityNotFoundException();
+    }
+    private void identityVerification(String userName, String tokenName){
+        LOGGER.info("[identityVerification] : token 정보와 검색 정보 일치 여부 검사");
+        if(!tokenName.equals(userName)){
+            LOGGER.info("[identityVerification] : token 정보 불일치");
+            throw new BadRequestException("토큰 불일치");
+        }
+        LOGGER.info("[identityVerification] : token 정보와 검색 정보 일치");
     }
 }

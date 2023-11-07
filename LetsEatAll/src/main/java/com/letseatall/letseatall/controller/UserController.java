@@ -5,6 +5,8 @@ import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.dto.User.*;
 import com.letseatall.letseatall.service.LoginService;
 import com.letseatall.letseatall.service.UserService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiParam;
@@ -15,12 +17,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
@@ -49,8 +54,22 @@ public class UserController {
     })
     @GetMapping()
     /* 회원 정보 요구 */
-    public ResponseEntity<UserResponseDto> getUser(@RequestParam String id) {
-        UserResponseDto returnUser = userService.getUser(id);
+    public ResponseEntity getUser(@RequestParam String id) {
+        LOGGER.info("[getUser] : security로부터 토큰의 사용자 정보 가져오기");
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserResponseDto returnUser = null;
+
+        try {
+            LOGGER.info("[getUser] : 사용자 정보 접근 시도");
+            returnUser = userService.getUser(id, userDetails.getUsername());
+        } catch (EntityNotFoundException e) {
+            LOGGER.info("[getUser] : 대상 정보를 찾지 못했습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("대상을 찾지 못했습니다.");
+        } catch (BadRequestException e) {
+            LOGGER.info("[getUser] : 검색 대상과 토큰 정보 불일치");
+            return ResponseEntity.status(401).body("토큰과 검색 대상 불일치");
+        }
+        LOGGER.info("[getUser] : 사용자 정보 전송완료. name : {}", returnUser.getName());
         return ResponseEntity.status(HttpStatus.OK).body(returnUser);
     }
 
@@ -63,9 +82,13 @@ public class UserController {
         String name = userDto.getName();
         LocalDate birthDate = userDto.getBirthDate();
         LOGGER.info("[checkUserData] : 비밀번호 변경 전, 사용자 정보 확인");
-        if (loginService.changeUserPassword_check(id, name, birthDate)) {
-            LOGGER.info("[checkUserData] : 회원 정보 확인 완료");
-            return ResponseEntity.ok("회원 정보 확인");
+        try {
+            if (loginService.changeUserPassword_check(id, name, birthDate)) {
+                LOGGER.info("[checkUserData] : 회원 정보 확인 완료");
+                return ResponseEntity.ok("회원 정보 확인");
+            }
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
         }
         LOGGER.info("[checkUserData] : 회원 정보 불일치");
         throw new BadRequestException("회원 정보 불일치");
@@ -81,36 +104,46 @@ public class UserController {
             loginService.changeUserPassword(dto.getId(), dto.getPassword());
             LOGGER.info("[updatePassword] : 비밀번호 변경 완료");
             return ResponseEntity.ok("비밀번호 변경 완료");
+        } catch (BadRequestException e) {
+            LOGGER.info("[updatePassword] : 토큰 정보 불일치");
+            return ResponseEntity.status(401).body(e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.info("[updatePassword] : 비밀번호 변경 실패");
-            throw(new BadRequestException("변경 실패"));
+            throw (new BadRequestException("변경 실패"));
         }
     }
+
     @ApiImplicitParams({
-            @ApiImplicitParam(name="X-AUTH-TOKEN", value="jwt token", required = true, dataType = "String", paramType = "header")
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "jwt token", required = true, dataType = "String", paramType = "header")
     })
     @PostMapping("/update")
-    public ResponseEntity updateUser(@RequestBody UserDto userDto){
+    public ResponseEntity updateUser(@RequestBody UserDto userDto) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         String id = userDto.getId();
         String name = userDto.getName();
         LocalDate birthDate = userDto.getBirthDate();
         LOGGER.info("[updateUser] : 요청으로부터 데이터 추출");
-        try{
-        UserResponseDto savedUser = userService.updateUser(id,name,birthDate);
+        try {
+            UserResponseDto savedUser = userService.updateUser(id, name, birthDate, userDetails.getUsername());
 
-        if(savedUser != null){
-            LOGGER.info("[updateUser] : 데이터 저장 완료. savedUser: {}", savedUser.toString());
-            return ResponseEntity.status(HttpStatus.OK).body(savedUser);
-        }
-        else{
-            LOGGER.info("[updateUser] : 데이터 저장 실패.");
-            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED);
-        }
-        }catch (RuntimeException e){
-            throw new BadRequestException("계정 검색 불가");
+            if (savedUser != null) {
+                LOGGER.info("[updateUser] : 데이터 저장 완료. savedUser: {}", savedUser.toString());
+                return ResponseEntity.status(HttpStatus.OK).body(savedUser);
+            } else {
+                LOGGER.info("[updateUser] : 데이터 저장 실패.");
+                return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("데이터 수정 실패");
+            }
+        } catch (EntityNotFoundException e) {
+            LOGGER.info("[updateUser] : 대상 검색 실패.");
+            return ResponseEntity.status(404).body("대상을 찾지 못했습니다.");
+        } catch (BadRequestException e) {
+            LOGGER.info("[updateUser] : 토큰 정보 불일치");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("토큰 정보 불일치");
         }
 
     }
+
     @PostMapping("/sign-up")
     /* 회원 가입 */
     public ResponseEntity signUp(@RequestBody SignUpRequestDto req) {
@@ -192,7 +225,7 @@ public class UserController {
         Map<String, String> map = new HashMap<>();
         map.put("error type", httpStatus.getReasonPhrase());
         map.put("code", "400");
-        map.put("message", "에러 발생");
+        map.put("message", e.getMessage());
 
         return new ResponseEntity<>(map, responseHeaders, httpStatus);
     }

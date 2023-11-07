@@ -3,6 +3,7 @@ package com.letseatall.letseatall.service.Impl;
 import com.letseatall.letseatall.common.CommonResponse;
 import com.letseatall.letseatall.config.security.JwtTokenProvider;
 import com.letseatall.letseatall.data.Entity.User;
+import com.letseatall.letseatall.data.dto.User.BadRequestException;
 import com.letseatall.letseatall.data.dto.User.SignInResultDto;
 import com.letseatall.letseatall.data.dto.User.SignUpResultDto;
 import com.letseatall.letseatall.data.dto.User.UserResponseDto;
@@ -11,6 +12,8 @@ import com.letseatall.letseatall.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -120,10 +123,19 @@ public class LoginServiceImpl implements LoginService {
     }
 
     public boolean changeUserPassword_check(String id, String name, LocalDate birthDate) {
+        //UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         LOGGER.info("[changeUserPassword_check] : User 정보 불러오기 시작. id: {}", id);
         User user = userRepository.getByUid(id);
         if (user != null) {
             LOGGER.info("[changeUserPassword_check] : User 정보 불러오기 성공. id: {}", id);
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            try{
+                identityVerification(userDetails.getUsername(), user.getUsername());
+            }catch (BadRequestException e){
+                throw e;
+            }
+
             if (!user.getName().equals(name) ){
                 LOGGER.info("[changeUserPassword_check] : User 정보 불일치. name: {} vs {}", user.getName(), name);
                 return false;
@@ -144,6 +156,13 @@ public class LoginServiceImpl implements LoginService {
         User user = userRepository.getByUid(id);
         if (user != null && newPassword != null) {
             LOGGER.info("[changeUserPassword] : User 정보 불러오기 성공. id: {}", id);
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            try{
+                identityVerification(userDetails.getUsername(), user.getUsername());
+            }catch (BadRequestException e){
+                throw e;
+            }
+            
             user.setPassword(passwordEncoder.encode(newPassword));
             try {
                 LOGGER.info("[changeUserPassword] : User 정보 저장 시도.");
@@ -154,6 +173,14 @@ public class LoginServiceImpl implements LoginService {
                 throw e;
             }
         }
+    }
+    private void identityVerification(String userName, String tokenName){
+        LOGGER.info("[identityVerification] : token 정보와 검색 정보 일치 여부 검사");
+        if(!tokenName.equals(userName)){
+            LOGGER.info("[identityVerification] : token 정보 불일치");
+            throw new BadRequestException("토큰 불일치");
+        }
+        LOGGER.info("[identityVerification] : token 정보와 검색 정보 일치");
     }
 
 }

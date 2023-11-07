@@ -55,9 +55,6 @@ public class User implements UserDetails {
         reviewList.remove(review);
     }
 
-    @OneToOne(mappedBy = "user")
-    private Login login;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // 가지고 있는 권한 목록 반환
