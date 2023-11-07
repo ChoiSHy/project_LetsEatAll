@@ -3,15 +3,18 @@ package com.letseatall.letseatall.service.Impl;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.dto.User.BadRequestException;
 import com.letseatall.letseatall.data.dto.User.UserResponseDto;
+import com.letseatall.letseatall.data.dto.User.UserScoreDto;
 import com.letseatall.letseatall.data.repository.UserRepository;
 import com.letseatall.letseatall.service.UserService;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
@@ -106,5 +109,30 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("토큰 불일치");
         }
         LOGGER.info("[identityVerification] : token 정보와 검색 정보 일치");
+    }
+
+    @Override
+    public UserScoreDto changeScore(String id, int score) {
+        LOGGER.info("[changeScore] : 해당 계정에 대한 점수 수정 시작 id: {}, score: {}", id, score);
+        User user = userRepository.getByUid(id);
+        if(user == null){
+            LOGGER.info("[changeScore] : 해당 계정을 찾을 수 없음.");
+            throw new EntityNotFoundException("해당 계정을 찾을 수 없음.");
+        }
+        user.setScore(user.getScore() + score);
+
+        LOGGER.info("[changeScore] : 수정된 정보 저장 시작");
+        User changedUser = userRepository.save(user);
+
+        if(changedUser == null){
+            LOGGER.info("[changeScore] : 데이터 수정 실패");
+            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED);
+        }
+        LOGGER.info("[changeScore] : 데이터 수정 성공");
+        UserScoreDto responseDto = UserScoreDto.builder()
+                .id(changedUser.getUid())
+                .score(changedUser.getScore())
+                .build();
+        return responseDto;
     }
 }

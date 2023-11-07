@@ -229,6 +229,19 @@ public class UserController {
 
         return new ResponseEntity<>(map, responseHeaders, httpStatus);
     }
+    @PostMapping("/score")
+    public ResponseEntity changeScore(@RequestBody UserScoreDto req){
+        LOGGER.info("[changeScore] : Request 도착");
+        try {
+            UserScoreDto resDto = userService.changeScore(req.getId(), req.getScore());
+            return ResponseEntity.ok().body(resDto);
+
+        }catch (EntityNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }catch (ResponseStatusException e){
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("데이터 수정 실패");
+        }
+    }
 
 
 }

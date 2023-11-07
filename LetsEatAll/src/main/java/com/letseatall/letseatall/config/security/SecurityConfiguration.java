@@ -37,8 +37,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests() // 리퀘스트에 대한 사용권한 체크
                 .antMatchers(HttpMethod.GET, "/user").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/user").authenticated()
-                .antMatchers(HttpMethod.POST, "/user/password/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/user/password/**", "/user/score").authenticated()
                 .antMatchers("**exception**").permitAll()
                 .anyRequest().permitAll()
 
