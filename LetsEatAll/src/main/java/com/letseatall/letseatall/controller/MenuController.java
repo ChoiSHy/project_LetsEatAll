@@ -30,11 +30,12 @@ public class MenuController {
 
     @GetMapping()
     public ResponseEntity<MenuResponseDto> getMenu(Long id){
+        log.info("[getMenu] : getMenu 시작");
         MenuResponseDto responseDto = menuService.getMenu(id);
+        log.info("[getMenu] : result: {}", responseDto.getName());
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
-
     @ApiImplicitParams({
             @ApiImplicitParam(name="X-AUTH-TOKEN", value = "로그인 성공 후 받은 access_token",
             required = true, dataType = "String", paramType = "header")
@@ -45,6 +46,11 @@ public class MenuController {
         MenuResponseDto responseDto = menuService.saveMenu(menuDto);
         log.info("[saveMenu] Response Time: {}ms", System.currentTimeMillis() - cur_time);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+    @PostMapping("/franchise/save")
+    public ResponseEntity saveFranchiseMenu(@RequestBody MenuDto menuDto){
+        MenuResponseDto menuResponseDto = menuService.saveFranchiseMenu(menuDto);
+        return ResponseEntity.ok(menuResponseDto);
     }
     @PutMapping()
     public ResponseEntity<String> changeMenuPrice(@RequestBody IntChangeDto intChangeDto){
@@ -63,6 +69,16 @@ public class MenuController {
     public ResponseEntity<List<MenuResponseDto>> getAllMenus(Long rid){
         List<MenuResponseDto> rList = menuService.getAllMenu(rid);
         return ResponseEntity.status(HttpStatus.OK).body(rList);
+    }
+    @GetMapping("/franchise/list")
+    public ResponseEntity<List<MenuResponseDto>> getListFranchiseMenus(Long fid){
+        List<MenuResponseDto> mlist = menuService.getListFranchiseMenu(fid);
+        return ResponseEntity.ok(mlist);
+    }
+    @GetMapping("/franchise/all")
+    public ResponseEntity<List<MenuResponseDto>> getAllFranchiseMenus_on(Long fid){
+        List<MenuResponseDto> mlist = menuService.getAllFranchiseMenu(fid);
+        return ResponseEntity.ok(mlist);
     }
 
 }

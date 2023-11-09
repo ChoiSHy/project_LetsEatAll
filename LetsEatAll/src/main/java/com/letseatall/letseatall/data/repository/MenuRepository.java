@@ -24,4 +24,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long>, MenuBulkRepos
     @Query("select m.id from Menu m where m.franchise.id = ?1")
     List<Long> findIdAllByFranchiseId(Long id);
 
+    List<Menu> findAllByRestaurant_FranchiseId(Long fid);
+
 }

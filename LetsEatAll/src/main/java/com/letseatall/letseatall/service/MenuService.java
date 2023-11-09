@@ -9,10 +9,20 @@ import java.util.List;
 
 public interface MenuService {
     MenuResponseDto saveMenu(MenuDto menuDto);
+
+    MenuResponseDto saveFranchiseMenu(MenuDto menuDto);
+
     MenuResponseDto getMenu(Long id);
+
     boolean changeMenuPrice(IntChangeDto intChangeDto);
+
     void deleteMenu(Long id);
 
     List<MenuResponseDto> getAllMenu(Long rid);
+
     List<MenuResponseDto> getAllMenu(int start, int size);
+
+    List<MenuResponseDto> getListFranchiseMenu(Long fid);
+
+    List<MenuResponseDto> getAllFranchiseMenu(Long fid);
 }

@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public class MenuResponseDto {
     private Long rid;
+    private String r_name;
     private String name;
     private int price;
     private String category;
