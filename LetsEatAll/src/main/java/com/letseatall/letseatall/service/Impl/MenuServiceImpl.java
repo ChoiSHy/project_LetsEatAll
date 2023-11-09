@@ -6,6 +6,8 @@ import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.data.repository.*;
 import com.letseatall.letseatall.service.MenuService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,9 @@ public class MenuServiceImpl implements MenuService {
     CategoryRepository categoryRepository;
     FranchiseRepository franchiseRepository;
     ReviewRepository reviewRepository;
+
+    private final Logger LOGGER = LoggerFactory.getLogger(MenuServiceImpl.class);
+
     @Autowired
     public MenuServiceImpl(RestaurantRepository restaurantRepository,
                            MenuRepository menuRepository,
@@ -31,33 +36,40 @@ public class MenuServiceImpl implements MenuService {
                            UserRepository userRepository,
                            CategoryRepository categoryRepository,
                            FranchiseRepository franchiseRepository,
-                           ReviewRepository reviewRepository)
-    {
-        this.restaurantRepository=restaurantRepository;
+                           ReviewRepository reviewRepository) {
+        this.restaurantRepository = restaurantRepository;
         this.menuRepository = menuRepository;
         this.youtubeRepository = youtubeRepository;
         this.userRepository = userRepository;
-        this.categoryRepository=categoryRepository;
-        this.franchiseRepository=franchiseRepository;
-        this.reviewRepository=reviewRepository;
+        this.categoryRepository = categoryRepository;
+        this.franchiseRepository = franchiseRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @Override
     /* 메뉴 정보 저장 */
     public MenuResponseDto saveMenu(MenuDto menuDto) {
+        LOGGER.info("[saveMenu] : saveMenu 시작 menu = {}", menuDto);
         Restaurant foundRest = restaurantRepository.findById(menuDto.getRid()).get();
+        LOGGER.info("[saveMenu] : 검색된 음식점 = {}", foundRest.getName());
         Category category = categoryRepository.findById(menuDto.getCategory()).get();
-        Franchise franchise=null;
-        if (foundRest.getFranchise()!= null)
-            franchise = franchiseRepository.findById( foundRest.getFranchise().getId() ).get();
+        LOGGER.info("[saveMenu] : 카테고리 = {}", category.getName());
+        Franchise franchise = null;
+        if (foundRest.getFranchise() != null) {
+            franchise = foundRest.getFranchise();
+            LOGGER.info("[saveMenu] : 프렌차이즈 = {}", franchise.getName());
+        }
+        LOGGER.info("[saveMenu] : 데이터 주입 시작");
         Menu menu = new Menu();
-                menu.setName(menuDto.getName());
-                menu.setPrice(menuDto.getPrice());
-                menu.setScore(0);
-                menu.setRestaurant(foundRest);
-                menu.setCategory(category);
-                menu.setFranchise(franchise);
+        menu.setName(menuDto.getName());
+        menu.setPrice(menuDto.getPrice());
+        menu.setScore(0);
+        menu.setRestaurant(foundRest);
+        menu.setCategory(category);
+        if (franchise!= null)
+            menu.setFranchise(franchise);
         Menu savedMenu = menuRepository.save(menu);
+        LOGGER.info("[saveMenu] : 데이터 DB 저장 성공 -> savedMenu = {}", savedMenu.getName());
 
         MenuResponseDto menuResponseDto = MenuResponseDto.builder()
                 .rid(savedMenu.getRestaurant().getId())
@@ -68,10 +80,14 @@ public class MenuServiceImpl implements MenuService {
                 .build();
         return menuResponseDto;
     }
+
     @Override
     /* 메뉴 정보 요청 */
     public MenuResponseDto getMenu(Long id) {
+        LOGGER.info("[getMenu] : id = {}, 가져오기", id);
         Menu foundMenu = menuRepository.findById(id).get();
+        LOGGER.info("[getMenu] : menu = {}", foundMenu);
+
 
         MenuResponseDto responseDto = MenuResponseDto.builder()
                 .rid(foundMenu.getRestaurant().getId())
@@ -85,9 +101,9 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public boolean changeMenuPrice(IntChangeDto changeDto) {
-        Optional<Menu> foundMenu= menuRepository.findById(changeDto.getId());
+        Optional<Menu> foundMenu = menuRepository.findById(changeDto.getId());
         Menu fMenu = null;
-        if (foundMenu.isPresent()){
+        if (foundMenu.isPresent()) {
             fMenu = foundMenu.get();
             fMenu.setPrice(changeDto.getValue());
         }
@@ -102,41 +118,42 @@ public class MenuServiceImpl implements MenuService {
     public void deleteMenu(Long id) {
         List<Long> ids = new ArrayList<>();
         Optional<Menu> oMenu = menuRepository.findById(id);
-        if(oMenu.isPresent()){
-            oMenu.get().getReviewList().forEach(review ->{
+        if (oMenu.isPresent()) {
+            oMenu.get().getReviewList().forEach(review -> {
                 ids.add(review.getId());
             });
         }
         reviewRepository.deleteAllByIdInBatch(ids);
         menuRepository.deleteById(id);
     }
+
     @Override
     public List<MenuResponseDto> getAllMenu(Long rid) {
         List<MenuResponseDto> responseDtoList = new ArrayList<>();
-        menuRepository.findAllByRestaurantId(rid).forEach(m->{
+        menuRepository.findAllByRestaurantId(rid).forEach(m -> {
             MenuResponseDto responseDto = MenuResponseDto.builder()
                     .rid(m.getRestaurant().getId())
                     .name(m.getName())
                     .price(m.getPrice())
                     .score(m.getScore())
                     .build();
-            if(m.getCategory()!=null)
+            if (m.getCategory() != null)
                 responseDto.setCategory(m.getCategory().getName());
             responseDtoList.add(responseDto);
         });
         return responseDtoList;
     }
 
-    public List<MenuResponseDto> getAllMenu(int start, int size){
+    public List<MenuResponseDto> getAllMenu(int start, int size) {
         List<MenuResponseDto> responseDtoList = new ArrayList<>();
-        menuRepository.findAll(PageRequest.of(start, size)).forEach(m->{
+        menuRepository.findAll(PageRequest.of(start, size)).forEach(m -> {
             MenuResponseDto responseDto = MenuResponseDto.builder()
                     .rid(m.getRestaurant().getId())
                     .name(m.getName())
                     .price(m.getPrice())
                     .score(m.getScore())
                     .build();
-            if(m.getCategory()!=null)
+            if (m.getCategory() != null)
                 responseDto.setCategory(m.getCategory().getName());
             responseDtoList.add(responseDto);
         });
