@@ -1,10 +1,12 @@
 package com.letseatall.letseatall.config.security;
 
+import com.letseatall.letseatall.data.dto.User.TokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +20,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * JWT 토큰을 생성하고 유효성을 검증하는 컴포넌트 클래스 JWT 는 여러 암호화 알고리즘을 제공하고 알고리즘과 비밀키를 가지고 토큰을 생성
@@ -32,13 +32,17 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
+    @Getter
+    @Value("${jwt.access-token-expiration-millis}")
+    private long accessTokenExpirationMills;
+    @Getter
+    @Value("${jwt.refresh-token-expiration-millis}")
+    private long refreshTokenExpirationMillis;
+    @Value("${springboot.jwt.secret}")
+    private String secretKey = "secretKey";
 
     private final Logger LOGGER = LoggerFactory.getLogger(JwtTokenProvider.class);
     private final UserDetailsService userDetailsService; // Spring Security 에서 제공하는 서비스 레이어
-
-    @Value("${springboot.jwt.secret}")
-    private String secretKey = "secretKey";
-    private final long tokenValidMillisecond = 1000L * 60 * 60; // 1시간 토큰 유효
 
     // SecretKey 에 대해 인코딩 수행
     @PostConstruct
@@ -47,6 +51,7 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
         LOGGER.info("[init] JwtTokenProvider 내 secretKey 초기화 완료");
     }
+
 
     // JWT 토큰 생성
     public String createToken(String userUid, List<String> roles) {
@@ -58,7 +63,7 @@ public class JwtTokenProvider {
         String token = Jwts.builder()
             .setClaims(claims)
             .setIssuedAt(now)
-            .setExpiration(new Date(now.getTime() + tokenValidMillisecond))
+            .setExpiration(new Date(now.getTime() + accessTokenExpirationMills))
             .signWith(SignatureAlgorithm.HS256, secretKey) // 암호화 알고리즘, secret 값 세팅
             .compact();
 
@@ -107,5 +112,12 @@ public class JwtTokenProvider {
             LOGGER.info("[validateToken] 토큰 유효 체크 예외 발생");
             return false;
         }
+    }
+    public Claims parseClaims(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

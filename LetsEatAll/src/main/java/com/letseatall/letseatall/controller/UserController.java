@@ -55,13 +55,11 @@ public class UserController {
     @GetMapping()
     /* 회원 정보 요구 */
     public ResponseEntity getUser(@RequestParam String id) {
-        LOGGER.info("[getUser] : security로부터 토큰의 사용자 정보 가져오기");
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserResponseDto returnUser = null;
 
         try {
             LOGGER.info("[getUser] : 사용자 정보 접근 시도");
-            returnUser = userService.getUser(id, userDetails.getUsername());
+            returnUser = userService.getUser(id);
         } catch (EntityNotFoundException e) {
             LOGGER.info("[getUser] : 대상 정보를 찾지 못했습니다.");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("대상을 찾지 못했습니다.");
@@ -241,6 +239,12 @@ public class UserController {
         }catch (ResponseStatusException e){
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("데이터 수정 실패");
         }
+    }
+    @PatchMapping("/logout")
+    public ResponseEntity logout(HttpServletRequest request){
+        loginService.logout(request);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("logged out successfully");
     }
 
 }

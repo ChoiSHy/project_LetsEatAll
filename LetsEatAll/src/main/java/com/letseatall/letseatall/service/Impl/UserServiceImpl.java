@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.getByUid(username);
     }
 
-    public UserResponseDto getUser(String id, String token_username){
+    public UserResponseDto getUser(String id){
         User user = null;
 
         LOGGER.info("[ServiceImpl/getUser] : user 정보 검색 시작");
@@ -51,12 +51,7 @@ public class UserServiceImpl implements UserService {
             LOGGER.info("[ServiceImpl/getUser] : user 정보 검색 실패");
             throw new EntityNotFoundException();
         }
-        try{
-            identityVerification(user.getUsername(), token_username);
-        }catch (BadRequestException e){
-            LOGGER.info("[ServiceImpl/getUser] : user 정보와 토큰 불일치");
-            throw e;
-        }
+
         UserResponseDto udto = UserResponseDto.builder()
                 .id(user.getUid())
                 .name(user.getName())

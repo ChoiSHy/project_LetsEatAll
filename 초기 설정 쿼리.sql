@@ -19,7 +19,6 @@ INSERT INTO category VALUES(18, '카페/디저트');
 INSERT INTO category VALUES(19, '햄버거');
 
 INSERT INTO franchise VALUES (1,'VIPS',11);
-
 # INSERT INTO user VALUES(1, STR_TO_DATE('19990228','%Y%m%d'), 'ChoiSHy', 50);
 # INSERT INTO login VALUES('tjdgus4697',1234,1);
 

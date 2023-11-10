@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public interface UserService extends UserDetailsService {
     //void deleteUser(String id);
-    UserResponseDto getUser(String id, String token_username);
+    UserResponseDto getUser(String id);
     UserResponseDto updateUser(String id, String name, LocalDate birthDate, String tokenName);
     UserScoreDto changeScore(String id, int score);
 }

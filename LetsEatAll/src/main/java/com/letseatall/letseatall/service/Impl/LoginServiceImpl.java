@@ -9,6 +9,8 @@ import com.letseatall.letseatall.data.dto.User.SignUpResultDto;
 import com.letseatall.letseatall.data.dto.User.UserResponseDto;
 import com.letseatall.letseatall.data.repository.UserRepository;
 import com.letseatall.letseatall.service.LoginService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.Collections;
 
@@ -174,6 +177,11 @@ public class LoginServiceImpl implements LoginService {
             }
         }
     }
+
+    @Override
+    public void logout(HttpServletRequest request) {
+    }
+
     private void identityVerification(String userName, String tokenName){
         LOGGER.info("[identityVerification] : token 정보와 검색 정보 일치 여부 검사");
         if(!tokenName.equals(userName)){

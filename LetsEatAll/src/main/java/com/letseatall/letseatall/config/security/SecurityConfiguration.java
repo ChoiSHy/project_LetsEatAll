@@ -21,6 +21,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public SecurityConfiguration(JwtTokenProvider jwtTokenProvider) {
+
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -36,13 +37,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .authorizeRequests() // 리퀘스트에 대한 사용권한 체크
-                .antMatchers(HttpMethod.GET, "/user").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/password/**", "/user/score").authenticated()
                 .antMatchers(HttpMethod.POST, "/restaurant/restaurant/save",
                         "/restaurant/franchise/save").authenticated()
-                .antMatchers(HttpMethod.POST,"/menu/**").authenticated()
-                .antMatchers(HttpMethod.PUT,"/menu/**").authenticated()
-                .antMatchers(HttpMethod.DELETE,"/menu/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/menu/**").authenticated()
+                .antMatchers(HttpMethod.PUT, "/menu/**").authenticated()
+                .antMatchers(HttpMethod.DELETE, "/menu/**").authenticated()
                 .antMatchers(HttpMethod.GET, "/menu/**").permitAll()
                 .antMatchers("**exception**").permitAll()
                 .anyRequest().permitAll()

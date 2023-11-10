@@ -3,6 +3,8 @@ package com.letseatall.letseatall.service;
 import com.letseatall.letseatall.data.dto.User.SignInResultDto;
 import com.letseatall.letseatall.data.dto.User.SignUpResultDto;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.http.HttpRequest;
 import java.time.LocalDate;
 
 public interface LoginService {
@@ -11,4 +13,5 @@ public interface LoginService {
     boolean existId(String id);
     boolean changeUserPassword_check(String id, String name, LocalDate birthDate);
     void changeUserPassword(String id, String password);
+    void logout(HttpServletRequest request);
 }
