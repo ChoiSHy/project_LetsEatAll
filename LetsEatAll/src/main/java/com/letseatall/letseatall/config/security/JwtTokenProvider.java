@@ -35,9 +35,6 @@ public class JwtTokenProvider {
     @Getter
     @Value("${jwt.access-token-expiration-millis}")
     private long accessTokenExpirationMills;
-    @Getter
-    @Value("${jwt.refresh-token-expiration-millis}")
-    private long refreshTokenExpirationMillis;
     @Value("${springboot.jwt.secret}")
     private String secretKey = "secretKey";
 
@@ -113,11 +110,8 @@ public class JwtTokenProvider {
             return false;
         }
     }
-    public Claims parseClaims(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    public String getUserPK(String token){
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
+
 }

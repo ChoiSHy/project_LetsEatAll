@@ -14,6 +14,7 @@ import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Collections;
 
@@ -28,16 +30,19 @@ import java.util.Collections;
 public class LoginServiceImpl implements LoginService {
     private final Logger LOGGER = LoggerFactory.getLogger(LoginServiceImpl.class);
 
-    public UserRepository userRepository;
-    public JwtTokenProvider jwtTokenProvider;
-    public PasswordEncoder passwordEncoder;
+    private RedisTemplate redisTemplate;
+    private UserRepository userRepository;
+    private JwtTokenProvider jwtTokenProvider;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public LoginServiceImpl(UserRepository userRepository, JwtTokenProvider jwtTokenProvider,
-                            PasswordEncoder passwordEncoder) {
+                            PasswordEncoder passwordEncoder,
+                            RedisTemplate redisTemplate) {
         this.userRepository = userRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -80,7 +85,7 @@ public class LoginServiceImpl implements LoginService {
         }
     }
 
-    @Override
+    @Transactional
     public SignInResultDto signIn(String id, String password) throws RuntimeException {
         LOGGER.info("[getSignInResult] signDataHandler 로 회원 정보 요청");
         User user = userRepository.getByUid(id);
@@ -93,15 +98,19 @@ public class LoginServiceImpl implements LoginService {
         LOGGER.info("[getSignInResult] 패스워드 일치");
 
         LOGGER.info("[getSignInResult] SignInResultDto 객체 생성");
+        String token = jwtTokenProvider.createToken(String.valueOf(user.getUid()),
+                user.getRoles());
         SignInResultDto signInResultDto = SignInResultDto.builder()
-                .token(jwtTokenProvider.createToken(String.valueOf(user.getUid()),
-                        user.getRoles()))
+                .token(token)
                 .name(user.getName())
                 .id(user.getUid())
                 .build();
 
         LOGGER.info("[getSignInResult] SignInResultDto 객체에 값 주입");
         setSuccessResult(signInResultDto);
+        LOGGER.info("[getSignInResult] redisTemplate에 id, token 저장 시도");
+        redisTemplate.opsForValue().set("JWT_TOKEN:"+id, token);
+        LOGGER.info("[getSignInResult] redisTemplate에 id, token 저장 완료");
 
         return signInResultDto;
     }
@@ -180,6 +189,14 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public void logout(HttpServletRequest request) {
+        LOGGER.info("[ LOG-OUT ] 현재 요청자 정보 불러오는 중");
+        UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.info("[ LOG-OUT ] 현재 요청자 정보 불러오기 완료 id: {}",user.getUsername());
+        if(redisTemplate.opsForValue().get("JWT_TOKEN:"+user.getUsername())!=null){
+            LOGGER.info("[ LOG-OUT ] Redis에서 토큰 정보 삭제 시도");
+            redisTemplate.delete("JWT_TOKEN:" + user.getUsername());
+            LOGGER.info("[ LOG-OUT ] Redis에서 토큰 정보 삭제 완료");
+        }
     }
 
     private void identityVerification(String userName, String tokenName){

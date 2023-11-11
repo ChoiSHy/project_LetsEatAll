@@ -227,24 +227,28 @@ public class UserController {
 
         return new ResponseEntity<>(map, responseHeaders, httpStatus);
     }
+
     @PostMapping("/score")
-    public ResponseEntity changeScore(@RequestBody UserScoreDto req){
+    public ResponseEntity changeScore(@RequestBody UserScoreDto req) {
         LOGGER.info("[changeScore] : Request 도착");
         try {
             UserScoreDto resDto = userService.changeScore(req.getId(), req.getScore());
             return ResponseEntity.ok().body(resDto);
 
-        }catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }catch (ResponseStatusException e){
+        } catch (ResponseStatusException e) {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("데이터 수정 실패");
         }
     }
-    @PatchMapping("/logout")
-    public ResponseEntity logout(HttpServletRequest request){
-        loginService.logout(request);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("logged out successfully");
+    @PostMapping("/logout")
+    public ResponseEntity logout(HttpServletRequest request) {
+        LOGGER.info("[ LOG-OUT ] 로그아웃 시도 중");
+        loginService.logout(request);
+        LOGGER.info("[ LOG-OUT ] 로그아웃 완료");
+
+        return ResponseEntity.ok().build();
     }
 
 }

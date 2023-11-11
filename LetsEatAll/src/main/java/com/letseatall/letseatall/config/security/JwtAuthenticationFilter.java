@@ -17,12 +17,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtTokenProvider jwtTokenProvider;
-    //private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest servletRequest,
@@ -33,12 +34,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         LOGGER.info("[doFilterInternal] token 값 유효성 체크 시작");
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String key = "JWT_TOKEN:" + jwtTokenProvider.getUsername(token);
+            String storedToken = redisTemplate.opsForValue().get(key);
+            LOGGER.info("[doFilterInternal] redis 저장된 값 (key : {})");
+            LOGGER.info("[doFilterInternal] redis 저장된 값 (storedToken : {})", storedToken);
 
-            LOGGER.info("[doFilterInternal] token 값 유효성 체크 완료");
+            if (redisTemplate.hasKey(key) && storedToken != null) {
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                LOGGER.info("[doFilterInternal] token 값 유효성 체크 완료");
+            }
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
     }
+
 }
