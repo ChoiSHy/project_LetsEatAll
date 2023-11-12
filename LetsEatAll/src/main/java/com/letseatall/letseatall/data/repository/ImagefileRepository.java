@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface ImagefileRepository extends JpaRepository<ImageFile, Long> {
     Optional<ImageFile> findByReviewId(Long id);
+    boolean existsByUploadedFileName(String uploadedFileName);
 }

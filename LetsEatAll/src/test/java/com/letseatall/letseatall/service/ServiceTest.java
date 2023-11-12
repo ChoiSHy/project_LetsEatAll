@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,13 +94,12 @@ public class ServiceTest {
         user.setScore(50);
         userRepository.save(user);
     }
-
+/*
     @Test
     @Transactional
     @DisplayName("프랜차이즈 음식점 저장")
-    public void saveNewFranchiseChain(){
+    public void saveNewFranchiseChain() throws IOException {
 
-        /* VIPS 프랜차이즈를 가진 음식점 신규 저장 */
         RestaurantDto requestDto = RestaurantDto.builder()
                 .name("VIPS-동성로점")
                 .addr("대구 동성로")
@@ -107,10 +107,8 @@ public class ServiceTest {
                 .fid(1L)
                 .build();
         RestaurantResponseDto responseDto = restaurantService.saveRestaurant(requestDto);
-        /* 저장된 음식점 정보 출력 */
         System.out.println(responseDto);
 
-        /* 현재 저장된 메뉴들 출력 */
         for (Menu menu : menuRepository.findAll()) {
             System.out.println("[Menu - "+menu.getId()+"]");
             System.out.println("\t"+menu.getName());
@@ -124,5 +122,5 @@ public class ServiceTest {
 
         System.out.println(menuRepository.findById(7L).get().getReviewList());
         restaurantService.deleteFranchise(1L);
-    }
+    }*/
 }

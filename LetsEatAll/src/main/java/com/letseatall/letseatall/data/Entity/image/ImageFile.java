@@ -15,18 +15,21 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@ToString
 public class ImageFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column(nullable = false)
-    private String store_file_name;
-    @Column(nullable = false)
-    private String upload_file_name;
+    @Column(nullable = false, name="storedName")
+    private String storedFileName;
+    @Column(nullable = false, name="uploadName")
+    private String uploadedFileName;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="review_id")
+    @ToString.Exclude
     private Review review;
-    public void setMenu(Review review){
+    public void setReview(Review review){
         if(this.review!=null)
             review.removeImg(this);
         this.review=review;
@@ -34,6 +37,6 @@ public class ImageFile {
     }
     @PrePersist
     public void setStoredName(){
-        store_file_name = UUID.randomUUID().toString();
+        storedFileName = UUID.randomUUID().toString();
     }
 }

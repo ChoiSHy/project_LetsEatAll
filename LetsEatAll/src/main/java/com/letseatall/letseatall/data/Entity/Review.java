@@ -1,10 +1,13 @@
 package com.letseatall.letseatall.data.Entity;
 
+import com.letseatall.letseatall.data.Entity.common.BaseEntity;
 import com.letseatall.letseatall.data.Entity.image.ImageFile;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -13,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Table(name = "review")
-public class Review {
+public class Review extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,7 +44,8 @@ public class Review {
     private int score;
     @Column(nullable = false)
     private int recCnt;
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "review")
+    @ToString.Exclude
     private List<ImageFile> imgList=new ArrayList<>();
     public void addImg(ImageFile img){
         imgList.add(img);

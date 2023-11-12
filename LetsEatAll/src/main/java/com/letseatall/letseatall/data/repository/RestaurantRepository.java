@@ -15,6 +15,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     List<Restaurant> findAllByFranchiseId(Long id);
     @Query("select r.id from Restaurant r where r.franchise.id = ?1")
     List<Long> findIdAllByFranchiseId(Long id);
+    List<Restaurant> findAllByCategoryId(int id);
+    List<Restaurant> findAllByNameLike(String name);
 
     Page<Restaurant> findAllByCategoryId(int id, Pageable pageable);
     Page<Restaurant> findAllByNameContainingIgnoreCase(String name, Pageable pageable);

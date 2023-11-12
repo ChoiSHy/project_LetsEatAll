@@ -25,5 +25,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long>, MenuBulkRepos
     List<Long> findIdAllByFranchiseId(Long id);
 
     List<Menu> findAllByRestaurant_FranchiseId(Long fid);
+    List<Menu> findAllByNameLike(String name);
 
 }

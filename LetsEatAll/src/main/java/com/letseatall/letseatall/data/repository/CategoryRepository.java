@@ -9,8 +9,10 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Integer>, CategoryBulkRepository
 {
-
+    Optional<Category> findByName(String name);
 }

@@ -36,31 +36,26 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
-    @GetMapping()
-    public ResponseEntity<ReviewResponseDto> getReview(Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<ReviewResponseDto> getReview(@PathVariable("id") Long id) {
         ReviewResponseDto responseDto = reviewService.getReview(id);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
-
     @PostMapping("/create")
-    public ResponseEntity<ReviewResponseDto> saveReview(
-            @RequestParam Long mid,
-            @RequestParam String title,
-            @RequestParam String content,
-            @RequestParam int score,
-            @RequestParam MultipartFile file) throws IOException{
-        ReviewResponseDto responseDto = reviewService.saveReview(mid, title, content, score, file);
+    public ResponseEntity saveReview(@RequestPart ReviewDto reviewDto,
+                                     @RequestPart List<MultipartFile> files) throws IOException {
+        ReviewResponseDto responseDto = reviewService.saveReview(reviewDto, files);
         return ResponseEntity.ok(responseDto);
     }
-
     @PutMapping("/modify")
-    public ResponseEntity<ReviewResponseDto> modifyReview(@RequestBody ReviewModifyDto rmd) {
-        ReviewResponseDto responseDto = reviewService.modifyReview(rmd);
+    public ResponseEntity<ReviewResponseDto> modifyReview(@RequestPart ReviewModifyDto rmd,
+                                                          @RequestPart List<MultipartFile> files) throws IOException {
+        ReviewResponseDto responseDto = reviewService.modifyReview(rmd, files);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteReview(Long id) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteReview(@PathVariable("id") Long id) {
         Long del_id = reviewService.deleteReview(id);
         return ResponseEntity.status(HttpStatus.OK).body(del_id + "게시글 삭제되었습니다.");
     }
@@ -75,6 +70,11 @@ public class ReviewController {
     public ResponseEntity<List<ReviewResponseDto>> getAllReviewsAboutRestaurant(Long rid) {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsInRestaurant(rid);
         return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
+    }
+    @GetMapping("/all")
+    public ResponseEntity getAllReviews(){
+        List<ReviewResponseDto> responseDtoList = reviewService.getAllReviews();
+        return ResponseEntity.ok().body(responseDtoList);
     }
 
     @PostMapping("/image")
