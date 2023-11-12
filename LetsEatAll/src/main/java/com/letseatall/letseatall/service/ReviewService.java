@@ -1,15 +1,28 @@
 package com.letseatall.letseatall.service;
 
+import com.letseatall.letseatall.data.Entity.Review;
 import com.letseatall.letseatall.data.dto.Review.ReviewDto;
+import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
+import com.letseatall.letseatall.data.repository.MenuRepository;
+import com.letseatall.letseatall.data.repository.ReviewRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 public interface ReviewService {
-    ReviewResponseDto saveReview(ReviewDto reviewDto);      // 리뷰 작성
-    ReviewResponseDto getReview(Long id);                   // 리뷰 조회
-    List<ReviewResponseDto> getReviewsForMenu(Long id);                   // 리뷰 조회(해당 메뉴의 모든 리뷰 조회)
-    List<ReviewResponseDto> getReviewsForUser(Long id);                 // 리뷰 조회(해당 사용자가 작성한 모든 리뷰 조회)
-    ReviewResponseDto updateReview(Long id, ReviewDto reviewDto); // 리뷰 수정
-    void deleteReview(Long id);                             // 리뷰 삭제
+    ReviewResponseDto saveReview(Long mid,String title,String content,int score,MultipartFile file) throws IOException;
+    ReviewResponseDto getReview(Long id);
+    ReviewResponseDto modifyReview(ReviewModifyDto rmd);
+    Long deleteReview(Long id);
+    List<ReviewResponseDto> getAllReviewsInMenu(Long mid);
+    List<ReviewResponseDto> getAllReviewsInRestaurant(Long rid);
+    List<ReviewResponseDto> getAllReviewsInFranchise(Long fid);
+    List<ReviewResponseDto> getReviewsForUser(Long uid);
+
+    ResponseEntity downloadImg(Long id) throws IOException;
 }

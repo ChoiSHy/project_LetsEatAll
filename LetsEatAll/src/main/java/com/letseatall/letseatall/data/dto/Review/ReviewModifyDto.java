@@ -12,5 +12,4 @@ public class ReviewModifyDto {
     private String title;
     private String content;
     private int score;
-    private String img;
 }

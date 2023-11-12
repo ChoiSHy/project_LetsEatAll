@@ -18,7 +18,7 @@ public class Youtube {
     private String content;
     @Column(nullable = false)
     private String url;
-
+/*
     @ManyToOne
     @JoinColumn(name="menu_id")
     private Menu menu;
@@ -30,7 +30,7 @@ public class Youtube {
         this.menu=menu;
         menu.addYoutube(this);
     }
-
+*/
     public Youtube(){}
     public Youtube(String url, String content){
         this.url=url;

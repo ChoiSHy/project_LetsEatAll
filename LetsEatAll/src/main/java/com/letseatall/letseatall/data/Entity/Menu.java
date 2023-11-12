@@ -62,9 +62,9 @@ public class Menu {
         this.score=score;
         this.category=category;
     }
-
+/*
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
     private List<Youtube> youtubeList = new ArrayList<>();
     public void addYoutube(Youtube youtube){youtubeList.add(youtube);}
-    public void removeYoutube(Youtube youtube){youtubeList.remove(youtube);}
+    public void removeYoutube(Youtube youtube){youtubeList.remove(youtube);}*/
 }

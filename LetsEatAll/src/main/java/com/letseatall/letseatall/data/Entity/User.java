@@ -42,10 +42,6 @@ public class User implements UserDetails {
     @ToString.Exclude                                   // 리뷰 리스트
     private List<Review> reviewList = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Builder.Default
-    private List<String> roles = new ArrayList<>();     // 권한 목록
-
     // 리뷰 추가
     public void addReview(Review review) {
         reviewList.add(review);
@@ -54,6 +50,10 @@ public class User implements UserDetails {
     public void removeReview(Review review){
         reviewList.remove(review);
     }
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<String> roles = new ArrayList<>();     // 권한 목록
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

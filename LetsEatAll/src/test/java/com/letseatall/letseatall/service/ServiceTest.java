@@ -119,13 +119,9 @@ public class ServiceTest {
             System.out.println("\t"+menu.getRestaurant());
             System.out.println("\t"+menu.getFranchise());
         }
-        reviewService.saveReview(ReviewDto.builder()
-                        .mid(7L)
-                        .title("제목")
-                        .content("내용입니다\n\n알겠죠?>?")
-                        .score(7)
-                        .uid(1L)
-                .build());
+        reviewService.saveReview(7L,"제목","내용입니다\n\n알겠죠?>?",
+                        7,null);
+
         System.out.println(menuRepository.findById(7L).get().getReviewList());
         restaurantService.deleteFranchise(1L);
     }

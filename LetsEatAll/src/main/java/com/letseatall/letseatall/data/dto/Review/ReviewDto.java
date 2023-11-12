@@ -1,15 +1,16 @@
 package com.letseatall.letseatall.data.dto.Review;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@Builder
 public class ReviewDto {
-    private Long uid;
-    private String writer;
     private Long mid;
-    private String menu;
+    private Long uid;
     private String title;
     private String content;
     private int score;
-    private Long img;
 }

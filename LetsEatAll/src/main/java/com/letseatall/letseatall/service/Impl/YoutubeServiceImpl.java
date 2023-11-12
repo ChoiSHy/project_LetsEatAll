@@ -1,5 +1,5 @@
 package com.letseatall.letseatall.service.Impl;
-
+/*
 import com.letseatall.letseatall.data.Entity.Menu;
 import com.letseatall.letseatall.data.Entity.Youtube;
 import com.letseatall.letseatall.data.dto.StringChangeDto;
@@ -26,74 +26,7 @@ public class YoutubeServiceImpl implements YoutubeService {
         this.menuRepository = menuRepository;
     }
 
-    @Override
-    public YoutubeDto saveYoutubeCaption(YoutubeDto youtubeDto) {   // YouTube 자막 정보를 저장
-        // YoutubeDto를 Youtube Entity로 변환
-        Youtube youtube = new Youtube(youtubeDto.getUrl(), youtubeDto.getContent());
 
-        // Youtube Entity를 저장
-        Youtube savedYoutube = youtubeRepository.save(youtube);
-
-        // 저장된 Youtube Entity의 정보를 YoutubeDto로 변환하여 반환
-        return YoutubeDto.builder()
-                .url(savedYoutube.getUrl())
-                .content(savedYoutube.getContent())
-                .mid(savedYoutube.getMenu().getId())
-                .build();
-    }
-
-    @Override
-    public YoutubeDto updateYoutubeCaption(Long id, YoutubeDto youtubeDto) { // YouTube 자막 정보를 업데이트
-        Optional<Youtube> optionalYoutube = youtubeRepository.findById(id);
-
-        if (optionalYoutube.isPresent()) {
-            Youtube youtube = optionalYoutube.get();
-
-            // YoutubeDto에서 업데이트할 필드를 가져와서 업데이트
-            youtube.setUrl(youtubeDto.getUrl());
-            youtube.setContent(youtubeDto.getContent());
-
-            // YouTube 정보 업데이트
-            Youtube updatedYoutube = youtubeRepository.save(youtube);
-
-            // 업데이트된 정보를 YoutubeDto로 변환하여 반환
-            return YoutubeDto.builder()
-                    .url(updatedYoutube.getUrl())
-                    .content(updatedYoutube.getContent())
-                    .mid(updatedYoutube.getMenu().getId())
-                    .build();
-        } else {
-            // 지정된 ID에 해당하는 YouTube 정보가 없을 경우 null 반환 또는 예외 처리
-            return null;
-        }
-    }
-
-    @Override
-    public void deleteYoutubeCaption(Long id) { // YouTube 자막 정보를 삭제
-        // 지정된 ID로 YouTube 정보를 찾아서 삭제
-        youtubeRepository.deleteById(id);
-    }
-
-    @Override
-    public YoutubeDto getYoutubeCaptionById(Long id) { // 지정된 ID로 YouTube 자막 정보를 조회
-        Optional<Youtube> optionalYoutube = youtubeRepository.findById(id);
-
-        if (optionalYoutube.isPresent()) {
-            Youtube youtube = optionalYoutube.get();
-
-            // YouTube 정보를 YoutubeDto로 변환하여 반환
-            return YoutubeDto.builder()
-                    .url(youtube.getUrl())
-                    .content(youtube.getContent())
-                    .mid(youtube.getMenu().getId())
-                    .build();
-        } else {
-            // 지정된 ID에 해당하는 YouTube 정보가 없을 경우 null 반환 또는 예외 처리
-            return null;
-        }
-    }
-
-    /* 아직 적용 x */
     public YoutubeDto saveNew(YoutubeDto request) {
         Optional<Menu> optionalMenu = menuRepository.findById(request.getMid());
         if (optionalMenu.isPresent()) {
@@ -151,3 +84,4 @@ public class YoutubeServiceImpl implements YoutubeService {
         youtubeRepository.deleteById(id);
     }
 }
+*/
