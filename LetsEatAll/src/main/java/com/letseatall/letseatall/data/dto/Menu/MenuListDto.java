@@ -10,5 +10,5 @@ public class MenuListDto {
     private String menu_name;
     private int menu_price;
     private String menu_category;
-    private int menu_score;
+    private double menu_score;
 }

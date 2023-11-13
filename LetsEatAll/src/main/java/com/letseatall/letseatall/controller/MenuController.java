@@ -80,5 +80,10 @@ public class MenuController {
         List<MenuResponseDto> mlist = menuService.getAllFranchiseMenu(fid);
         return ResponseEntity.ok(mlist);
     }
+    @GetMapping("/score/sum")
+    public ResponseEntity sumScore(){
+        menuService.sum();
+        return ResponseEntity.ok().build();
+    }
 
 }

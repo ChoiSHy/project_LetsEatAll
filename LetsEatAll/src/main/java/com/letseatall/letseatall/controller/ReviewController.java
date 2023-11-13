@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,23 +42,34 @@ public class ReviewController {
         ReviewResponseDto responseDto = reviewService.getReview(id);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
+
     @PostMapping("/create")
     public ResponseEntity saveReview(@RequestPart ReviewDto reviewDto,
                                      @RequestPart List<MultipartFile> files) throws IOException {
         ReviewResponseDto responseDto = reviewService.saveReview(reviewDto, files);
         return ResponseEntity.ok(responseDto);
     }
+
     @PutMapping("/modify")
     public ResponseEntity<ReviewResponseDto> modifyReview(@RequestPart ReviewModifyDto rmd,
                                                           @RequestPart List<MultipartFile> files) throws IOException {
+        try{
         ReviewResponseDto responseDto = reviewService.modifyReview(rmd, files);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);}
+        catch (ResponseStatusException e){
+            throw e;
+        }
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteReview(@PathVariable("id") Long id) {
-        Long del_id = reviewService.deleteReview(id);
-        return ResponseEntity.status(HttpStatus.OK).body(del_id + "게시글 삭제되었습니다.");
+        try {
+            Long del_id = reviewService.deleteReview(id);
+            return ResponseEntity.status(HttpStatus.OK).body(del_id + "게시글 삭제되었습니다.");
+        }
+        catch(ResponseStatusException e){
+            throw e;
+        }
     }
 
     @GetMapping("/menu/reviews")
@@ -71,8 +83,9 @@ public class ReviewController {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsInRestaurant(rid);
         return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
     }
+
     @GetMapping("/all")
-    public ResponseEntity getAllReviews(){
+    public ResponseEntity getAllReviews() {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviews();
         return ResponseEntity.ok().body(responseDtoList);
     }
@@ -86,7 +99,7 @@ public class ReviewController {
 
         if (!file.isEmpty()) {
             String fullPath = imgPath + file.getOriginalFilename();
-            LOGGER.info("[uploadReviewImg] 저장할 이미지 위치 : {}",fullPath);
+            LOGGER.info("[uploadReviewImg] 저장할 이미지 위치 : {}", fullPath);
             file.transferTo(new File(fullPath));
             LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
         }
@@ -97,6 +110,18 @@ public class ReviewController {
     public ResponseEntity downloadReviewImg(
             @PathVariable("reviewId") Long id) throws IOException {
         return reviewService.downloadImg(id);
+    }
+
+    @GetMapping("/reviewList/user/me")
+    public ResponseEntity findAllOfMyReviews() {
+        List<ReviewResponseDto> responseDtoList = reviewService.findAllReviewsWrittenByYou();
+        return ResponseEntity.ok().body(responseDtoList);
+    }
+
+    @GetMapping("reviewList/user/{user_id}")
+    public ResponseEntity findAllReviewsOfUser(@PathVariable("user_id") long user_id) {
+        List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsWrittenByUser(user_id);
+        return ResponseEntity.ok().body(responseDtoList);
     }
 
 }

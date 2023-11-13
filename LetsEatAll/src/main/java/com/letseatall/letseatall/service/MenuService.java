@@ -25,4 +25,6 @@ public interface MenuService {
     List<MenuResponseDto> getListFranchiseMenu(Long fid);
 
     List<MenuResponseDto> getAllFranchiseMenu(Long fid);
+
+    void sum();
 }

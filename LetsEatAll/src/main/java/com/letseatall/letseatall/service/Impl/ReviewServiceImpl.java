@@ -19,11 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
@@ -57,50 +59,6 @@ public class ReviewServiceImpl implements ReviewService {
         this.imgRepository = imgRepository;
     }
 
- /*   public ReviewResponseDto saveReview(Long mid,
-                                        String title,
-                                        String content,
-                                        int score,
-                                        MultipartFile file) throws IOException {
-        Menu menu = null;
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.getByUid(userDetails.getUsername());
-        LOGGER.info("[saveReview] 작성자: {}", user.getName());
-
-        Optional<Menu> oMenu = menuRepository.findById(mid);
-        LOGGER.info("[saveReview] 메뉴 불러오기 mid = {}", mid);
-        if (oMenu.isPresent()) {
-            menu = oMenu.get();
-            LOGGER.info("[saveReview] 불러온 메뉴: {}", menu);
-        }
-        LOGGER.info("[saveReview] Review 객체 생성 시작");
-        ImageFile img = new ImageFile();
-        img.setUpload_file_name(file.getOriginalFilename());
-
-        Review newReview = new Review();
-        newReview.setTitle(title);
-        newReview.setContent(content);
-        newReview.setScore(score);
-        newReview.setRecCnt(0);
-        newReview.setMenu(menu);
-        newReview.setWriter(user);
-
-        img.setReview(newReview);
-        LOGGER.info("[saveReview] Review 객체 생성 완료: {}", newReview);
-
-        Review savedReview = imgRepository.save(img).getReview();
-
-        LOGGER.info("[saveReview] Review 저장 완료");
-
-        if (!file.isEmpty()) {
-            String fullPath = imgPath + img.getStore_file_name()+".jpg";
-            LOGGER.info("[uploadReviewImg] 저장할 이미지 위치 : {}", fullPath);
-            file.transferTo(new File(fullPath));
-            LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
-        }
-        return getReviewResponseDto(savedReview);
-    }*/
-
     public ReviewResponseDto saveReview(ReviewDto reviewDto, List<MultipartFile> files) throws IOException {
         Menu menu = null;
         LOGGER.info("[saveReview] 시작");
@@ -113,6 +71,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (oMenu.isPresent()) {
             menu = oMenu.get();
             LOGGER.info("[saveReview] 불러온 메뉴: {}", menu);
+            menu.setScore(menu.getScore() + reviewDto.getScore());
         }
         LOGGER.info("[saveReview] Review 객체 생성 시작");
 
@@ -145,8 +104,8 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review savedReview = reviewRepository.save(newReview);
         LOGGER.info("[saveReview] Review imgList");
-        savedReview.getImgList().forEach(img ->{
-            LOGGER.info("[saveReview] img = {}",img);
+        savedReview.getImgList().forEach(img -> {
+            LOGGER.info("[saveReview] img = {}", img);
         });
         LOGGER.info("[saveReview] Review 저장 완료");
         return getReviewResponseDto(savedReview);
@@ -188,14 +147,18 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<ReviewResponseDto> getReviewsForUser(Long id) {
-        List<Review> reviews = reviewRepository.findAllByWriterId(id);
+    public List<ReviewResponseDto> getAllReviewsWrittenByUser(Long user_id) {
+        User user = userRepository.getById(user_id);
+        LOGGER.info("[findAllReviewsWrittenByUser] 작성자 = {} ({})", user.getUsername(), user.getName());
 
-        List<ReviewResponseDto> responseDtos = new ArrayList<>();
-        /* 병합 과정에서 포함 못함. 추후에 작성*/
-
-        // 변환된 ReviewResponseDto 리스트를 반환합니다.
-        return responseDtos;
+        LOGGER.info("[findAllReviewsWrittenByUser] 작성자의 리뷰 리스트 불러오기 시작");
+        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
+        for (Review review : reviewRepository.findAllByWriterId(user.getId())) {
+            ReviewResponseDto rrd = getReviewResponseDto(review);
+            responseDtoList.add(rrd);
+        }
+        LOGGER.info("[findAllReviewsWrittenByUser] 작성자의 리뷰 리스트 불러오기 완료");
+        return responseDtoList;
     }
 
     @Transactional
@@ -203,7 +166,11 @@ public class ReviewServiceImpl implements ReviewService {
         LOGGER.info("[modifyReview] 수정 시작");
         Optional<Review> oReview = reviewRepository.findById(rmd.getId());
         Review review = oReview.orElse(null);
-        if (review!=null) {
+        if(!isWriter(review.getWriter())){
+            LOGGER.info("[modifyReview] 수정 권한 없음");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        if (review != null) {
             LOGGER.info("[modifyReview] 수정할 정보 불러오기 성공. {}", review.toString());
             review.setTitle(rmd.getTitle());
             review.setContent(rmd.getContent());
@@ -214,9 +181,9 @@ public class ReviewServiceImpl implements ReviewService {
             LOGGER.info("[modifyReview] 이미지 정보 수정 시작");
             List<ImageFile> imageFileList = review.getImgList();
 
-            for (MultipartFile file : files){
-                if(!file.isEmpty()){
-                    if (!imgRepository.existsByUploadedFileName(file.getOriginalFilename())){
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    if (!imgRepository.existsByUploadedFileName(file.getOriginalFilename())) {
                         ImageFile img = new ImageFile();
                         img.setUploadedFileName(file.getOriginalFilename());
                         img.setStoredName();
@@ -238,16 +205,28 @@ public class ReviewServiceImpl implements ReviewService {
         return null;
     }
 
+    private boolean isWriter(User writer) {
+        LOGGER.info("[isWriter] 삭제 권한 확인");
+        UserDetails you = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.info("[isWriter] you : {}, writer : {}", you.getUsername(), writer.getUsername());
+        return you.equals(writer.getUid());
+    }
+
     @Override
     public Long deleteReview(Long id) {
         Optional<Review> oReview = reviewRepository.findById(id);
         Review review = oReview.orElse(null);
-
-        for (ImageFile img : review.getImgList()) {
-            review.removeImg(img);
+        if (isWriter(review.getWriter())) {
+            for (ImageFile img : review.getImgList()) {
+                review.removeImg(img);
+            }
+            reviewRepository.deleteById(id);
+            LOGGER.info("[deleteReview] 삭제 완료");
+            
+            return id;
         }
-        reviewRepository.deleteById(id);
-        return id;
+        LOGGER.info("[deleteReview] 삭제 권한 없음");
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
 
     private ReviewResponseDto getReviewResponseDto(Review review) {
@@ -259,7 +238,9 @@ public class ReviewServiceImpl implements ReviewService {
                 .title(review.getTitle())
                 .content(review.getContent())
                 .score(review.getScore())
-                .rec_count(review.getRecCnt()).build();
+                .rec_count(review.getRecCnt())
+                .updatedAt(review.getUpdatedAt())
+                .build();
         if (menu != null) {
             rrd.setMenu_id(menu.getId());
             rrd.setMenu_name(menu.getName());
@@ -306,5 +287,21 @@ public class ReviewServiceImpl implements ReviewService {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
                 .body(resource);
+    }
+
+    public List<ReviewResponseDto> findAllReviewsWrittenByYou() {
+        LOGGER.info("[findAllReviewsWrittenByYou] 메서드 동작 시작");
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.getByUid(userDetails.getUsername());
+        LOGGER.info("[findAllReviewsWrittenByYou] 작성자 = {} ({})", user.getUsername(), user.getName());
+
+        LOGGER.info("[findAllReviewsWrittenByYou] 작성자의 리뷰 리스트 불러오기 시작");
+        List<ReviewResponseDto> responseDtoList = new ArrayList<>();
+        for (Review review : reviewRepository.findAllByWriterId(user.getId())) {
+            ReviewResponseDto rrd = getReviewResponseDto(review);
+            responseDtoList.add(rrd);
+        }
+        LOGGER.info("[findAllReviewsWrittenByYou] 작성자의 리뷰 리스트 불러오기 완료");
+        return responseDtoList;
     }
 }

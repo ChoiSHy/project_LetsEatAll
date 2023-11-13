@@ -15,7 +15,6 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 public interface ReviewService {
-    //ReviewResponseDto saveReview(Long mid,String title,String content,int score,MultipartFile file) throws IOException;
     ReviewResponseDto saveReview(ReviewDto reviewDto, List<MultipartFile> files) throws IOException;
     ReviewResponseDto getReview(Long id);
     ReviewResponseDto modifyReview(ReviewModifyDto rmd, List<MultipartFile> files) throws IOException;
@@ -24,6 +23,7 @@ public interface ReviewService {
     List<ReviewResponseDto> getAllReviewsInRestaurant(Long rid);
     List<ReviewResponseDto> getAllReviews();
     List<ReviewResponseDto> getAllReviewsInFranchise(Long fid);
-    List<ReviewResponseDto> getReviewsForUser(Long uid);
+    List<ReviewResponseDto> getAllReviewsWrittenByUser(Long uid);
+    List<ReviewResponseDto> findAllReviewsWrittenByYou();
     ResponseEntity downloadImg(Long id) throws IOException;
 }

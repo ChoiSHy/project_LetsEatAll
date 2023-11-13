@@ -105,8 +105,10 @@ public class RestaurantServiceImpl implements RestaurantService {
                             .menu_name(menu.getName())
                             .menu_price(menu.getPrice())
                             .menu_category(menu.getCategory().getName())
-                            .menu_score(menu.getScore())
                             .build();
+                    if(menu.getScore() != 0)
+                        mrd.setMenu_score(menu.getScore() / menu.getReviewList().size());
+                    else mrd.setMenu_score(0);
                     menuList.add(mrd);
                 }
             });
@@ -264,7 +266,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     public List<RestaurantResponseDto> findByCategory(String cate_name) throws UnsupportedEncodingException {
         String decode_name = URLDecoder.decode(cate_name, "UTF-8");
         LOGGER.info("[findByCategory] 찾을 카테고리: {}", decode_name);
-        Optional<Category> option = categoryRepository.findByName(decode_name);
+        Optional<Category> option = categoryRepository.findByNameLike("%"+decode_name+"%");
         Category category = option.orElse(null);
         if (category != null) {
             LOGGER.info("[findByCategory] 카테고리 발견: id={}, name={}", category.getId(), category.getName());

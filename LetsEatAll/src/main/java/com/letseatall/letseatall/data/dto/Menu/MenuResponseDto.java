@@ -15,5 +15,5 @@ public class MenuResponseDto {
     private String name;
     private int price;
     private String category;
-    private int score;
+    private double score;
 }
