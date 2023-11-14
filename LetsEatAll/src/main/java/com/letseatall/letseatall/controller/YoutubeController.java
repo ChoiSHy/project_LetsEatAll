@@ -1,6 +1,7 @@
 package com.letseatall.letseatall.controller;
 
-import com.example.demo.Service.YouTubeService;
+import com.example.demo.Service.YouTubeService; // 패키지 경로에 맞게 이름 수정 필요
+import com.example.demo.dto.CaptionDto; // 패키지 경로에 맞게 이름 수정 필요
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,10 +27,13 @@ public class CaptionController {
             String captionXml = youTubeService.getUrl(decodeUrl);
             String caption = youTubeService.makeCaption(captionXml);
             String summary = youTubeService.summarizeCaption(caption);
-            System.out.println("요약된 가사: " + summary);
+            System.out.println("특징 분석: " + summary);
 
-            // 모델에 데이터 추가 (필요한 경우)
-            model.addAttribute("decodedUrl", decodeUrl);
+            // CaptionDto 객체 생성 및 설정
+            CaptionDto captionDto = new CaptionDto(videoUrl, summary);
+
+            // 모델에 CaptionDto 객체 추가
+            model.addAttribute("captionDto", captionDto);
 
             // 자막을 보여줄 View의 이름
             return "captionPage";
