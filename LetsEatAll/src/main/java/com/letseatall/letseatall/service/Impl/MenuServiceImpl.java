@@ -193,8 +193,11 @@ public class MenuServiceImpl implements MenuService {
                 .price(menu.getPrice())
                 .category(menu.getCategory().getName())
                 .name(menu.getName())
+                .score(0)
                 .build();
-        mrd.setScore(menu.getScore() / menu.getReviewList().size());
+        if(menu.getReviewList().size()!= 0)
+            mrd.setScore(menu.getScore() / menu.getReviewList().size());
+
         LOGGER.info("[makeDto] DTO 생성 완료");
         return mrd;
     }
