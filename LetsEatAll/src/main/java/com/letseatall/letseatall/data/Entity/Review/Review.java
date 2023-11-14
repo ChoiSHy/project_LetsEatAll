@@ -23,6 +23,7 @@ public class Review extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private User writer;
     public void setWriter(User writer){
         if(this.writer!=null)
@@ -31,6 +32,7 @@ public class Review extends BaseEntity {
         writer.addReview(this);
     }
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Menu menu;
     public void setMenu(Menu menu){
         if(this.menu!=null)

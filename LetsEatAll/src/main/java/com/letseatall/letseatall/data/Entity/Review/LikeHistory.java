@@ -22,7 +22,7 @@ public class LikeHistory {
     @Column(name="user_id", nullable = false)
     Long userId;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapsId("reviewId")
     @JoinColumn(name = "review_id")
     Review review;

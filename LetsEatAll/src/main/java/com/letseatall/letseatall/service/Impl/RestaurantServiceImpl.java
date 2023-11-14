@@ -93,8 +93,11 @@ public class RestaurantServiceImpl implements RestaurantService {
         RestaurantResponseDto rrd = null;
         if (foundOptional.isPresent()) {
             Restaurant found = foundOptional.get();
+            LOGGER.info("[getRestaurant] 식당 검색 결과: {}", found.getName());
             rrd = makeDto(found);
             List<MenuListDto> menuList = new ArrayList<>();
+            LOGGER.info("[getRestaurant] 식당 검색 메뉴 정보 검색");
+
             menuRepository.findAllByRestaurantId(id).forEach(menu -> {
                 if (menu != null) {
                     MenuListDto mrd = MenuListDto.builder()
@@ -110,6 +113,8 @@ public class RestaurantServiceImpl implements RestaurantService {
                 }
             });
             rrd.setMenuDtoList(menuList);
+            LOGGER.info("[getRestaurant] 메뉴 정보 주입 완료");
+            
             return rrd;
         }
         return null;

@@ -27,6 +27,7 @@ public class Menu {
     private int score;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Restaurant restaurant;
 
     public void setRestaurant(Restaurant restaurant){
@@ -45,7 +46,7 @@ public class Menu {
         this.franchise=franchise;
         this.franchise.addMenu(this);
     }
-    @OneToMany(mappedBy = "menu",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "menu",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Review> reviewList=new ArrayList<>();
 

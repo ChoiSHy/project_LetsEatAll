@@ -34,6 +34,7 @@ public class RestaurantController {
     @GetMapping("/restaurant")
     @ApiOperation(value= "음식점 정보", notes="id를 가진 음식점 정보 전달")
     public ResponseEntity<RestaurantResponseDto> getRestaurant(Long id){
+        LOGGER.info("[getRestaurant] 음식점 정보 검색 id : {}",id);
         RestaurantResponseDto responseDto = restaurantService.getRestaurant(id);
         if(responseDto == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
