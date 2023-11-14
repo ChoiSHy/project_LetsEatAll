@@ -53,10 +53,10 @@ public class ReviewController {
     @PutMapping("/modify")
     public ResponseEntity<ReviewResponseDto> modifyReview(@RequestPart ReviewModifyDto rmd,
                                                           @RequestPart List<MultipartFile> files) throws IOException {
-        try{
-        ReviewResponseDto responseDto = reviewService.modifyReview(rmd, files);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);}
-        catch (ResponseStatusException e){
+        try {
+            ReviewResponseDto responseDto = reviewService.modifyReview(rmd, files);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        } catch (ResponseStatusException e) {
             throw e;
         }
     }
@@ -66,8 +66,7 @@ public class ReviewController {
         try {
             Long del_id = reviewService.deleteReview(id);
             return ResponseEntity.status(HttpStatus.OK).body(del_id + "게시글 삭제되었습니다.");
-        }
-        catch(ResponseStatusException e){
+        } catch (ResponseStatusException e) {
             throw e;
         }
     }
@@ -112,16 +111,42 @@ public class ReviewController {
         return reviewService.downloadImg(id);
     }
 
-    @GetMapping("/reviewList/user/me")
+    @GetMapping("/user/me")
     public ResponseEntity findAllOfMyReviews() {
         List<ReviewResponseDto> responseDtoList = reviewService.findAllReviewsWrittenByYou();
         return ResponseEntity.ok().body(responseDtoList);
     }
 
-    @GetMapping("reviewList/user/{user_id}")
+    @GetMapping("/user/{user_id}")
     public ResponseEntity findAllReviewsOfUser(@PathVariable("user_id") long user_id) {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsWrittenByUser(user_id);
         return ResponseEntity.ok().body(responseDtoList);
     }
 
+    @GetMapping("user/like/{review_id}")
+    public ResponseEntity likeReview(@PathVariable("review_id") long review_id) {
+        LOGGER.info("[likeReview] 좋아요 누르기 review-id = {}", review_id);
+        try {
+            ReviewResponseDto responseDto = reviewService.likeReview(review_id, 1);
+            LOGGER.info("[likeReview] 좋아요 처리 완료", review_id);
+            
+            return ResponseEntity.ok().body(responseDto);
+        }catch (RuntimeException e){
+            LOGGER.info("[likeReview] 좋아요 중복 처리 불가", review_id);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("user/unlike/{review_id}")
+    public ResponseEntity unlikeReview(@PathVariable("review_id") long review_id) {
+        LOGGER.info("[likeReview] 좋아요 누르기 review-id = {}", review_id);
+        try {
+            ReviewResponseDto responseDto = reviewService.likeReview(review_id, -1);
+            LOGGER.info("[likeReview] 좋아요 처리 완료", review_id);
+
+            return ResponseEntity.ok().body(responseDto);
+        }catch (RuntimeException e){
+            LOGGER.info("[likeReview] 좋아요 중복 처리 불가", review_id);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

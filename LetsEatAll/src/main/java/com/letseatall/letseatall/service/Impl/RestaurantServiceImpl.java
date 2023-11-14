@@ -81,6 +81,8 @@ public class RestaurantServiceImpl implements RestaurantService {
         for (Menu fMenu : fMenus) {
             Menu newMenu = new Menu(fMenu.getName(), fMenu.getPrice(), fMenu.getScore(), fMenu.getCategory());
             newMenu.setRestaurant(restaurant);
+            if(fMenu.getUrl() != null)
+                newMenu.setUrl(fMenu.getUrl());
             saveMenus.add(newMenu);
         }
         restaurantRepository.save(restaurant);

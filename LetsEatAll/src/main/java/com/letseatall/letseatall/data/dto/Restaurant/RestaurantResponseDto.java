@@ -18,7 +18,7 @@ public class RestaurantResponseDto {
     private String restaurant_name;
     private String restaurant_addr;
     private String restaurant_category;
-    private int restaurant_score;
+    private double restaurant_score;
     private String franchise;
     private List<MenuListDto> menuDtoList;
 

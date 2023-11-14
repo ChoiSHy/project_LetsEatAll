@@ -24,7 +24,7 @@ public class Menu {
     private Category category;
 
     @Column(nullable = false)
-    private int score;
+    private double score;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
@@ -58,7 +58,7 @@ public class Menu {
     }
 
     public Menu(){}
-    public Menu(String name, int price, int score, Category category){
+    public Menu(String name, int price, double score, Category category){
         this.name=name;
         this.price=price;
         this.score=score;
@@ -71,4 +71,6 @@ public class Menu {
             sum += review.getScore();
         this.score=sum;
     }
+    @Column
+    private String url;
 }

@@ -42,12 +42,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests() // 리퀘스트에 대한 사용권한 체크
                 .antMatchers(HttpMethod.POST, "/user/password/**", "/user/score").authenticated()
-                .antMatchers(HttpMethod.POST, "/restaurant/restaurant/save",
-                        "/restaurant/franchise/save").authenticated()
-                .antMatchers(HttpMethod.POST, "/menu/**").authenticated()
-                .antMatchers(HttpMethod.PUT, "/menu/**").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/menu/**").authenticated()
-                .antMatchers(HttpMethod.GET, "/menu/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/restaurant/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.PUT, "/restaurant/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/restaurant/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/menu/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.PUT, "/menu/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/menu/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/review/**").authenticated()
                 .antMatchers(HttpMethod.PUT, "/review/**").authenticated()
                 .antMatchers(HttpMethod.DELETE, "/review/**").authenticated()

@@ -21,4 +21,6 @@ public interface ReviewService {
     List<ReviewResponseDto> getAllReviewsWrittenByUser(Long uid);
     List<ReviewResponseDto> findAllReviewsWrittenByYou();
     ResponseEntity downloadImg(Long id) throws IOException;
+
+    ReviewResponseDto likeReview(long id, int score);
 }

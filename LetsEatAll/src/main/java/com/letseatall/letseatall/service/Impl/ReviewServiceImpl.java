@@ -1,6 +1,7 @@
 package com.letseatall.letseatall.service.Impl;
 
 import com.letseatall.letseatall.data.Entity.Menu;
+import com.letseatall.letseatall.data.Entity.Restaurant;
 import com.letseatall.letseatall.data.Entity.Review.LikeHistory;
 import com.letseatall.letseatall.data.Entity.Review.LikeHistoryKey;
 import com.letseatall.letseatall.data.Entity.Review.Review;
@@ -122,7 +123,6 @@ public class ReviewServiceImpl implements ReviewService {
         }
         return null;
     }
-
     // 리뷰 조회(해당 메뉴의 모든 리뷰 조회)
     @Override
     @Transactional
@@ -325,7 +325,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
     }
 
-    public ReviewResponseDto likeReview(long reviewId) {
+    public ReviewResponseDto likeReview(long reviewId, int score) {
         LOGGER.info("[likeReview] 좋아요 추가 시작");
         ReviewResponseDto reviewDto = null;
         User user = null;
@@ -335,10 +335,14 @@ public class ReviewServiceImpl implements ReviewService {
             Review review = reviewRepository.findById(reviewId).orElse(null);
             if (review != null) {
                 LOGGER.info("[likeReview] 리뷰의 좋아요 개수 추가 작업");
-                review.setLike_cnt(review.getLike_cnt() + 1);
+                User writer = review.getWriter();
+                review.setLike_cnt(review.getLike_cnt() + score);
+                writer.setScore(writer.getScore() + score);
                 reviewRepository.save(review);
                 LOGGER.info("[likeReview] 추가 완료. 기록 시작");
                 LikeHistory history = LikeHistory.builder()
+                        .reviewId(review.getId())
+                        .userId(user.getId())
                         .review(review)
                         .user(user)
                         .build();
@@ -347,6 +351,10 @@ public class ReviewServiceImpl implements ReviewService {
 
                 reviewDto = getReviewResponseDto(review);
             }
+        }
+        // 중복일 경우 불가능
+        else{
+            throw new RuntimeException("중복 추천은 불가합니다.");
         }
         return reviewDto;
     }

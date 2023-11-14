@@ -31,7 +31,7 @@ public class MenuBulkRepositoryImpl implements MenuBulkRepository {
                         ps.setString(2, menu.getName());
                         ps.setInt(3,menu.getPrice());
                         ps.setObject(4, menu.getCategory());
-                        ps.setInt(5,menu.getScore());
+                        ps.setDouble(5,menu.getScore());
                         ps.setObject(6,menu.getRestaurant());
                         ps.setObject(7, menu.getFranchise());
                     }

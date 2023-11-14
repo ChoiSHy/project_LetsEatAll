@@ -74,7 +74,7 @@ public class MenuServiceImpl implements MenuService {
         String name = menuDto.getName();
         int price = menuDto.getPrice();
         int cid = menuDto.getCategory();
-        LOGGER.info("[saveFranchiseMenu] : 데이터 추출 완료 : fid: {}, name: {}, price: {}, category: {}", fid,name,price,cid);
+        LOGGER.info("[saveFranchiseMenu] : 데이터 추출 완료 : fid: {}, name: {}, price: {}, category: {}", fid, name, price, cid);
 
         Category category = null;
         Franchise franchise = null;
@@ -84,16 +84,15 @@ public class MenuServiceImpl implements MenuService {
         newMenu.setScore(0);
 
         Optional<Category> opCtg = categoryRepository.findById(cid);
-        if (opCtg.isPresent()){
+        if (opCtg.isPresent()) {
             category = opCtg.get();
             LOGGER.info("[saveFranchiseMenu] : category 불러오기: {}", category);
         }
         Optional<Franchise> opFrc = franchiseRepository.findById(fid);
-        if(opFrc.isPresent()){
+        if (opFrc.isPresent()) {
             franchise = opFrc.get();
             LOGGER.info("[saveFranchiseMenu] : franchise 불러오기: {}", franchise);
-        }
-        else return null;
+        } else return null;
         newMenu.setCategory(category);
         newMenu.setFranchise(franchise);
 
@@ -110,7 +109,7 @@ public class MenuServiceImpl implements MenuService {
         LOGGER.info("[getMenu] : menu = {}", foundMenu);
 
         MenuResponseDto responseDto = makeDto(foundMenu);
-        if(foundMenu.getRestaurant() != null) responseDto.setRid(foundMenu.getRestaurant().getId());
+        if (foundMenu.getRestaurant() != null) responseDto.setRid(foundMenu.getRestaurant().getId());
         else responseDto.setRid(foundMenu.getFranchise().getId());
         return responseDto;
     }
@@ -127,10 +126,11 @@ public class MenuServiceImpl implements MenuService {
             LOGGER.info("[changeMenuPrice] : 메뉴 수정 시작");
         }
         Menu chagedMenu = menuRepository.save(fMenu);
-        
-        if (chagedMenu.getPrice() != changeDto.getValue()){
+
+        if (chagedMenu.getPrice() != changeDto.getValue()) {
             LOGGER.info("[changeMenuPrice] : 메뉴 불러오기 실패");
-            return false;}
+            return false;
+        }
         LOGGER.info("[changeMenuPrice] : 메뉴 수정 성공 = {}", chagedMenu);
         return true;
     }
@@ -170,7 +170,7 @@ public class MenuServiceImpl implements MenuService {
     public List<MenuResponseDto> getListFranchiseMenu(Long fid) {
         List<MenuResponseDto> resDtoList = new ArrayList<>();
         LOGGER.info("[getListFranchiseMenu] : 탐색 시작");
-        menuRepository.findAllByFranchiseId(fid).forEach(m->{
+        menuRepository.findAllByFranchiseId(fid).forEach(m -> {
             resDtoList.add(makeDto(m));
         });
         LOGGER.info("[getListFranchiseMenu] : 탐색 종료");
@@ -180,30 +180,35 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public List<MenuResponseDto> getAllFranchiseMenu(Long fid) {
         List<MenuResponseDto> responseDtoList = new ArrayList<>();
-        menuRepository.findAllByRestaurant_FranchiseId(fid).forEach(m ->{
+        menuRepository.findAllByRestaurant_FranchiseId(fid).forEach(m -> {
             responseDtoList.add(makeDto(m));
         });
         return responseDtoList;
     }
-    private MenuResponseDto makeDto(Menu menu){
+
+    private MenuResponseDto makeDto(Menu menu) {
         LOGGER.info("[makeDto] DTO 생성 시작 : {}", menu);
         MenuResponseDto mrd = MenuResponseDto.builder()
-                .rid(menu.getRestaurant().getId())
-                .r_name(menu.getRestaurant().getName())
                 .price(menu.getPrice())
                 .category(menu.getCategory().getName())
                 .name(menu.getName())
                 .score(0)
                 .build();
-        if(menu.getReviewList().size()!= 0)
+        if (menu.getRestaurant() != null) {
+            mrd.setRid(menu.getRestaurant().getId());
+            mrd.setR_name(menu.getRestaurant().getName());
+        }
+        if (menu.getReviewList().size() != 0)
             mrd.setScore(menu.getScore() / menu.getReviewList().size());
+        if (menu.getUrl() != null)
+            mrd.setUrl(menu.getUrl());
 
         LOGGER.info("[makeDto] DTO 생성 완료");
         return mrd;
     }
 
-    public void sum(){
-        List<Menu> mlist= new ArrayList<>();
+    public void sum() {
+        List<Menu> mlist = new ArrayList<>();
         menuRepository.findAll().forEach(menu -> {
             menu.sumScore();
             mlist.add(menu);

@@ -20,7 +20,7 @@ public class Restaurant {
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)
-    private int score;
+    private double score;
     @Column
     private String addr;
     @ManyToOne
