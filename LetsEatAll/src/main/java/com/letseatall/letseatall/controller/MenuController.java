@@ -7,6 +7,7 @@ import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.service.MenuService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ public class MenuController {
     }
 
     @GetMapping()
+    @ApiOperation(value="메뉴 정보 조회", notes="전달받은 메뉴 id를 통해 메뉴 정보를 조회한다.")
     public ResponseEntity<MenuResponseDto> getMenu(Long id){
         log.info("[getMenu] : getMenu 시작");
         MenuResponseDto responseDto = menuService.getMenu(id);
@@ -40,6 +42,7 @@ public class MenuController {
             @ApiImplicitParam(name="X-AUTH-TOKEN", value = "로그인 성공 후 받은 access_token",
             required = true, dataType = "String", paramType = "header")
     })
+    @ApiOperation(value="메뉴 저장", notes="전달된 정보를 토대로 메뉴 데이터를 추가한다.")
     @PostMapping()
     public ResponseEntity<MenuResponseDto> saveMenu(@RequestBody MenuDto menuDto){
         long cur_time = System.currentTimeMillis();
@@ -48,11 +51,21 @@ public class MenuController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
     @PostMapping("/franchise/save")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access_token",
+                    required = true, dataType = "String", paramType = "header")
+    })
+    @ApiOperation(value="메뉴 저장 (프랜차이즈)", notes="프랜차이즈의 공통 메뉴를 추가한다.")
     public ResponseEntity saveFranchiseMenu(@RequestBody MenuDto menuDto){
         MenuResponseDto menuResponseDto = menuService.saveFranchiseMenu(menuDto);
         return ResponseEntity.ok(menuResponseDto);
     }
     @PutMapping()
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access_token",
+                    required = true, dataType = "String", paramType = "header")
+    })
+    @ApiOperation(value="메뉴 수정", notes="메뉴를 수정한다.")
     public ResponseEntity<String> changeMenuPrice(@RequestBody IntChangeDto intChangeDto){
         boolean res = menuService.changeMenuPrice(intChangeDto);
         if(!res)
@@ -60,27 +73,40 @@ public class MenuController {
         return ResponseEntity.status(HttpStatus.OK).body("수정 성공하였습니다.");
     }
     @DeleteMapping()
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access_token",
+                    required = true, dataType = "String", paramType = "header")
+    })
+    @ApiOperation(value="메뉴 삭제", notes="메뉴를 삭제한다.")
     public ResponseEntity<String> delete(Long id){
         menuService.deleteMenu(id);
         return ResponseEntity.status(HttpStatus.OK).body("삭제되었습니다.");
     }
 
     @GetMapping("/restaurant/all")
+    @ApiOperation(value="메뉴 리스트", notes="음식점의 메뉴 리스트를 불러온다.")
     public ResponseEntity<List<MenuResponseDto>> getAllMenus(Long rid){
         List<MenuResponseDto> rList = menuService.getAllMenu(rid);
         return ResponseEntity.status(HttpStatus.OK).body(rList);
     }
     @GetMapping("/franchise/list")
-    public ResponseEntity<List<MenuResponseDto>> getListFranchiseMenus(Long fid){
+    @ApiOperation(value="메뉴 리스트(프랜차이즈)", notes="프랜차이즈의 공통 메뉴 리스트를 불러온다.")
+    public ResponseEntity<List<MenuResponseDto>> getAllFranchiseMenus(Long fid){
         List<MenuResponseDto> mlist = menuService.getListFranchiseMenu(fid);
         return ResponseEntity.ok(mlist);
     }
     @GetMapping("/franchise/all")
-    public ResponseEntity<List<MenuResponseDto>> getAllFranchiseMenus_on(Long fid){
+    @ApiOperation(value="메뉴 리스트(프랜차이즈점)", notes="프랜차이즈 지점들의 메뉴들을 불러온다.")
+    public ResponseEntity<List<MenuResponseDto>> getAllFranchiseRestaurantMenus_on(Long fid){
         List<MenuResponseDto> mlist = menuService.getAllFranchiseMenu(fid);
         return ResponseEntity.ok(mlist);
     }
     @GetMapping("/score/sum")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access_token",
+                    required = true, dataType = "String", paramType = "header")
+    })
+    @ApiOperation(value="메뉴 평점 계산", notes="리뷰점수의 합을 메뉴점수로 저장한다.")
     public ResponseEntity sumScore(){
         menuService.sum();
         return ResponseEntity.ok().build();

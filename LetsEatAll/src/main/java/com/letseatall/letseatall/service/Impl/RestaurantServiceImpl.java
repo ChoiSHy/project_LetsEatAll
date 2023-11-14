@@ -1,9 +1,8 @@
 package com.letseatall.letseatall.service.Impl;
 
 import com.letseatall.letseatall.data.Entity.*;
-import com.letseatall.letseatall.data.dto.Menu.MenuDto;
+import com.letseatall.letseatall.data.Entity.Review.Review;
 import com.letseatall.letseatall.data.dto.Menu.MenuListDto;
-import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.FranchiseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.FranchiseResponseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantDto;
@@ -13,9 +12,7 @@ import com.letseatall.letseatall.service.RestaurantService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
@@ -317,5 +314,8 @@ public class RestaurantServiceImpl implements RestaurantService {
         LOGGER.info("[findByMenuName] map에 dto 채우기 완료");
 
         return new ArrayList<>(map.values());
+    }
+
+    public void sumScore(){
     }
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>리뷰 작성</title>
+    <script>
+        window.onload = function(){
+            document.getElementById('btn').onclick = function (){
+                let mid = document.getElementsByName('mid');
+                let title = document.getElementsByName('title');
+            }
+        }
+        const url = document.getElementById("formData").action
+        const token = document.getElementById("token")
+        const httpRequest = new XMLHttpRequest();
+        let body = json(
+            document.getElementById("formData").
+        )
+        httpRequest.open("POST", url, true);
+        httpRequest.setRequestHeader("X-AUTH-TOKEN", token);
+        httpRequest.send()
+    </script>
+</head>
+<body>
+<div align="cetner">
+
+    <form id=formData method=post action=http://43.200.179.244:8080/review/create>
+        <input id type="hidden" name="mid" th:value="mid">
+        <table>
+            <tr>
+                <td>text</td>
+                <td><input id = title type="text" name="title"></td>
+            </tr>
+            <tr>
+                <td>content</td>
+                <td><input type="text" name="content"></td>
+            </tr>
+            <tr>
+                <td>score</td>
+                <td><input type="number" name="score"></td>
+            </tr>
+            <tr>
+                <td>img</td>
+                <td><input type="file" name img></td>
+            </tr>
+            <tr>
+                <td><input type="button" id="btn" value="저장"></td>
+            </tr>
+
+        </table>
+    </form>
+</div>
+
+</body>
+</html>

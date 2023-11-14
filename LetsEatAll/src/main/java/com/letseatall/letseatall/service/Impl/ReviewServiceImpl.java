@@ -1,17 +1,15 @@
 package com.letseatall.letseatall.service.Impl;
 
-import ch.qos.logback.core.rolling.helper.FileStoreUtil;
 import com.letseatall.letseatall.data.Entity.Menu;
-import com.letseatall.letseatall.data.Entity.Review;
+import com.letseatall.letseatall.data.Entity.Review.LikeHistory;
+import com.letseatall.letseatall.data.Entity.Review.LikeHistoryKey;
+import com.letseatall.letseatall.data.Entity.Review.Review;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.Entity.image.ImageFile;
 import com.letseatall.letseatall.data.dto.Review.ReviewDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
-import com.letseatall.letseatall.data.repository.ImagefileRepository;
-import com.letseatall.letseatall.data.repository.MenuRepository;
-import com.letseatall.letseatall.data.repository.ReviewRepository;
-import com.letseatall.letseatall.data.repository.UserRepository;
+import com.letseatall.letseatall.data.repository.*;
 import com.letseatall.letseatall.service.ReviewService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -45,6 +41,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
     private final ImagefileRepository imgRepository;
+    private final LikeHistoryRepository historyRepository;
 
     private final Logger LOGGER = LoggerFactory.getLogger(ReviewServiceImpl.class);
 
@@ -52,11 +49,13 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewServiceImpl(ReviewRepository reviewRepository,
                              MenuRepository menuRepository,
                              UserRepository userRepository,
-                             ImagefileRepository imgRepository) {
+                             ImagefileRepository imgRepository,
+                             LikeHistoryRepository historyRepository) {
         this.reviewRepository = reviewRepository;
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
         this.imgRepository = imgRepository;
+        this.historyRepository = historyRepository;
     }
 
     public ReviewResponseDto saveReview(ReviewDto reviewDto, List<MultipartFile> files) throws IOException {
@@ -92,7 +91,8 @@ public class ReviewServiceImpl implements ReviewService {
         newReview.setTitle(reviewDto.getTitle());
         newReview.setContent(reviewDto.getContent());
         newReview.setScore(reviewDto.getScore());
-        newReview.setRecCnt(0);
+        newReview.setLike_cnt(0);
+        newReview.setUnlike_cnt(0);
         newReview.setMenu(menu);
         newReview.setWriter(user);
 
@@ -166,7 +166,7 @@ public class ReviewServiceImpl implements ReviewService {
         LOGGER.info("[modifyReview] 수정 시작");
         Optional<Review> oReview = reviewRepository.findById(rmd.getId());
         Review review = oReview.orElse(null);
-        if(!isWriter(review.getWriter())){
+        if (!isWriter(review.getWriter())) {
             LOGGER.info("[modifyReview] 수정 권한 없음");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
@@ -222,7 +222,7 @@ public class ReviewServiceImpl implements ReviewService {
             }
             reviewRepository.deleteById(id);
             LOGGER.info("[deleteReview] 삭제 완료");
-            
+
             return id;
         }
         LOGGER.info("[deleteReview] 삭제 권한 없음");
@@ -238,7 +238,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .title(review.getTitle())
                 .content(review.getContent())
                 .score(review.getScore())
-                .rec_count(review.getRecCnt())
+                .like_count(review.getLike_cnt())
+                .unlike_count(review.getUnlike_cnt())
                 .updatedAt(review.getUpdatedAt())
                 .build();
         if (menu != null) {
@@ -303,5 +304,50 @@ public class ReviewServiceImpl implements ReviewService {
         }
         LOGGER.info("[findAllReviewsWrittenByYou] 작성자의 리뷰 리스트 불러오기 완료");
         return responseDtoList;
+    }
+
+    private User isDuplicated(long reviewId) {
+        LOGGER.info("[isDuplicated] 중복 추천 여부 검사");
+        try {
+            UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userRepository.getByUid(ud.getUsername());
+            boolean res = historyRepository.existsByReviewIdAndUserId(reviewId, user.getId());
+            if (res) {
+                LOGGER.info("[isDuplicated] 중복 추천");
+                return null;
+            } else {
+                LOGGER.info("[isDuplicated] 추천 가능");
+                return user;
+            }
+        } catch (Exception e) {
+            LOGGER.info("[isDuplicated] 토큰 정보 확인 불가");
+            throw new RuntimeException("토큰 정보 확인 불가");
+        }
+    }
+
+    public ReviewResponseDto likeReview(long reviewId) {
+        LOGGER.info("[likeReview] 좋아요 추가 시작");
+        ReviewResponseDto reviewDto = null;
+        User user = null;
+
+        // 추천 가능
+        if ((user = isDuplicated(reviewId)) != null) {
+            Review review = reviewRepository.findById(reviewId).orElse(null);
+            if (review != null) {
+                LOGGER.info("[likeReview] 리뷰의 좋아요 개수 추가 작업");
+                review.setLike_cnt(review.getLike_cnt() + 1);
+                reviewRepository.save(review);
+                LOGGER.info("[likeReview] 추가 완료. 기록 시작");
+                LikeHistory history = LikeHistory.builder()
+                        .review(review)
+                        .user(user)
+                        .build();
+                historyRepository.save(history);
+                LOGGER.info("[likeReview] 기록 완료. ");
+
+                reviewDto = getReviewResponseDto(review);
+            }
+        }
+        return reviewDto;
     }
 }

@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.data.Entity;
 
+import com.letseatall.letseatall.data.Entity.Review.Review;
 import lombok.*;
 
 import javax.persistence.*;

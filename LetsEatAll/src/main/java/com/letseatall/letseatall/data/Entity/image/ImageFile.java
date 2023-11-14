@@ -1,12 +1,9 @@
 package com.letseatall.letseatall.data.Entity.image;
 
-import com.letseatall.letseatall.data.Entity.Menu;
-import com.letseatall.letseatall.data.Entity.Review;
+import com.letseatall.letseatall.data.Entity.Review.Review;
 import lombok.*;
-import org.hibernate.id.UUIDGenerator;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.UUID;
 
 @EqualsAndHashCode

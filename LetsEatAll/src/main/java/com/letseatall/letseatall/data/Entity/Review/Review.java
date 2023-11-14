@@ -1,5 +1,7 @@
-package com.letseatall.letseatall.data.Entity;
+package com.letseatall.letseatall.data.Entity.Review;
 
+import com.letseatall.letseatall.data.Entity.Menu;
+import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.Entity.common.BaseEntity;
 import com.letseatall.letseatall.data.Entity.image.ImageFile;
 import lombok.*;
@@ -43,7 +45,9 @@ public class Review extends BaseEntity {
     @Column(nullable = false)
     private int score;
     @Column(nullable = false)
-    private int recCnt;
+    private int like_cnt;
+    @Column(nullable = false)
+    private int unlike_cnt;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "review")
     @ToString.Exclude
     private List<ImageFile> imgList=new ArrayList<>();
@@ -53,4 +57,5 @@ public class Review extends BaseEntity {
     public void removeImg(ImageFile img){
         imgList.remove(img);
     }
+
 }

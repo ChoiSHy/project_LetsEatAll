@@ -16,7 +16,8 @@ public class ReviewResponseDto {
     private String title;
     private String content;
     private int score;
-    private int rec_count;  // recommend count
+    private int like_count;
+    private int unlike_count;
     private Long menu_id;
     private String menu_name;
     private String writer;
