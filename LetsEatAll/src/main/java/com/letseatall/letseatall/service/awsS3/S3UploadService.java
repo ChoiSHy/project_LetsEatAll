@@ -4,14 +4,12 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
-import com.letseatall.letseatall.data.repository.ImagefileRepository;
+import com.letseatall.letseatall.data.repository.review.ImagefileRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,7 +38,7 @@ public class S3UploadService {
     /**
      * 로컬 경로에 저장
      */
-    public String uploadFileToS3(MultipartFile multipartFile, String filePath) {
+    public String[] uploadFileToS3(MultipartFile multipartFile, String filePath) {
         // MultipartFile -> File 로 변환
         log.info("[uploadFileToS3] MultipartFile -> 변환 시도");
         File uploadFile = null;
@@ -59,7 +56,7 @@ public class S3UploadService {
         // s3로 업로드 후 로컬 파일 삭제
         String uploadImageUrl = putS3(uploadFile, fileName);
         removeNewFile(uploadFile);
-        return uploadImageUrl;
+        return new String[]{uploadImageUrl, fileName};
     }
 
 

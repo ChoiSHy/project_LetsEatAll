@@ -1,13 +1,9 @@
-package com.letseatall.letseatall.data.repository;
+package com.letseatall.letseatall.data.repository.Menu;
 
-import com.letseatall.letseatall.data.Entity.Franchise;
-import com.letseatall.letseatall.data.Entity.Menu;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.repository.custom.MenuBulkRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 

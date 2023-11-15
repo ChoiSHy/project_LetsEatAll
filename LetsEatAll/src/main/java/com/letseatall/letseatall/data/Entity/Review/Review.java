@@ -1,6 +1,6 @@
 package com.letseatall.letseatall.data.Entity.Review;
 
-import com.letseatall.letseatall.data.Entity.Menu;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.Entity.common.BaseEntity;
 import lombok.*;
@@ -35,8 +35,6 @@ public class Review extends BaseEntity {
         this.menu=menu;
         menu.addReview(this);
     }
-    @Column(nullable = false)
-    private String title;
     @Column
     private String content;
     @Column(nullable = false)

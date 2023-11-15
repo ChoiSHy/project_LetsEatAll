@@ -1,9 +1,7 @@
 package com.letseatall.letseatall.data.dto.Menu;
 
-import com.letseatall.letseatall.data.Entity.Menu;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.repository.query.Param;
 
 @Getter
 @Setter

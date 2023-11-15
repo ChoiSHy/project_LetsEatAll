@@ -1,6 +1,5 @@
 package com.letseatall.letseatall.controller;
 
-import com.letseatall.letseatall.data.Entity.Menu;
 import com.letseatall.letseatall.data.dto.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
@@ -8,14 +7,15 @@ import com.letseatall.letseatall.service.MenuService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -31,7 +31,7 @@ public class MenuController {
 
     @GetMapping()
     @ApiOperation(value="메뉴 정보 조회", notes="전달받은 메뉴 id를 통해 메뉴 정보를 조회한다.")
-    public ResponseEntity<MenuResponseDto> getMenu(Long id){
+    public ResponseEntity<MenuResponseDto> getMenu(Long id) throws IOException {
         log.info("[getMenu] : getMenu 시작");
         MenuResponseDto responseDto = menuService.getMenu(id);
         log.info("[getMenu] : result: {}", responseDto.getName());
@@ -44,9 +44,9 @@ public class MenuController {
     })
     @ApiOperation(value="메뉴 저장", notes="전달된 정보를 토대로 메뉴 데이터를 추가한다.")
     @PostMapping()
-    public ResponseEntity<MenuResponseDto> saveMenu(@RequestBody MenuDto menuDto){
+    public ResponseEntity<MenuResponseDto> saveMenu(@RequestPart MenuDto menuDto, @RequestPart MultipartFile file) throws IOException {
         long cur_time = System.currentTimeMillis();
-        MenuResponseDto responseDto = menuService.saveMenu(menuDto);
+        MenuResponseDto responseDto = menuService.saveMenu(menuDto, file);
         log.info("[saveMenu] Response Time: {}ms", System.currentTimeMillis() - cur_time);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
@@ -56,8 +56,9 @@ public class MenuController {
                     required = true, dataType = "String", paramType = "header")
     })
     @ApiOperation(value="메뉴 저장 (프랜차이즈)", notes="프랜차이즈의 공통 메뉴를 추가한다.")
-    public ResponseEntity saveFranchiseMenu(@RequestBody MenuDto menuDto){
-        MenuResponseDto menuResponseDto = menuService.saveFranchiseMenu(menuDto);
+    public ResponseEntity saveFranchiseMenu(@RequestPart MenuDto menuDto,
+                                            @RequestPart MultipartFile file) throws IOException {
+        MenuResponseDto menuResponseDto = menuService.saveFranchiseMenu(menuDto, file);
         return ResponseEntity.ok(menuResponseDto);
     }
     @PutMapping()

@@ -1,13 +1,21 @@
 package com.letseatall.letseatall.service.Impl;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.letseatall.letseatall.data.Entity.*;
 import com.letseatall.letseatall.data.Entity.Review.Review;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
+import com.letseatall.letseatall.data.Entity.menu.MenuImageFile;
 import com.letseatall.letseatall.data.dto.Menu.MenuListDto;
 import com.letseatall.letseatall.data.dto.Restaurant.FranchiseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.FranchiseResponseDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
 import com.letseatall.letseatall.data.repository.*;
+import com.letseatall.letseatall.data.repository.Menu.MenuImageFileRepository;
+import com.letseatall.letseatall.data.repository.Menu.MenuRepository;
+import com.letseatall.letseatall.data.repository.review.ImagefileRepository;
+import com.letseatall.letseatall.data.repository.review.ReviewRepository;
+import com.letseatall.letseatall.service.MenuService;
 import com.letseatall.letseatall.service.RestaurantService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +29,14 @@ import java.util.*;
 
 @Service
 public class RestaurantServiceImpl implements RestaurantService {
-    RestaurantRepository restaurantRepository;
-    FranchiseRepository franchiseRepository;
-    CategoryRepository categoryRepository;
-    MenuRepository menuRepository;
-    ReviewRepository reviewRepository;
+    final RestaurantRepository restaurantRepository;
+    final FranchiseRepository franchiseRepository;
+    final CategoryRepository categoryRepository;
+    final MenuRepository menuRepository;
+    final ReviewRepository reviewRepository;
+    final MenuImageFileRepository imageFileRepository;
+    final ImagefileRepository imgRepository;
+    final MenuService menuService;
     private final Logger LOGGER = LoggerFactory.getLogger(RestaurantServiceImpl.class);
 
     @Autowired
@@ -34,12 +45,18 @@ public class RestaurantServiceImpl implements RestaurantService {
                                  FranchiseRepository franchiseRepository,
                                  CategoryRepository categoryRepository,
                                  MenuRepository menuRepository,
-                                 ReviewRepository reviewRepository) {
+                                 ReviewRepository reviewRepository,
+                                 MenuImageFileRepository imageRepository,
+                                 ImagefileRepository imgRepository,
+                                 MenuService menuService) {
         this.restaurantRepository = restaurantRepository;
         this.franchiseRepository = franchiseRepository;
         this.categoryRepository = categoryRepository;
         this.menuRepository = menuRepository;
         this.reviewRepository = reviewRepository;
+        this.imageFileRepository = imageRepository;
+        this.imgRepository = imgRepository;
+        this.menuService = menuService;
     }
 
     @Override
@@ -78,11 +95,23 @@ public class RestaurantServiceImpl implements RestaurantService {
     private void addFranchiseMenus(Franchise franchise, Restaurant restaurant) {
         List<Menu> fMenus = franchise.getMenus();
         List<Menu> saveMenus = new ArrayList<>();
+        LOGGER.info("[addFranchiseMenus] 시작");
         for (Menu fMenu : fMenus) {
             Menu newMenu = new Menu(fMenu.getName(), fMenu.getPrice(), fMenu.getScore(), fMenu.getCategory());
             newMenu.setRestaurant(restaurant);
-            if(fMenu.getUrl() != null)
+            if(fMenu.getUrl() != null) {
                 newMenu.setUrl(fMenu.getUrl());
+                LOGGER.info("[addFranchiseMenus] url 처리");
+            }
+            if(fMenu.getImg() != null){
+                MenuImageFile fimg = imageFileRepository.findByMenuId(fMenu.getId()).orElseThrow(()->new NotFoundException("대상 찾지 못함"));
+                MenuImageFile img = new MenuImageFile();
+                img.setUrl(fimg.getUrl());
+                img.setStoredName(fimg.getStoredName());
+                newMenu.setImg(img);
+                LOGGER.info("[addFranchiseMenus] 이미지 처리");
+                
+            }
             saveMenus.add(newMenu);
         }
         restaurantRepository.save(restaurant);
@@ -182,10 +211,10 @@ public class RestaurantServiceImpl implements RestaurantService {
                 mids.add(menu.getId());
             }
         }
-        if (!rvids.isEmpty())
-            reviewRepository.deleteAllByIdInBatch(rvids);
-        if (!mids.isEmpty())
-            menuRepository.deleteAllByIdInBatch(mids);
+
+        if (!mids.isEmpty()){
+            mids.forEach(mid -> menuService.deleteMenu(mid));
+        }
         restaurantRepository.deleteById(id);
     }
 

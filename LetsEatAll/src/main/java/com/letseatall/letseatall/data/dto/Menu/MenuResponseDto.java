@@ -17,4 +17,5 @@ public class MenuResponseDto {
     private String category;
     private double score;
     private String url;
+    private String img;
 }

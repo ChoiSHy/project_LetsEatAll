@@ -1,6 +1,6 @@
 package com.letseatall.letseatall.service.Impl;
 
-import com.letseatall.letseatall.data.Entity.Menu;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.Entity.Review.LikeHistory;
 import com.letseatall.letseatall.data.Entity.Review.Review;
 import com.letseatall.letseatall.data.Entity.User;
@@ -9,14 +9,15 @@ import com.letseatall.letseatall.data.dto.Review.ReviewDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
 import com.letseatall.letseatall.data.repository.*;
+import com.letseatall.letseatall.data.repository.Menu.MenuRepository;
+import com.letseatall.letseatall.data.repository.review.ImagefileRepository;
+import com.letseatall.letseatall.data.repository.review.ReviewRepository;
 import com.letseatall.letseatall.service.ReviewService;
 import com.letseatall.letseatall.service.awsS3.S3UploadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,9 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -77,14 +76,17 @@ public class ReviewServiceImpl implements ReviewService {
         }
         LOGGER.info("[saveReview] Review 객체 생성 시작");
         ImageFile img = null;
-        if (!file.isEmpty()) {
+        if (file!=null) {
             img = new ImageFile();
-            img.setUrl(uploadReviewImage(file));
+            String[] res = uploadReviewImage(file);
+            if(res!=null){
+                img.setUrl(res[0]);
+                img.setStoredName(res[1]);
+            }
             LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
         }
 
         Review newReview = new Review();
-        newReview.setTitle(reviewDto.getTitle());
         newReview.setContent(reviewDto.getContent());
         newReview.setScore(reviewDto.getScore());
         newReview.setLike_cnt(0);
@@ -161,7 +163,6 @@ public class ReviewServiceImpl implements ReviewService {
         }
         if (review != null) {
             LOGGER.info("[modifyReview] 수정할 정보 불러오기 성공. {}", review.toString());
-            review.setTitle(rmd.getTitle());
             review.setContent(rmd.getContent());
             review.setScore(rmd.getScore());
             review.getMenu();
@@ -169,10 +170,13 @@ public class ReviewServiceImpl implements ReviewService {
 
             LOGGER.info("[modifyReview] 이미지 정보 수정 시작");
 
-            if (!file.isEmpty()) {
-                String url = uploadReviewImage(file);
+            if (file!=null) {
+                String[] res = uploadReviewImage(file);
                 ImageFile img = new ImageFile();
-                img.setUrl(url);
+                if(res!= null){
+                    img.setUrl(res[0]);
+                    img.setStoredName(res[1]);
+                }
                 LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
             }
             Review modifiedReview = reviewRepository.save(review);
@@ -209,7 +213,6 @@ public class ReviewServiceImpl implements ReviewService {
         User user = review.getWriter();
         ReviewResponseDto rrd = ReviewResponseDto.builder()
                 .review_id(review.getId())
-                .title(review.getTitle())
                 .content(review.getContent())
                 .score(review.getScore())
                 .like_count(review.getLike_cnt())
@@ -323,12 +326,12 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Transactional
-    public String uploadReviewImage(MultipartFile file) {
-        String url = "";
+    public String[] uploadReviewImage(MultipartFile file) {
+        String[] result=null;
         if (file != null) {
-            url = s3UploadService.uploadFileToS3(file, "Images");
+            result = s3UploadService.uploadFileToS3(file, "Images");
         }
-        return url;
+        return result;
     }
 
     public ResponseEntity getImg(String storedFileName) throws IOException {

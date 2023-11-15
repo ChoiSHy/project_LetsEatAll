@@ -1,31 +1,40 @@
 package com.letseatall.letseatall.service.Impl;
 
 import com.letseatall.letseatall.data.Entity.*;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
+import com.letseatall.letseatall.data.Entity.menu.MenuImageFile;
 import com.letseatall.letseatall.data.dto.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.data.repository.*;
+import com.letseatall.letseatall.data.repository.Menu.MenuImageFileRepository;
+import com.letseatall.letseatall.data.repository.Menu.MenuRepository;
+import com.letseatall.letseatall.data.repository.review.ReviewRepository;
 import com.letseatall.letseatall.service.MenuService;
+import com.letseatall.letseatall.service.awsS3.S3UploadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class MenuServiceImpl implements MenuService {
-    RestaurantRepository restaurantRepository;
-    MenuRepository menuRepository;
-    YoutubeRepository youtubeRepository;
-    UserRepository userRepository;
-    CategoryRepository categoryRepository;
-    FranchiseRepository franchiseRepository;
-    ReviewRepository reviewRepository;
+    final RestaurantRepository restaurantRepository;
+    final MenuRepository menuRepository;
+    final YoutubeRepository youtubeRepository;
+    final UserRepository userRepository;
+    final CategoryRepository categoryRepository;
+    final FranchiseRepository franchiseRepository;
+    final ReviewRepository reviewRepository;
+    final S3UploadService s3UploadService;
+    final MenuImageFileRepository imgRepository;
 
     private final Logger LOGGER = LoggerFactory.getLogger(MenuServiceImpl.class);
 
@@ -36,7 +45,10 @@ public class MenuServiceImpl implements MenuService {
                            UserRepository userRepository,
                            CategoryRepository categoryRepository,
                            FranchiseRepository franchiseRepository,
-                           ReviewRepository reviewRepository) {
+                           ReviewRepository reviewRepository,
+                           S3UploadService s3UploadService,
+                           MenuImageFileRepository imgRepository
+    ) {
         this.restaurantRepository = restaurantRepository;
         this.menuRepository = menuRepository;
         this.youtubeRepository = youtubeRepository;
@@ -44,11 +56,13 @@ public class MenuServiceImpl implements MenuService {
         this.categoryRepository = categoryRepository;
         this.franchiseRepository = franchiseRepository;
         this.reviewRepository = reviewRepository;
+        this.s3UploadService = s3UploadService;
+        this.imgRepository = imgRepository;
     }
 
     @Override
     /* 메뉴 정보 저장 */
-    public MenuResponseDto saveMenu(MenuDto menuDto) {
+    public MenuResponseDto saveMenu(MenuDto menuDto, MultipartFile file) throws IOException {
         LOGGER.info("[saveMenu] : saveMenu 시작 menu = {}", menuDto);
         Restaurant foundRest = restaurantRepository.findById(menuDto.getRid()).get();
         LOGGER.info("[saveMenu] : 검색된 음식점 = {}", foundRest.getName());
@@ -61,6 +75,17 @@ public class MenuServiceImpl implements MenuService {
         menu.setScore(0);
         menu.setRestaurant(foundRest);
         menu.setCategory(category);
+
+        LOGGER.info("[saveMenu] : 이미지 저장 시작");
+        MenuImageFile mimg = null;
+        if (!file.isEmpty()) {
+            String[] res = s3UploadService.uploadFileToS3(file, "Images/Menu");
+            mimg = new MenuImageFile();
+            mimg.setMenu(menu);
+            mimg.setUrl(res[0]);
+            mimg.setStoredName(res[1]);
+        }
+        menu.setImg(mimg);
         Menu savedMenu = menuRepository.save(menu);
         LOGGER.info("[saveMenu] : 데이터 DB 저장 성공 -> savedMenu = {}", savedMenu.getName());
 
@@ -69,7 +94,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public MenuResponseDto saveFranchiseMenu(MenuDto menuDto) {
+    public MenuResponseDto saveFranchiseMenu(MenuDto menuDto, MultipartFile file) throws IOException {
         Long fid = menuDto.getRid();
         String name = menuDto.getName();
         int price = menuDto.getPrice();
@@ -93,6 +118,16 @@ public class MenuServiceImpl implements MenuService {
             franchise = opFrc.get();
             LOGGER.info("[saveFranchiseMenu] : franchise 불러오기: {}", franchise);
         } else return null;
+
+        MenuImageFile mimg = null;
+        if (!file.isEmpty()) {
+            String[] res = s3UploadService.uploadFileToS3(file, "Images/Menu");
+            mimg = new MenuImageFile();
+            mimg.setMenu(newMenu);
+            mimg.setUrl(res[0]);
+            mimg.setStoredName(res[1]);
+        }
+        newMenu.setImg(mimg);
         newMenu.setCategory(category);
         newMenu.setFranchise(franchise);
 
@@ -103,7 +138,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     /* 메뉴 정보 요청 */
-    public MenuResponseDto getMenu(Long id) {
+    public MenuResponseDto getMenu(Long id) throws IOException {
         LOGGER.info("[getMenu] : id = {}, 가져오기", id);
         Menu foundMenu = menuRepository.findById(id).get();
         LOGGER.info("[getMenu] : menu = {}", foundMenu);
@@ -140,9 +175,19 @@ public class MenuServiceImpl implements MenuService {
         List<Long> ids = new ArrayList<>();
         Optional<Menu> oMenu = menuRepository.findById(id);
         if (oMenu.isPresent()) {
-            oMenu.get().getReviewList().forEach(review -> {
+            Menu menu = oMenu.get();
+            LOGGER.info("[delete menu] menu = {}", menu);
+
+            menu.getReviewList().forEach(review -> {
                 ids.add(review.getId());
             });
+            LOGGER.info("[delete menu] 리뷰 삭제");
+            if (menu.getImg() != null) {
+                imgRepository.deleteById(menu.getImg().getId());
+                LOGGER.info("[delete menu] 이미지 정보 삭제");
+            }
+
+            menu.removeImg(menu.getImg());
         }
         reviewRepository.deleteAllByIdInBatch(ids);
         menuRepository.deleteById(id);
@@ -152,7 +197,12 @@ public class MenuServiceImpl implements MenuService {
     public List<MenuResponseDto> getAllMenu(Long rid) {
         List<MenuResponseDto> responseDtoList = new ArrayList<>();
         menuRepository.findAllByRestaurantId(rid).forEach(m -> {
-            MenuResponseDto responseDto = makeDto(m);
+            MenuResponseDto responseDto = null;
+            try {
+                responseDto = makeDto(m);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             responseDtoList.add(responseDto);
         });
         return responseDtoList;
@@ -161,7 +211,12 @@ public class MenuServiceImpl implements MenuService {
     public List<MenuResponseDto> getAllMenu(int start, int size) {
         List<MenuResponseDto> responseDtoList = new ArrayList<>();
         menuRepository.findAll(PageRequest.of(start, size)).forEach(m -> {
-            MenuResponseDto responseDto = makeDto(m);
+            MenuResponseDto responseDto = null;
+            try {
+                responseDto = makeDto(m);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             responseDtoList.add(responseDto);
         });
         return responseDtoList;
@@ -171,7 +226,11 @@ public class MenuServiceImpl implements MenuService {
         List<MenuResponseDto> resDtoList = new ArrayList<>();
         LOGGER.info("[getListFranchiseMenu] : 탐색 시작");
         menuRepository.findAllByFranchiseId(fid).forEach(m -> {
-            resDtoList.add(makeDto(m));
+            try {
+                resDtoList.add(makeDto(m));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         });
         LOGGER.info("[getListFranchiseMenu] : 탐색 종료");
         return resDtoList;
@@ -181,13 +240,18 @@ public class MenuServiceImpl implements MenuService {
     public List<MenuResponseDto> getAllFranchiseMenu(Long fid) {
         List<MenuResponseDto> responseDtoList = new ArrayList<>();
         menuRepository.findAllByRestaurant_FranchiseId(fid).forEach(m -> {
-            responseDtoList.add(makeDto(m));
+            try {
+                responseDtoList.add(makeDto(m));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         });
         return responseDtoList;
     }
 
-    private MenuResponseDto makeDto(Menu menu) {
+    private MenuResponseDto makeDto(Menu menu) throws IOException {
         LOGGER.info("[makeDto] DTO 생성 시작 : {}", menu);
+
         MenuResponseDto mrd = MenuResponseDto.builder()
                 .price(menu.getPrice())
                 .category(menu.getCategory().getName())
@@ -202,7 +266,9 @@ public class MenuServiceImpl implements MenuService {
             mrd.setScore(menu.getScore() / menu.getReviewList().size());
         if (menu.getUrl() != null)
             mrd.setUrl(menu.getUrl());
-
+        if (menu.getImg() != null) {
+            mrd.setImg(s3UploadService.getObject(menu.getImg().getStoredName()));
+        }
         LOGGER.info("[makeDto] DTO 생성 완료");
         return mrd;
     }

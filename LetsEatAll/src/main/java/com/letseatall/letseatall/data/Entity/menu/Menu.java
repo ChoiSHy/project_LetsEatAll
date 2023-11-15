@@ -1,5 +1,9 @@
-package com.letseatall.letseatall.data.Entity;
+package com.letseatall.letseatall.data.Entity.menu;
 
+import com.letseatall.letseatall.data.Entity.Category;
+import com.letseatall.letseatall.data.Entity.Franchise;
+import com.letseatall.letseatall.data.Entity.Restaurant;
+import com.letseatall.letseatall.data.Entity.Review.ImageFile;
 import com.letseatall.letseatall.data.Entity.Review.Review;
 import lombok.*;
 
@@ -8,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Setter
+@Getter
+@ToString
 @Table(name="menu")
 public class Menu {
     @Id
@@ -73,4 +79,20 @@ public class Menu {
     }
     @Column
     private String url;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "menu")
+    @ToString.Exclude
+    private MenuImageFile img;
+
+    public void setImg(MenuImageFile img) {
+        this.img = img;
+        if(img != null)
+            img.setMenu(this);
+    }
+    public void removeImg(MenuImageFile img){
+        this.img= null;
+        if(img != null)
+            img.setMenu(null);
+    }
+
 }

@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @ToString
 public class ReviewResponseDto {
     private Long review_id;
-    private String title;
     private String content;
     private int score;
     private int like_count;

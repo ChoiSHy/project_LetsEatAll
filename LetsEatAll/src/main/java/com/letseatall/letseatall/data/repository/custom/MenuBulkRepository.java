@@ -1,6 +1,6 @@
 package com.letseatall.letseatall.data.repository.custom;
 
-import com.letseatall.letseatall.data.Entity.Menu;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
 
 import java.util.List;
 

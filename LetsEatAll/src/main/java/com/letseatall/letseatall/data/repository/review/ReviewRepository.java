@@ -1,4 +1,4 @@
-package com.letseatall.letseatall.data.repository;
+package com.letseatall.letseatall.data.repository.review;
 
 import com.letseatall.letseatall.data.Entity.Review.Review;
 import org.springframework.data.jpa.repository.JpaRepository;

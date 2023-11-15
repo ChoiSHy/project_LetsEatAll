@@ -12,7 +12,6 @@ import java.util.List;
 @Builder
 public class ReviewDto {
     private Long mid;
-    private String title;
     private String content;
     private int score;
 }

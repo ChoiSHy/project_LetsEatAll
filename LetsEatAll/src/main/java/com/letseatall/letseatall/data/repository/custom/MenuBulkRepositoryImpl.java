@@ -1,6 +1,6 @@
 package com.letseatall.letseatall.data.repository.custom;
 
-import com.letseatall.letseatall.data.Entity.Menu;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;

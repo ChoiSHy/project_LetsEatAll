@@ -1,29 +1,27 @@
-package com.letseatall.letseatall.data.Entity.Review;
+package com.letseatall.letseatall.data.Entity.menu;
 
-import com.letseatall.letseatall.data.Entity.Review.Review;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity
 @ToString
-public class ImageFile {
+@Entity
+public class MenuImageFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private long id;
     @Column(nullable = false)
     private String url;
     @Column(nullable = false)
     private String storedName;
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="review_id")
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="menu_id")
     @ToString.Exclude
-    private Review review;
+    private Menu menu;
+
 }

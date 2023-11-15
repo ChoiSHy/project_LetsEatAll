@@ -1,6 +1,6 @@
 package com.letseatall.letseatall.data.Entity;
 
-import com.letseatall.letseatall.data.dto.Restaurant.FranchiseDto;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
 import lombok.*;
 
 import javax.persistence.*;
@@ -9,7 +9,9 @@ import java.util.List;
 
 @Entity
 @Builder
-@Data
+@Setter
+@Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="restaurant")
