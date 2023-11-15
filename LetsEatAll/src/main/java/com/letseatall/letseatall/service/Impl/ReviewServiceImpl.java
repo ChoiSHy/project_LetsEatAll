@@ -1,13 +1,10 @@
 package com.letseatall.letseatall.service.Impl;
 
-import com.amazonaws.services.s3.model.S3Object;
 import com.letseatall.letseatall.data.Entity.Menu;
-import com.letseatall.letseatall.data.Entity.Restaurant;
 import com.letseatall.letseatall.data.Entity.Review.LikeHistory;
-import com.letseatall.letseatall.data.Entity.Review.LikeHistoryKey;
 import com.letseatall.letseatall.data.Entity.Review.Review;
 import com.letseatall.letseatall.data.Entity.User;
-import com.letseatall.letseatall.data.Entity.image.ImageFile;
+import com.letseatall.letseatall.data.Entity.Review.ImageFile;
 import com.letseatall.letseatall.data.dto.Review.ReviewDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
@@ -64,7 +61,7 @@ public class ReviewServiceImpl implements ReviewService {
         this.s3UploadService = s3UploadService;
     }
 
-    public ReviewResponseDto saveReview(ReviewDto reviewDto, List<MultipartFile> files) throws IOException {
+    public ReviewResponseDto saveReview(ReviewDto reviewDto, MultipartFile file) throws IOException {
         Menu menu = null;
         LOGGER.info("[saveReview] 시작");
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -79,20 +76,13 @@ public class ReviewServiceImpl implements ReviewService {
             menu.setScore(menu.getScore() + reviewDto.getScore());
         }
         LOGGER.info("[saveReview] Review 객체 생성 시작");
-
-        List<ImageFile> imgList = new ArrayList();
-        for (MultipartFile file : files) {
-            if (!file.isEmpty()) {
-                ImageFile img = new ImageFile();
-                img.setUploadedFileName(file.getOriginalFilename());
-                img.setStoredName();
-                imgList.add(img);
-                String fullPath = imgPath + img.getStoredFileName() + ".jpg";
-                LOGGER.info("[uploadReviewImg] 저장할 이미지 위치 : {}", fullPath);
-                file.transferTo(new File(fullPath));
-                LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
-            }
+        ImageFile img = null;
+        if (!file.isEmpty()) {
+            img = new ImageFile();
+            img.setUrl(uploadReviewImage(file));
+            LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
         }
+
         Review newReview = new Review();
         newReview.setTitle(reviewDto.getTitle());
         newReview.setContent(reviewDto.getContent());
@@ -101,18 +91,11 @@ public class ReviewServiceImpl implements ReviewService {
         newReview.setUnlike_cnt(0);
         newReview.setMenu(menu);
         newReview.setWriter(user);
-
-        imgList.forEach(img -> {
-            img.setReview(newReview);
-        });
+        newReview.setImg(img);
 
         LOGGER.info("[saveReview] Review 객체 생성 완료: {}", newReview);
 
         Review savedReview = reviewRepository.save(newReview);
-        LOGGER.info("[saveReview] Review imgList");
-        savedReview.getImgList().forEach(img -> {
-            LOGGER.info("[saveReview] img = {}", img);
-        });
         LOGGER.info("[saveReview] Review 저장 완료");
         return getReviewResponseDto(savedReview);
     }
@@ -128,6 +111,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
         return null;
     }
+
     // 리뷰 조회(해당 메뉴의 모든 리뷰 조회)
     @Override
     @Transactional
@@ -167,7 +151,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Transactional
-    public ReviewResponseDto modifyReview(ReviewModifyDto rmd, List<MultipartFile> files) throws IOException {
+    public ReviewResponseDto modifyReview(ReviewModifyDto rmd, MultipartFile file) throws IOException {
         LOGGER.info("[modifyReview] 수정 시작");
         Optional<Review> oReview = reviewRepository.findById(rmd.getId());
         Review review = oReview.orElse(null);
@@ -184,29 +168,16 @@ public class ReviewServiceImpl implements ReviewService {
             review.getWriter();
 
             LOGGER.info("[modifyReview] 이미지 정보 수정 시작");
-            List<ImageFile> imageFileList = review.getImgList();
 
-            for (MultipartFile file : files) {
-                if (!file.isEmpty()) {
-                    if (!imgRepository.existsByUploadedFileName(file.getOriginalFilename())) {
-                        ImageFile img = new ImageFile();
-                        img.setUploadedFileName(file.getOriginalFilename());
-                        img.setStoredName();
-                        review.addImg(img);
-                        String fullPath = imgPath + img.getStoredFileName() + ".jpg";
-                        LOGGER.info("[uploadReviewImg] 저장할 이미지 위치 : {}", fullPath);
-                        file.transferTo(new File(fullPath));
-                        imageFileList.add(img);
-
-                        LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
-                    }
-                }
+            if (!file.isEmpty()) {
+                String url = uploadReviewImage(file);
+                ImageFile img = new ImageFile();
+                img.setUrl(url);
+                LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
             }
             Review modifiedReview = reviewRepository.save(review);
-
             return getReviewResponseDto(modifiedReview);
         }
-
         return null;
     }
 
@@ -214,7 +185,7 @@ public class ReviewServiceImpl implements ReviewService {
         LOGGER.info("[isWriter] 삭제 권한 확인");
         UserDetails you = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         LOGGER.info("[isWriter] you : {}, writer : {}", you.getUsername(), writer.getUsername());
-        return you.equals(writer.getUid());
+        return you.getUsername().equals(writer.getUid());
     }
 
     @Override
@@ -222,12 +193,10 @@ public class ReviewServiceImpl implements ReviewService {
         Optional<Review> oReview = reviewRepository.findById(id);
         Review review = oReview.orElse(null);
         if (isWriter(review.getWriter())) {
-            for (ImageFile img : review.getImgList()) {
-                review.removeImg(img);
-            }
+            ImageFile img = review.getImg();
+            review.setImg(null);
             reviewRepository.deleteById(id);
             LOGGER.info("[deleteReview] 삭제 완료");
-
             return id;
         }
         LOGGER.info("[deleteReview] 삭제 권한 없음");
@@ -255,6 +224,10 @@ public class ReviewServiceImpl implements ReviewService {
             rrd.setWriter(user.getName());
             rrd.setUser_id(user.getId());
         }
+        ImageFile img = imgRepository.findByReviewId(review.getId()).orElse(null);
+        if(img != null){
+            rrd.setImg_url(img.getUrl());
+        }
         return rrd;
     }
 
@@ -278,21 +251,6 @@ public class ReviewServiceImpl implements ReviewService {
                         getReviewResponseDto(rev))
                 );
         return responseDtoList;
-    }
-
-    public ResponseEntity downloadImg(Long id) throws MalformedURLException {
-        Optional<ImageFile> findFile = imgRepository.findByReviewId(id);
-        ImageFile file = findFile.orElse(null);
-        if (file == null) return null;
-
-        String storedName = file.getStoredFileName();
-        String uploadedName = file.getUploadedFileName();
-
-        String contentDisposition = "attachment; filename=\"" + uploadedName + "\"";
-        UrlResource resource = new UrlResource("file:" + imgPath + storedName + ".jpg");
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                .body(resource);
     }
 
     public List<ReviewResponseDto> findAllReviewsWrittenByYou() {
@@ -358,22 +316,23 @@ public class ReviewServiceImpl implements ReviewService {
             }
         }
         // 중복일 경우 불가능
-        else{
+        else {
             throw new RuntimeException("중복 추천은 불가합니다.");
         }
         return reviewDto;
     }
+
     @Transactional
-    public void uploadReviewImage(long review_id, MultipartFile file){
+    public String uploadReviewImage(MultipartFile file) {
         String url = "";
-        if(file!= null){
-            url = s3UploadService.uploadFileToS3(file, "/Images");
+        if (file != null) {
+            url = s3UploadService.uploadFileToS3(file, "Images");
         }
+        return url;
     }
 
-    @Override
-    public ResponseEntity<byte[]> getObject(String storedFileName) throws IOException {
+    public ResponseEntity getImg(String storedFileName) throws IOException {
         LOGGER.info("[ReviewService - getObject]");
-        return s3UploadService.getObject(storedFileName);
+        return new ResponseEntity(s3UploadService.getObject(storedFileName), HttpStatus.OK);
     }
 }

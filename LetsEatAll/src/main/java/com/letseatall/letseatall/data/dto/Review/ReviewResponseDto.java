@@ -22,5 +22,6 @@ public class ReviewResponseDto {
     private String menu_name;
     private String writer;
     private Long user_id;
+    private String img_url;
     private LocalDateTime updatedAt;
 }

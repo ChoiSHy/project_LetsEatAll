@@ -10,19 +10,14 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ReviewService {
-    ReviewResponseDto saveReview(ReviewDto reviewDto, List<MultipartFile> files) throws IOException;
+    ReviewResponseDto saveReview(ReviewDto reviewDto, MultipartFile file) throws IOException;
     ReviewResponseDto getReview(Long id);
-    ReviewResponseDto modifyReview(ReviewModifyDto rmd, List<MultipartFile> files) throws IOException;
+    ReviewResponseDto modifyReview(ReviewModifyDto rmd, MultipartFile file) throws IOException;
     Long deleteReview(Long id);
     List<ReviewResponseDto> getAllReviewsInMenu(Long mid);
     List<ReviewResponseDto> getAllReviewsInRestaurant(Long rid);
     List<ReviewResponseDto> getAllReviews();
-    List<ReviewResponseDto> getAllReviewsInFranchise(Long fid);
     List<ReviewResponseDto> getAllReviewsWrittenByUser(Long uid);
     List<ReviewResponseDto> findAllReviewsWrittenByYou();
-    ResponseEntity downloadImg(Long id) throws IOException;
-
     ReviewResponseDto likeReview(long id, int score);
-    void uploadReviewImage(long review_id, MultipartFile file);
-    ResponseEntity<byte[]> getObject(String storedFileName) throws IOException;
 }

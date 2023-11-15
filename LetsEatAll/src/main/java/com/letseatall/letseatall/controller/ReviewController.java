@@ -47,16 +47,16 @@ public class ReviewController {
 
     @PostMapping("/create")
     public ResponseEntity saveReview(@RequestPart ReviewDto reviewDto,
-                                     @RequestPart List<MultipartFile> files) throws IOException {
-        ReviewResponseDto responseDto = reviewService.saveReview(reviewDto, files);
+                                     @RequestPart MultipartFile file) throws IOException {
+        ReviewResponseDto responseDto = reviewService.saveReview(reviewDto, file);
         return ResponseEntity.ok(responseDto);
     }
 
     @PutMapping("/modify")
     public ResponseEntity<ReviewResponseDto> modifyReview(@RequestPart ReviewModifyDto rmd,
-                                                          @RequestPart List<MultipartFile> files) throws IOException {
+                                                          @RequestPart MultipartFile file) throws IOException {
         try {
-            ReviewResponseDto responseDto = reviewService.modifyReview(rmd, files);
+            ReviewResponseDto responseDto = reviewService.modifyReview(rmd, file);
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
         } catch (ResponseStatusException e) {
             throw e;
@@ -89,30 +89,6 @@ public class ReviewController {
     public ResponseEntity getAllReviews() {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviews();
         return ResponseEntity.ok().body(responseDtoList);
-    }
-
-    @PostMapping(value = "/image", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity uploadReviewImg(
-            @RequestParam Long rid,
-            @RequestParam MultipartFile file) throws IOException {
-        LOGGER.info("[uploadReviewImg] itemName = " + rid);
-
-        if (!file.isEmpty()) {
-            reviewService.uploadReviewImage(rid, file);
-            LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
-        }
-        return ResponseEntity.ok("저장");
-    }
-    @GetMapping("/download/img/{fileName}")
-    public ResponseEntity<byte[]> download(@PathVariable("fileName") String fileName) throws IOException {
-        LOGGER.info("[download] 파일 다운로드 시작 : {}",fileName);
-        return reviewService.getObject(fileName);
-    }
-
-    @GetMapping("/image/{reviewId}/attach")
-    public ResponseEntity downloadReviewImg(
-            @PathVariable("reviewId") Long id) throws IOException {
-        return reviewService.downloadImg(id);
     }
 
     @GetMapping("/user/me")

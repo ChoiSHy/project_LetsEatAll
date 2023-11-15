@@ -3,14 +3,9 @@ package com.letseatall.letseatall.data.Entity.Review;
 import com.letseatall.letseatall.data.Entity.Menu;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.Entity.common.BaseEntity;
-import com.letseatall.letseatall.data.Entity.image.ImageFile;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
@@ -50,14 +45,13 @@ public class Review extends BaseEntity {
     private int like_cnt;
     @Column(nullable = false)
     private int unlike_cnt;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "review")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "review")
     @ToString.Exclude
-    private List<ImageFile> imgList=new ArrayList<>();
-    public void addImg(ImageFile img){
-        imgList.add(img);
-    }
-    public void removeImg(ImageFile img){
-        imgList.remove(img);
-    }
+    private ImageFile img;
 
+    public void setImg(ImageFile img){
+        this.img= img;
+        if(img != null)
+            img.setReview(this);
+    }
 }

@@ -1,52 +1,61 @@
 package com.letseatall.letseatall.service.awsS3;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
-import com.amazonaws.util.IOUtils;
-import lombok.extern.slf4j.Slf4j;
+import com.letseatall.letseatall.data.repository.ImagefileRepository;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URLEncoder;
+import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
 
-@Component
-@Slf4j
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class S3UploadService {
 
-    private AmazonS3Client amazonS3Client;
+    private final AmazonS3 amazonS3;
+    private final ImagefileRepository imagefileRepository;
+    private final Logger log = LoggerFactory.getLogger(S3UploadService.class);
     @Value("${cloud.aws.bucket}")
     private String bucket;
-    public S3UploadService(AmazonS3Client amazonS3Client){
-        this.amazonS3Client = amazonS3Client;
+    @Autowired
+    public S3UploadService(AmazonS3Client amazonS3Client, ImagefileRepository imagefileRepository){
+        this.imagefileRepository = imagefileRepository;
+        this.amazonS3 = amazonS3Client;
     }
     /**
      * 로컬 경로에 저장
      */
     public String uploadFileToS3(MultipartFile multipartFile, String filePath) {
         // MultipartFile -> File 로 변환
+        log.info("[uploadFileToS3] MultipartFile -> 변환 시도");
         File uploadFile = null;
         try {
             uploadFile = convert(multipartFile)
-                    .orElseThrow(() -> new IllegalArgumentException("[error]: MultipartFile -> 파일 변환 실패"));
+                    .orElseThrow(() ->
+                        new IllegalArgumentException("[error]: MultipartFile -> 파일 변환 실패"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         // S3에 저장된 파일 이름
         String fileName = filePath + "/" + UUID.randomUUID();
-
+        log.info("fileName = {}", fileName);
         // s3로 업로드 후 로컬 파일 삭제
         String uploadImageUrl = putS3(uploadFile, fileName);
         removeNewFile(uploadFile);
@@ -61,9 +70,9 @@ public class S3UploadService {
      * @return 업로드 경로
      */
     public String putS3(File uploadFile, String fileName) {
-        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(
+        amazonS3.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(
                 CannedAccessControlList.PublicRead));
-        return amazonS3Client.getUrl(bucket, fileName).toString();
+        return amazonS3.getUrl(bucket, fileName).toString();
     }
 
     /**
@@ -75,7 +84,7 @@ public class S3UploadService {
             String key = filePath.substring(56); // 폴더/파일.확장자
 
             try {
-                amazonS3Client.deleteObject(bucket, key);
+                amazonS3.deleteObject(bucket, key);
             } catch (AmazonServiceException e) {
                 log.info(e.getErrorMessage());
             }
@@ -104,7 +113,9 @@ public class S3UploadService {
      */
     private Optional<File> convert(MultipartFile file) throws IOException {
         // 로컬에서 저장할 파일 경로 : user.dir => 현재 디렉토리 기준
+        log.info("[convert] 변환 시작");
         String dirPath = System.getProperty("user.dir") + "/" + file.getOriginalFilename();
+        log.info("[convert] dirPath = {}", dirPath);
         File convertFile = new File(dirPath);
 
         if (convertFile.createNewFile()) {
@@ -117,19 +128,7 @@ public class S3UploadService {
 
         return Optional.empty();
     }
-    public ResponseEntity<byte[]> getObject(String storedFileName) throws IOException {
-        S3Object o = amazonS3Client.getObject(new GetObjectRequest(bucket, storedFileName));
-        S3ObjectInputStream objectInputStream = ((S3Object) o).getObjectContent();
-        byte[] bytes = IOUtils.toByteArray(objectInputStream);
-
-        String fileName = URLEncoder.encode(storedFileName, "UTF-8").replaceAll("\\+", "%20");
-        log.info("[S3Uploader - getObject] filename = {}", fileName);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.setContentLength(bytes.length);
-        httpHeaders.setContentDispositionFormData("attachment", fileName);
-
-        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
-
+    public String getObject(String storedFileName) throws IOException {
+        return ""+amazonS3.getUrl(bucket, storedFileName);
     }
 }
