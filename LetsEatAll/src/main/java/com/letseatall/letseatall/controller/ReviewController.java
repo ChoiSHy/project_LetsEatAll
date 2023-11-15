@@ -103,6 +103,10 @@ public class ReviewController {
         }
         return ResponseEntity.ok("저장");
     }
+    @GetMapping("/download/img/{fileName}")
+    public ResponseEntity<byte[]> doownload(@PathVariable String fileName) throws IOException {
+        return reviewService.getObject(fileName);
+    }
 
     @GetMapping("/image/{reviewId}/attach")
     public ResponseEntity downloadReviewImg(

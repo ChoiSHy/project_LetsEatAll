@@ -24,4 +24,5 @@ public interface ReviewService {
 
     ReviewResponseDto likeReview(long id, int score);
     void uploadReviewImage(long review_id, MultipartFile file);
+    ResponseEntity<byte[]> getObject(String storedFileName) throws IOException;
 }

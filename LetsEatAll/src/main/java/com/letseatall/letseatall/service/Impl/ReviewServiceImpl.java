@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.service.Impl;
 
+import com.amazonaws.services.s3.model.S3Object;
 import com.letseatall.letseatall.data.Entity.Menu;
 import com.letseatall.letseatall.data.Entity.Restaurant;
 import com.letseatall.letseatall.data.Entity.Review.LikeHistory;
@@ -368,5 +369,10 @@ public class ReviewServiceImpl implements ReviewService {
         if(file!= null){
             url = s3UploadService.uploadFileToS3(file, "/Images");
         }
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getObject(String storedFileName) throws IOException {
+        return s3UploadService.getObject(storedFileName);
     }
 }
