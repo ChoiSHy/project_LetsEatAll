@@ -12,4 +12,5 @@ public class MenuListDto {
     private String menu_category;
     private double menu_score;
     private String menu_url;
+
 }

@@ -75,6 +75,7 @@ public class MenuServiceImpl implements MenuService {
         menu.setScore(0);
         menu.setRestaurant(foundRest);
         menu.setCategory(category);
+        menu.setInfo(menuDto.getInfo());
 
         LOGGER.info("[saveMenu] : 이미지 저장 시작");
         MenuImageFile mimg = null;
@@ -107,6 +108,7 @@ public class MenuServiceImpl implements MenuService {
         newMenu.setName(name);
         newMenu.setPrice(price);
         newMenu.setScore(0);
+        newMenu.setInfo(menuDto.getInfo());
 
         Optional<Category> opCtg = categoryRepository.findById(cid);
         if (opCtg.isPresent()) {
@@ -257,6 +259,7 @@ public class MenuServiceImpl implements MenuService {
                 .category(menu.getCategory().getName())
                 .name(menu.getName())
                 .score(0)
+                .info(menu.getInfo())
                 .build();
         if (menu.getRestaurant() != null) {
             mrd.setRid(menu.getRestaurant().getId());

@@ -22,7 +22,7 @@ public class ImageFile {
     private String url;
     @Column(nullable = false)
     private String storedName;
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="review_id")
     @ToString.Exclude
     private Review review;

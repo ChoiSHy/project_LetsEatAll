@@ -94,5 +94,7 @@ public class Menu {
         if(img != null)
             img.setMenu(null);
     }
+    @Column
+    public String info;
 
 }
