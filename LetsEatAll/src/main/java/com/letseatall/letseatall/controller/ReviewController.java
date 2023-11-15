@@ -104,7 +104,7 @@ public class ReviewController {
         return ResponseEntity.ok("저장");
     }
     @GetMapping("/download/img/{fileName}")
-    public ResponseEntity<byte[]> download(@PathVariable String fileName) throws IOException {
+    public ResponseEntity<byte[]> download(@PathVariable("fileName") String fileName) throws IOException {
         LOGGER.info("[download] 파일 다운로드 시작 : {}",fileName);
         return reviewService.getObject(fileName);
     }
