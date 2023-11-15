@@ -29,11 +29,6 @@ class ReviewServiceImplTest {
     private ReviewService reviewService;
 
 
-    @BeforeEach
-    public void setUpTest() {
-        reviewService = new ReviewServiceImpl(reviewRepository, menuRepository, userRepository, imagefileRepository, historyRepository);
-    }
-
     @Test
     void isDuplicatedTest() {
     }

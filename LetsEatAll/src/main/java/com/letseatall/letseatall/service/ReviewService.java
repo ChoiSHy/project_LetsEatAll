@@ -23,4 +23,5 @@ public interface ReviewService {
     ResponseEntity downloadImg(Long id) throws IOException;
 
     ReviewResponseDto likeReview(long id, int score);
+    void uploadReviewImage(long review_id, MultipartFile file);
 }

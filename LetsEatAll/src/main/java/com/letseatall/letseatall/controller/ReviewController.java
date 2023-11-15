@@ -4,11 +4,13 @@ import com.letseatall.letseatall.data.dto.Review.ReviewDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
 import com.letseatall.letseatall.service.ReviewService;
+import com.letseatall.letseatall.service.awsS3.S3UploadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +35,7 @@ public class ReviewController {
     private final Logger LOGGER = LoggerFactory.getLogger(ReviewController.class);
 
     @Autowired
-    public ReviewController(ReviewService reviewService) {
+    public ReviewController(ReviewService reviewService){
         this.reviewService = reviewService;
     }
 
@@ -89,17 +91,14 @@ public class ReviewController {
         return ResponseEntity.ok().body(responseDtoList);
     }
 
-    @PostMapping("/image")
+    @PostMapping(value = "/image", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity uploadReviewImg(
             @RequestParam Long rid,
-            @RequestParam MultipartFile file
-    ) throws IOException {
-        System.out.println("itemName = " + rid);
+            @RequestParam MultipartFile file) throws IOException {
+        LOGGER.info("[uploadReviewImg] itemName = " + rid);
 
         if (!file.isEmpty()) {
-            String fullPath = imgPath + file.getOriginalFilename();
-            LOGGER.info("[uploadReviewImg] 저장할 이미지 위치 : {}", fullPath);
-            file.transferTo(new File(fullPath));
+            reviewService.uploadReviewImage(rid, file);
             LOGGER.info("[uploadReviewImg] 이미지 저장 완료");
         }
         return ResponseEntity.ok("저장");
@@ -149,4 +148,5 @@ public class ReviewController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 }

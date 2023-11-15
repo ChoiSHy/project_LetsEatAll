@@ -12,6 +12,7 @@ import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
 import com.letseatall.letseatall.data.repository.*;
 import com.letseatall.letseatall.service.ReviewService;
+import com.letseatall.letseatall.service.awsS3.S3UploadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final ImagefileRepository imgRepository;
     private final LikeHistoryRepository historyRepository;
+    private final S3UploadService s3UploadService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(ReviewServiceImpl.class);
 
@@ -51,12 +53,14 @@ public class ReviewServiceImpl implements ReviewService {
                              MenuRepository menuRepository,
                              UserRepository userRepository,
                              ImagefileRepository imgRepository,
-                             LikeHistoryRepository historyRepository) {
+                             LikeHistoryRepository historyRepository,
+                             S3UploadService s3UploadService) {
         this.reviewRepository = reviewRepository;
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
         this.imgRepository = imgRepository;
         this.historyRepository = historyRepository;
+        this.s3UploadService = s3UploadService;
     }
 
     public ReviewResponseDto saveReview(ReviewDto reviewDto, List<MultipartFile> files) throws IOException {
@@ -357,5 +361,12 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("중복 추천은 불가합니다.");
         }
         return reviewDto;
+    }
+    @Transactional
+    public void uploadReviewImage(long review_id, MultipartFile file){
+        String url = "";
+        if(file!= null){
+            url = s3UploadService.uploadFileToS3(file, "/Images");
+        }
     }
 }
