@@ -121,6 +121,7 @@ public class S3UploadService {
         byte[] bytes = IOUtils.toByteArray(objectInputStream);
 
         String fileName = URLEncoder.encode(storedFileName, "UTF-8").replaceAll("\\+", "%20");
+        log.info("[S3Uploader - getObject] filename = {}", fileName);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         httpHeaders.setContentLength(bytes.length);

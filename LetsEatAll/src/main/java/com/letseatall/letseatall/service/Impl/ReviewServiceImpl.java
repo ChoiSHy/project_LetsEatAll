@@ -373,6 +373,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<byte[]> getObject(String storedFileName) throws IOException {
+        LOGGER.info("[ReviewService - getObject]");
         return s3UploadService.getObject(storedFileName);
     }
 }
