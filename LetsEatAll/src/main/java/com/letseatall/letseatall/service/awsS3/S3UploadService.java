@@ -24,11 +24,13 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class S3UploadService {
-    @Autowired
-    private AmazonS3Client amazonS3Client;
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
 
+    private AmazonS3Client amazonS3Client;
+    @Value("${cloud.aws.bucket}")
+    private String bucket;
+    public S3UploadService(AmazonS3Client amazonS3Client){
+        this.amazonS3Client = amazonS3Client;
+    }
     /**
      * 로컬 경로에 저장
      */
