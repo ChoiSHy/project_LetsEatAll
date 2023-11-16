@@ -2,18 +2,35 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>다먹자</title>
+    <title>Main</title>
+    <style>
+        ul{
+            list-style-type: none;
+        }
+    </style>
 </head>
 <body>
 <div align="center">
-    <h1>다먹자 main</h1>
+    <h2>메인 화면</h2>
     <hr>
-    <p>
-        <a href="/page/login">로그인</a>
-    </p>
-    <hr>
+    <div align="left" border = 1>
+        <div id="search">
+            <select id = keyword>
+                <option name="r_name" value="r_name">식당 이름</option>
+                <option name="c_name" value="c_name">카테고리</option>
+                <option name="m_name" value="m_name">메뉴 이름</option>
+            </select>
+            <form method="get" action="/page/restaurant" >
+                <input type="text" name="keyword">
+                <input type="submit" name="search">
+            </form>
+        </div>
+        <p>카테고리</p>
+        <ul th:each="category : ${categories}">
+            <li><a th:href="${category.url}"><p th:text="${category.name}"/></a></li>
+        </ul>
+    </div>
     <div>
-        <p>사진</p>
     </div>
 </div>
 </body>

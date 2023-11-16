@@ -1,5 +1,6 @@
-package com.letseatall.letseatall.controller;
+package com.letseatall.letseatall.controller.page;
 
+import com.letseatall.letseatall.controller.UserController;
 import com.letseatall.letseatall.data.Entity.Category;
 import com.letseatall.letseatall.data.dto.Category.CategoryDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
@@ -47,8 +48,8 @@ public class PageController {
         this.loginService= loginService;
     }
     @GetMapping("/login")
-    public String index(Model model){
-        return "/login/Login";
+    public String loginPage(Model model){
+        return "/login/login";
     }
     @PostMapping("/login")
     public String tryLogin(HttpServletRequest req, HttpServletResponse res){
@@ -71,10 +72,10 @@ public class PageController {
         return "login/sign-up";
     }
 
-    @GetMapping("/main")
+    @GetMapping()
     public String mainPage(@CookieValue(name="X-AUTH-TOKEN", required=false) String token,
             Model model) throws UnsupportedEncodingException {
-        String url_ = "restaurant//";
+        String url_ = "restaurant/";
         List<Category> categoryList = categoryRepository.findAll();
         List<CategoryDto> dtoList = new ArrayList<>();
 
@@ -90,27 +91,7 @@ public class PageController {
         model.addAttribute("categories", dtoList);
         return "main/main";
     }
-    @GetMapping("/restaurant/{category}/{start}")
-    public String getCategoryRestaurant(@PathVariable int category, @PathVariable int start, Model model){
-        List<RestaurantResponseDto> responseDtoList = restaurantService.findAllInCategory(category,start);
-        model.addAttribute("rList", responseDtoList);
-        return "restList";
-    }
-    @GetMapping("/restaurant")
-    public String getRestaurant(@RequestParam long id, Model model){
-        RestaurantResponseDto rrd = restaurantService.getRestaurant(id);
-        model.addAttribute("restaurant", rrd);
-        return "restaurant";
-    }
 
-    @GetMapping("/restaurant/search/{word}/{start}")
-    public String searchRestaurant(@PathVariable String word, @PathVariable int start, Model model){
-        System.out.println(word+"-search");
-        List<RestaurantResponseDto> responseDtoList = restaurantService.searchName(word, start);
-        model.addAttribute("rList",responseDtoList);
-        System.out.println("data response");
-        return "redirect:restList";
-    }
 
     @GetMapping("/review/create/{mid}")
     public String reviewWriter(@PathVariable(value = "mid") Long mid, Model model){

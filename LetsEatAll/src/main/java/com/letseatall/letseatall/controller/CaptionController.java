@@ -2,6 +2,7 @@ package com.letseatall.letseatall.controller;
 
 import com.letseatall.letseatall.data.dto.Youtube.CaptionDto;
 import com.letseatall.letseatall.data.dto.Youtube.YoutubeDto;
+import com.letseatall.letseatall.service.MenuService;
 import com.letseatall.letseatall.service.YoutubeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class CaptionController {
 
     @Autowired
     private YoutubeService youTubeService;
+
     private final Logger log= LoggerFactory.getLogger(CaptionController.class);
 
     @RequestMapping(value = "youtube/summary", method = RequestMethod.POST)

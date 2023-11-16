@@ -140,13 +140,13 @@ public class LoginServiceImpl implements LoginService {
         LOGGER.info("[changeUserPassword_check] : User 정보 불러오기 시작. id: {}", id);
         User user = userRepository.getByUid(id);
         if (user != null) {
-            LOGGER.info("[changeUserPassword_check] : User 정보 불러오기 성공. id: {}", id);
+            LOGGER.info("[changeUserPassword_check] : User 정보 불러오기 성공. id: {}", id);/*
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             try{
                 identityVerification(userDetails.getUsername(), user.getUsername());
             }catch (BadRequestException e){
                 throw e;
-            }
+            }*/
 
             if (!user.getName().equals(name) ){
                 LOGGER.info("[changeUserPassword_check] : User 정보 불일치. name: {} vs {}", user.getName(), name);
