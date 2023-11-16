@@ -1,6 +1,7 @@
 package com.letseatall.letseatall.controller;
 
 import com.letseatall.letseatall.data.dto.Youtube.CaptionDto;
+import com.letseatall.letseatall.data.dto.Youtube.YoutubeDto;
 import com.letseatall.letseatall.service.YoutubeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,8 @@ public class CaptionController {
     private final Logger log= LoggerFactory.getLogger(CaptionController.class);
 
     @RequestMapping(value = "youtube/summary", method = RequestMethod.POST)
-    public ResponseEntity<CaptionDto> summaryVideo(@RequestParam String videoUrl){
+    public ResponseEntity<String> summaryVideo(@RequestBody YoutubeDto youtubeDto){
+        String videoUrl = youtubeDto.getVideoUrl();
         if(!videoUrl.contains("http://")){
             videoUrl = "https://www.youtube.com/watch?"+videoUrl;
         }
@@ -34,10 +36,9 @@ public class CaptionController {
         String summary = youTubeService.summarizeCaption(caption);
         log.info("[summaryVideo] 특징 분석 완료");
         // CaptionDto 객체 생성 및 설정
-        CaptionDto captionDto = new CaptionDto(videoUrl, summary);
 
         log.info("[summaryVideo] 분석 결과 반환");
-        return ResponseEntity.ok(captionDto);
+        return ResponseEntity.ok(summary);
     }
     @RequestMapping(value="subtitlesPage",method = RequestMethod.GET)
     public String gotoPutPage() {

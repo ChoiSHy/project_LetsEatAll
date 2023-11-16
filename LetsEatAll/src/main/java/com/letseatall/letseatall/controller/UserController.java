@@ -158,16 +158,6 @@ public class UserController {
         }
     }
 
-    /*
-    public ResponseEntity<UserResponseDto> register(@RequestBody UserDto UserDto){
-        UserResponseDto returnUser = userService.saveUser(UserDto);
-        if(returnUser.getScore() == -101)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(returnUser);
-        else if (returnUser != null)
-            return ResponseEntity.status(HttpStatus.OK).body(returnUser);
-
-        else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-    }*/
     @PostMapping("/sign-in")
     /* 로그인 시도 */
     public SignInResultDto signIn(
