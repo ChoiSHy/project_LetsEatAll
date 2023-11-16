@@ -13,6 +13,7 @@ import com.letseatall.letseatall.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +56,7 @@ public class PageController {
         LOGGER.info("[tryLogin] id={}, pw={}",id,pw);
         try {
             SignInResultDto result = loginService.signIn(id, pw);
-            Cookie token = new Cookie("token", result.getToken());
+            Cookie token = new Cookie("X-AUTH-TOKEN", result.getToken());
             res.addCookie(token);
             return "redirect:/page/main";
         }catch (RuntimeException e){
@@ -68,9 +71,9 @@ public class PageController {
     }
 
     @GetMapping("/main")
-    public String mainPage(@CookieValue(name="token", required=false) String token,
-            Model model){
-        String url_ = "http://43.200.179.244:8080/restaurant/";
+    public String mainPage(@CookieValue(name="X-AUTH-TOKEN", required=false) String token,
+            Model model) throws UnsupportedEncodingException {
+        String url_ = "restaurant//";
         List<Category> categoryList = categoryRepository.findAll();
         List<CategoryDto> dtoList = new ArrayList<>();
 
@@ -78,8 +81,9 @@ public class PageController {
             CategoryDto dto = CategoryDto.builder()
                     .id(category.getId())
                     .name(category.getName())
-                    .url(url_+category.getId()+"/0")
+                    .url("restaurant/"+category.getId()+"/0" )
                     .build();
+            LOGGER.info("url = {}",dto.getUrl());
             dtoList.add(dto);
         }
         model.addAttribute("categories", dtoList);
@@ -98,6 +102,12 @@ public class PageController {
         model.addAttribute("rList",responseDtoList);
         System.out.println("data response");
         return "redirect:restList";
+    }
+
+    @GetMapping("/review/create/{mid}")
+    public String reviewWriter(@PathVariable(value = "mid") Long mid, Model model){
+        model.addAttribute("menu_id" , mid);
+        return "redirect:ReviewWriter";
     }
 
 }

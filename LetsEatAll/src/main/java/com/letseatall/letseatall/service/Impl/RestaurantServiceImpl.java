@@ -140,6 +140,9 @@ public class RestaurantServiceImpl implements RestaurantService {
                     if(menu.getScore() != 0)
                         mrd.setMenu_score(menu.getScore() / menu.getReviewList().size());
                     else mrd.setMenu_score(0);
+                    if(menu.getImg() != null){
+                        mrd.setImg_url(menu.getImg().getUrl());
+                    }
                     menuList.add(mrd);
                 }
             });

@@ -114,7 +114,7 @@ public class YoutubeService {
     }
 
     public String summarizeCaption(String text) { // chat gpt를 통해 특징 분석
-        int maxTokens = 1000; // 요청당 최대 토큰 수
+        int maxTokens = 500; // 요청당 최대 토큰 수
         String customPrompt = "음식 리뷰를 분석해야해."
                 + "아래 내용을보고 해당 음식의 특징을 분석해줘. " +
                 "#분석 대상: \n" + text;

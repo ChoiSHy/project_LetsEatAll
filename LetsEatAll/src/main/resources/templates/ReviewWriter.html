@@ -3,28 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>리뷰 작성</title>
-    <script>
-        window.onload = function(){
-            document.getElementById('btn').onclick = function (){
-                let mid = document.getElementsByName('mid');
-                let title = document.getElementsByName('title');
-            }
-        }
-        const url = document.getElementById("formData").action
-        const token = document.getElementById("token")
-        const httpRequest = new XMLHttpRequest();
-        let body = json(
-            document.getElementById("formData").
-        )
-        httpRequest.open("POST", url, true);
-        httpRequest.setRequestHeader("X-AUTH-TOKEN", token);
-        httpRequest.send()
-    </script>
 </head>
 <body>
 <div align="cetner">
 
-    <form id=formData method=post action=http://43.200.179.244:8080/review/create>
+    <form id=formData method=post action=http://43.200.179.244:8080/page/review/create>
         <input id type="hidden" name="mid" th:value="mid">
         <table>
             <tr>
