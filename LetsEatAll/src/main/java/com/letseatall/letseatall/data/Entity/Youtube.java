@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.data.Entity;
 
+import com.letseatall.letseatall.data.Entity.menu.Menu;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,11 +19,11 @@ public class Youtube {
     private String content;
     @Column(nullable = false)
     private String url;
-/*
+
     @ManyToOne
     @JoinColumn(name="menu_id")
     private Menu menu;
-
+/*
     public void setMenu(Menu menu){
         if(menu != null){
             menu.removeYoutube(this);
