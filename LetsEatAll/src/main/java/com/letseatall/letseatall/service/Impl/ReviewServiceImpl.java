@@ -72,14 +72,16 @@ public class ReviewServiceImpl implements ReviewService {
         if (oMenu.isPresent()) {
             menu = oMenu.get();
             LOGGER.info("[saveReview] 불러온 메뉴: {}", menu);
-            menu.setScore(menu.getScore() + reviewDto.getScore());
+            int review_size = reviewRepository.countAllByMenuId(menu.getId());
+            double total = menu.getScore() * review_size + reviewDto.getScore();
+            menu.setScore(total / (review_size + 1));
         }
         LOGGER.info("[saveReview] Review 객체 생성 시작");
         ImageFile img = null;
-        if (file!=null && !file.isEmpty()) {
+        if (file != null && !file.isEmpty()) {
             img = new ImageFile();
             String[] res = uploadReviewImage(file);
-            if(res!=null){
+            if (res != null) {
                 img.setUrl(res[0]);
                 img.setStoredName(res[1]);
             }
@@ -164,16 +166,20 @@ public class ReviewServiceImpl implements ReviewService {
         if (review != null) {
             LOGGER.info("[modifyReview] 수정할 정보 불러오기 성공. {}", review.toString());
             review.setContent(rmd.getContent());
+            if (rmd.getScore() != review.getScore()) {
+                Menu menu = review.getMenu();
+                int review_size = reviewRepository.countAllByMenuId(menu.getId());
+                double total = menu.getScore() * review_size + rmd.getScore();
+                menu.setScore(total / (review_size + 1));
+            }
             review.setScore(rmd.getScore());
-            review.getMenu();
-            review.getWriter();
 
             LOGGER.info("[modifyReview] 이미지 정보 수정 시작");
 
-            if (file!=null && !file.isEmpty()) {
+            if (file != null && !file.isEmpty()) {
                 String[] res = uploadReviewImage(file);
                 ImageFile img = new ImageFile();
-                if(res!= null){
+                if (res != null) {
                     img.setUrl(res[0]);
                     img.setStoredName(res[1]);
                 }
@@ -228,7 +234,7 @@ public class ReviewServiceImpl implements ReviewService {
             rrd.setUser_id(user.getId());
         }
         ImageFile img = imgRepository.findByReviewId(review.getId()).orElse(null);
-        if(img != null){
+        if (img != null) {
             rrd.setImg_url(img.getUrl());
         }
         return rrd;
@@ -302,8 +308,13 @@ public class ReviewServiceImpl implements ReviewService {
             if (review != null) {
                 LOGGER.info("[likeReview] 리뷰의 좋아요 개수 추가 작업");
                 User writer = review.getWriter();
-                review.setLike_cnt(review.getLike_cnt() + score);
+                if (score > 0) {
+                    review.setLike_cnt(review.getLike_cnt() + score);
+                }else {
+                    review.setUnlike_cnt(review.getUnlike_cnt()-score);
+                }
                 writer.setScore(writer.getScore() + score);
+
                 reviewRepository.save(review);
                 LOGGER.info("[likeReview] 추가 완료. 기록 시작");
                 LikeHistory history = LikeHistory.builder()
@@ -327,7 +338,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Transactional
     public String[] uploadReviewImage(MultipartFile file) {
-        String[] result=null;
+        String[] result = null;
         if (file != null) {
             result = s3UploadService.uploadFileToS3(file, "Images");
         }

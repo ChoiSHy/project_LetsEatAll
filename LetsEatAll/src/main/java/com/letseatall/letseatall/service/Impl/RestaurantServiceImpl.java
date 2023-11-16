@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.*;
 
 @Service
@@ -258,7 +259,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public List<RestaurantResponseDto> searchName(String name, int start) {
+    public List<RestaurantResponseDto> searchName(String keyword, int start) throws UnsupportedEncodingException {
+        String name = URLEncoder.encode(keyword,"utf8");
         List<RestaurantResponseDto> responseDtoList = new ArrayList<>();
         List<Restaurant> restaurantList = restaurantRepository.findAllByNameContainingIgnoreCase(name, PageRequest.of(start, 10)).getContent();
         for (Restaurant restaurant : restaurantList) {

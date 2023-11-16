@@ -30,7 +30,7 @@
       </tr>
     </thead>
     <tbody >
-    <tr th:each="menu : ${restaurant.menuDtoList}">
+    <tr th:each="menu : ${restaurant.menuDtoList}" th:onclick="|location.href='@{/page/menu(id=${menu.menu_id})}'|">
       <td><img th:src="${menu.img_url}"></td>
       <td><a th:href="@{/page/menu(id=${menu.menu_id})}" ><p th:text="${menu.menu_name}"/></a></td>
       <td><p th:text="${menu.menu_price}"/></td>

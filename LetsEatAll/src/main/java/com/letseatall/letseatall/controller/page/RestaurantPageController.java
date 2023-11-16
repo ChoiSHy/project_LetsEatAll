@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @Controller
@@ -23,21 +24,21 @@ public class RestaurantPageController {
     public String getCategoryRestaurant(@PathVariable int category, @PathVariable int start, Model model){
         List<RestaurantResponseDto> responseDtoList = restaurantService.findAllInCategory(category,start);
         model.addAttribute("rList", responseDtoList);
-        return "restList";
+        return "restaurant/restList";
     }
     @GetMapping()
     public String getRestaurant(@RequestParam long id, Model model){
         RestaurantResponseDto rrd = restaurantService.getRestaurant(id);
         model.addAttribute("restaurant", rrd);
-        return "restaurant";
+        return "restaurant/restaurant";
     }
 
     @GetMapping("/search/{word}/{start}")
-    public String searchRestaurant(@PathVariable String word, @PathVariable int start, Model model){
+    public String searchRestaurant(@PathVariable String word, @PathVariable int start, Model model) throws UnsupportedEncodingException {
         System.out.println(word+"-search");
         List<RestaurantResponseDto> responseDtoList = restaurantService.searchName(word, start);
         model.addAttribute("rList",responseDtoList);
         System.out.println("data response");
-        return "redirect:restList";
+        return "restaurant/restList";
     }
 }

@@ -1,6 +1,8 @@
 package com.letseatall.letseatall.data.repository.review;
 
 import com.letseatall.letseatall.data.Entity.Review.Review;
+import com.letseatall.letseatall.data.Entity.menu.Menu;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -20,4 +22,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Long> findIdAllByFranchise(Long id);
 
     List<Review> findAllByWriterId(Long id);
+
+    int countAllByWriterId(Long id);
+    int countAllByMenuId(Long menu_id);
 }

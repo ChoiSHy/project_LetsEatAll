@@ -4,8 +4,16 @@
     <meta charset="UTF-8">
     <title>Main</title>
     <style>
-        ul{
+        ul {
             list-style-type: none;
+            margin-: 0 auto;
+            padding: 0;
+        }
+
+        li {
+            margin: 5px 5px 5px 5px;
+            padding: 0 0 0 0;
+            border: 0;
         }
     </style>
 </head>
@@ -13,22 +21,37 @@
 <div align="center">
     <h2>메인 화면</h2>
     <hr>
-    <div align="left" border = 1>
-        <div id="search">
-            <select id = keyword>
+    <div align="right">
+        <th:block th:if="${#request.cookies}== null">
+            <button onclick='location.href="/page/login"'>로그인</button>
+        </th:block>
+        <th:block th:if="${#request.cookies}!= null">
+            <button onclick="location.href='/page/logout'">로그아웃</button>
+
+        </th:block>
+    </div>
+    <div id="search">
+        <form method="get" action="/search">
+            <select name=key>
                 <option name="r_name" value="r_name">식당 이름</option>
                 <option name="c_name" value="c_name">카테고리</option>
                 <option name="m_name" value="m_name">메뉴 이름</option>
             </select>
-            <form method="get" action="/page/restaurant" >
-                <input type="text" name="keyword">
-                <input type="submit" name="search">
-            </form>
+
+            <input type="text" name="keyword">
+            <input type="submit" value="검색">
+        </form>
+    </div>
+    <div align="left" border=2>
+        <div>
+            <h3>카테고리</h3>
+            <ul th:each="category : ${categories}">
+                <li><a th:href="${category.url}"><p th:text="${category.name}"/></a></li>
+            </ul>
         </div>
-        <p>카테고리</p>
-        <ul th:each="category : ${categories}">
-            <li><a th:href="${category.url}"><p th:text="${category.name}"/></a></li>
-        </ul>
+        <div>
+            <a href="/youtube/summary/subtitlesPage">YouTube 영상 요약하기</a>
+        </div>
     </div>
     <div>
     </div>

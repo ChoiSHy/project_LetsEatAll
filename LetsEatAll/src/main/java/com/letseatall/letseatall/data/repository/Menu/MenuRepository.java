@@ -2,6 +2,8 @@ package com.letseatall.letseatall.data.repository.Menu;
 
 import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.repository.custom.MenuBulkRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -22,5 +24,7 @@ public interface MenuRepository extends JpaRepository<Menu, Long>, MenuBulkRepos
 
     List<Menu> findAllByRestaurant_FranchiseId(Long fid);
     List<Menu> findAllByNameLike(String name);
+
+    Page<Menu> findAllByRestaurantIdOrderByScore(Long rest_id, Pageable pageable);
 
 }

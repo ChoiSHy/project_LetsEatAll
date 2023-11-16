@@ -24,7 +24,8 @@ public interface RestaurantService {
     public List<RestaurantResponseDto> getAll(int start, int size);
     public List<RestaurantResponseDto> getAll();
     public List<RestaurantResponseDto> findAllInCategory(int category, int start);
-    public List<RestaurantResponseDto> searchName(String name, int start);
+    public List<RestaurantResponseDto> searchName(String name, int start) throws UnsupportedEncodingException;
+
 
     void sumScore();
 }

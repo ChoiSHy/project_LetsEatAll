@@ -20,4 +20,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     Page<Restaurant> findAllByCategoryId(int id, Pageable pageable);
     Page<Restaurant> findAllByNameContainingIgnoreCase(String name, Pageable pageable);
+
+    Page<Restaurant> findAllByCategoryIdOrderByScore(int id, Pageable pageable);
+    Page<Restaurant> findAllByNameLikeOrderByScore(String name, Pageable pageable);
+
+
 }

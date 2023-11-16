@@ -1,6 +1,6 @@
 package com.letseatall.letseatall.data.dto.Menu;
 
-import com.letseatall.letseatall.data.dto.Review.ReviewElement;
+import com.letseatall.letseatall.data.dto.Review.ReviewPageDto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Setter;

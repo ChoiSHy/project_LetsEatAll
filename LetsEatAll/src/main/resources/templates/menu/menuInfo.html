@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${menu.name}">></title>
+    <style>
+        img{
+            width:500px;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+<div align="center">
+    <h2 th:text="${menu.name}"/>
+    <img th:src="${menu.img_url}">
+    <table>
+        <tr>
+            <th>판매점</th>
+            <td th:text="${menu.r_name}"></td>
+        </tr>
+        <tr>
+            <th>가격:</th>
+            <td th:text="${menu.price}"></td>
+        </tr>
+        <tr>
+            <th>점수</th>
+            <td th:text="${menu.score}"/>
+        </tr>
+        <tr>
+            <td th:text="${menu.info}" colspan="2"></td>
+        </tr>
+    </table>
+    <p>[리뷰]</p>
+    <ul th:each="review : ${reviews}">
+        <li><table border="1" th:onclick="|location.href='@{/page/review(id=${review.review_id})}'|">
+            <tr><td th:text="${review.content}"></td>
+                <td th:text="${review.score}"></td>
+                <td th:text="${review.writer}"></td></tr>
+        </table></li>
+    </ul>
+</div>
+</body>
+</html>

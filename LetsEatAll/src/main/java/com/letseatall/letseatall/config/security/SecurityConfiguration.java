@@ -53,6 +53,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.DELETE, "/review/**").authenticated()
                 .antMatchers(HttpMethod.GET, "/review/user/me").authenticated()
                 .antMatchers("**exception**").permitAll()
+                .antMatchers(HttpMethod.GET, "/page/review/like").authenticated()
                 .anyRequest().permitAll()
 
                 .and()
@@ -76,7 +77,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity webSecurity) {
         webSecurity.ignoring().antMatchers("/swagger-resources/**",
-                "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception",
-                "/page/**");
+                "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception"
+                );
     }
 }
