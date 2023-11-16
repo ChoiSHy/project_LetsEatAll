@@ -29,4 +29,5 @@ public interface MenuService {
     List<MenuResponseDto> getAllFranchiseMenu(Long fid);
 
     void sum();
+    void uploadMenuImage(long menu_id, MultipartFile file);
 }

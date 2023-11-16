@@ -270,7 +270,7 @@ public class MenuServiceImpl implements MenuService {
         if (menu.getUrl() != null)
             mrd.setUrl(menu.getUrl());
         if (menu.getImg() != null) {
-            mrd.setImg(s3UploadService.getObject(menu.getImg().getStoredName()));
+            mrd.setImg_url(s3UploadService.getObject(menu.getImg().getStoredName()));
         }
         LOGGER.info("[makeDto] DTO 생성 완료");
         return mrd;
@@ -283,5 +283,19 @@ public class MenuServiceImpl implements MenuService {
             mlist.add(menu);
         });
         menuRepository.saveAllAndFlush(mlist);
+    }
+
+    public void uploadMenuImage(long menu_id, MultipartFile file) {
+        Menu menu = menuRepository.findById(menu_id).orElse(null);
+        if (menu != null && file != null) {
+            MenuImageFile mimg = null;
+            String[] res = s3UploadService.uploadFileToS3(file, "Images/Menu");
+            mimg = new MenuImageFile();
+            mimg.setMenu(menu);
+            mimg.setUrl(res[0]);
+            mimg.setStoredName(res[1]);
+            menu.setImg(mimg);
+            menuRepository.save(menu);
+        }
     }
 }

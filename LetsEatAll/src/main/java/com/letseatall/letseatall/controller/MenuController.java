@@ -66,7 +66,7 @@ public class MenuController {
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access_token",
                     required = true, dataType = "String", paramType = "header")
     })
-    @ApiOperation(value="메뉴 수정", notes="메뉴를 수정한다.")
+    @ApiOperation(value="메뉴 수정", notes="메뉴의 가격을 수정한다.")
     public ResponseEntity<String> changeMenuPrice(@RequestBody IntChangeDto intChangeDto){
         boolean res = menuService.changeMenuPrice(intChangeDto);
         if(!res)
@@ -110,6 +110,12 @@ public class MenuController {
     @ApiOperation(value="메뉴 평점 계산", notes="리뷰점수의 합을 메뉴점수로 저장한다.")
     public ResponseEntity sumScore(){
         menuService.sum();
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/image/upload/{menu_id}")
+    public ResponseEntity uploadImage(@PathVariable("menu_id") Long id, MultipartFile file){
+        menuService.uploadMenuImage(id, file);
         return ResponseEntity.ok().build();
     }
 
