@@ -3,7 +3,7 @@ package com.letseatall.letseatall.service.Impl;
 import com.letseatall.letseatall.data.Entity.*;
 import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.Entity.menu.MenuImageFile;
-import com.letseatall.letseatall.data.dto.IntChangeDto;
+import com.letseatall.letseatall.data.dto.common.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.data.repository.*;

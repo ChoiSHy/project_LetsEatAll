@@ -26,13 +26,11 @@ import java.util.UUID;
 public class S3UploadService {
 
     private final AmazonS3 amazonS3;
-    private final ImagefileRepository imagefileRepository;
     private final Logger log = LoggerFactory.getLogger(S3UploadService.class);
     @Value("${cloud.aws.bucket}")
     private String bucket;
     @Autowired
-    public S3UploadService(AmazonS3Client amazonS3Client, ImagefileRepository imagefileRepository){
-        this.imagefileRepository = imagefileRepository;
+    public S3UploadService(AmazonS3Client amazonS3Client){
         this.amazonS3 = amazonS3Client;
     }
     /**

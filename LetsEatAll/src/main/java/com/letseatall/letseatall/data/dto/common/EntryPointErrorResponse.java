@@ -1,4 +1,4 @@
-package com.letseatall.letseatall.data.dto;
+package com.letseatall.letseatall.data.dto.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

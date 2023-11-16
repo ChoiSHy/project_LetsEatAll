@@ -2,7 +2,7 @@ package com.letseatall.letseatall.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.letseatall.letseatall.data.dto.EntryPointErrorResponse;
+import com.letseatall.letseatall.data.dto.common.EntryPointErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;

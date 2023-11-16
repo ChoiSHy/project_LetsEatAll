@@ -51,7 +51,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/review/**").authenticated()
                 .antMatchers(HttpMethod.PUT, "/review/**").authenticated()
                 .antMatchers(HttpMethod.DELETE, "/review/**").authenticated()
-                .antMatchers(HttpMethod.GET, "/review/user/**").authenticated()
+                .antMatchers(HttpMethod.GET, "/review/user/me").authenticated()
                 .antMatchers("**exception**").permitAll()
                 .anyRequest().permitAll()
 

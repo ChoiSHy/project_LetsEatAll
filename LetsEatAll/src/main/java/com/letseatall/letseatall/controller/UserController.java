@@ -185,18 +185,6 @@ public class UserController {
         }
     }
 
-
-    /*
-    public ResponseEntity<UserResponseDto> tryLogin(@RequestBody LoginRequestDto loginRequestDto){
-        UserResponseDto returnUser = userService.tryLogin(loginRequestDto);
-        if(returnUser == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        else if (returnUser.getId()== -400L){
-            System.out.println("[Error]: 400 ");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);}
-        else
-            return ResponseEntity.status(HttpStatus.OK).body(returnUser);
-    }*/
     @GetMapping(value = "/exception")
     public void exceptionTest() throws RuntimeException {
         throw new RuntimeException("접근이 금지되었습니다.");

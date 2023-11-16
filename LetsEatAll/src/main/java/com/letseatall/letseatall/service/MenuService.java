@@ -1,8 +1,7 @@
 package com.letseatall.letseatall.service;
 
-import com.letseatall.letseatall.data.dto.IntChangeDto;
+import com.letseatall.letseatall.data.dto.common.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
-import com.letseatall.letseatall.data.dto.Menu.MenuElement;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import org.springframework.web.multipart.MultipartFile;
 

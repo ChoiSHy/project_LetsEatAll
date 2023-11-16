@@ -5,8 +5,11 @@
     <title>음식점</title>
   <style>
     img {
-      width:"200"
-      height:"200";
+      width:200px;
+      height:200px;
+    }
+    td{
+      text-align:center;
     }
   </style>
 </head>
@@ -29,9 +32,9 @@
     <tbody >
     <tr th:each="menu : ${restaurant.menuDtoList}">
       <td><img th:src="${menu.img_url}"></td>
-      <td><p th:text="${menu.menu_name}"/></td>
+      <td><a th:href="@{/page/menu(id=${menu.menu_id})}" ><p th:text="${menu.menu_name}"/></a></td>
       <td><p th:text="${menu.menu_price}"/></td>
-      <td><p th:text="${menu.menu_score}"/></td>
+      <td th:width="50px"><p th:text="${menu.menu_score}"/></td>
     </tr>
 
     </tbody>

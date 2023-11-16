@@ -1,6 +1,6 @@
 package com.letseatall.letseatall.controller;
 
-import com.letseatall.letseatall.data.dto.IntChangeDto;
+import com.letseatall.letseatall.data.dto.common.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.service.MenuService;

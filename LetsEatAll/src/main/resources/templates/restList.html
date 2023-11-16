@@ -12,12 +12,14 @@
         th, td {
             border: 1px solid;
             margin: 1px;
+            text-align: center;
         }
 
     </style>
 </head>
-<body>
-<h1>다먹자! 음식점 리스트 불러오기!!</h1>
+<body >
+<div align="center">
+<h1>다먹어!</h1>
 <table id="restaurant_list">
     <thead>
     <tr>
@@ -31,13 +33,13 @@
     <tr id="">
         <td><a th:href="@{/page/restaurant(id = ${list.restaurant_id})}"><p th:text="${list.restaurant_name}"></p></a></td>
         <td><span th:text="${list.restaurant_addr}"></span></td>
-        <td><span th:text="${list.restaurant_category}"></span></td>
-        <td><span th:text="${list.restaurant_score}"></span></td>
+        <td th:width="80px"><span th:text="${list.restaurant_category}"></span></td>
+        <td th:width="80px"><span th:text="${list.restaurant_score}"></span></td>
     </tr>
     </tbody>
 </table>
 <a th:href="@{/page/main}">돌아가기</a>
-
+</div>
 </body>
 
 </html>

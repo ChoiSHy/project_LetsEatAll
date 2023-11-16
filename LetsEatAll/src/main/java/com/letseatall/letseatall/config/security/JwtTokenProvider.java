@@ -1,11 +1,9 @@
 package com.letseatall.letseatall.config.security;
 
-import com.letseatall.letseatall.data.dto.User.TokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
