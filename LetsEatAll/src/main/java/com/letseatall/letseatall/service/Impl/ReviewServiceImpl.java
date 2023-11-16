@@ -76,7 +76,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
         LOGGER.info("[saveReview] Review 객체 생성 시작");
         ImageFile img = null;
-        if (file!=null) {
+        if (file!=null && !file.isEmpty()) {
             img = new ImageFile();
             String[] res = uploadReviewImage(file);
             if(res!=null){
@@ -170,7 +170,7 @@ public class ReviewServiceImpl implements ReviewService {
 
             LOGGER.info("[modifyReview] 이미지 정보 수정 시작");
 
-            if (file!=null) {
+            if (file!=null && !file.isEmpty()) {
                 String[] res = uploadReviewImage(file);
                 ImageFile img = new ImageFile();
                 if(res!= null){

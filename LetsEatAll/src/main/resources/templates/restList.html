@@ -29,13 +29,15 @@
     </thead>
     <tbody th:each = "list : ${rList}">
     <tr id="">
-        <td><a th:href="/menu/${list.restaurant_id}"><p th:text="${list.restaurant_name}"></p></a></td>
+        <td><a th:href="@{/page/restaurant(id = ${list.restaurant_id})}"><p th:text="${list.restaurant_name}"></p></a></td>
         <td><span th:text="${list.restaurant_addr}"></span></td>
         <td><span th:text="${list.restaurant_category}"></span></td>
         <td><span th:text="${list.restaurant_score}"></span></td>
     </tr>
     </tbody>
 </table>
+<a th:href="@{/page/main}">돌아가기</a>
+
 </body>
 
 </html>

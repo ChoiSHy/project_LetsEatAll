@@ -3,6 +3,7 @@ package com.letseatall.letseatall.controller;
 import com.letseatall.letseatall.data.Entity.Category;
 import com.letseatall.letseatall.data.dto.Category.CategoryDto;
 import com.letseatall.letseatall.data.dto.Restaurant.RestaurantResponseDto;
+import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
 import com.letseatall.letseatall.data.dto.User.BadRequestException;
 import com.letseatall.letseatall.data.dto.User.SignInRequestDto;
 import com.letseatall.letseatall.data.dto.User.SignInResultDto;
@@ -95,6 +96,13 @@ public class PageController {
         model.addAttribute("rList", responseDtoList);
         return "restList";
     }
+    @GetMapping("/restaurant")
+    public String getRestaurant(@RequestParam long id, Model model){
+        RestaurantResponseDto rrd = restaurantService.getRestaurant(id);
+        model.addAttribute("restaurant", rrd);
+        return "restaurant";
+    }
+
     @GetMapping("/restaurant/search/{word}/{start}")
     public String searchRestaurant(@PathVariable String word, @PathVariable int start, Model model){
         System.out.println(word+"-search");
