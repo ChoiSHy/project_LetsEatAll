@@ -131,7 +131,7 @@ public class RestaurantController {
             @PathVariable int cate_id){
         return ResponseEntity.ok(restaurantService.findByCategoryOrderByScore(cate_id,false));
     }
-    @GetMapping("/restaurant/category/{cate_id}/score-order")
+    @GetMapping("/restaurant/category/{cate_id}/score-order/reverse")
     @ApiOperation(value="카테고리 id를 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 점수 역순")
     public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByScoreReverse(
             @PathVariable int cate_id){
