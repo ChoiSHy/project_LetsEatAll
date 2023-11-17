@@ -112,6 +112,31 @@ public class RestaurantController {
         List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategory(cate_id);
         return ResponseEntity.ok().body(responseDtoList);
     }
+    @GetMapping("/restaurant/category/{cate_id}/name-order")
+    @ApiOperation(value="카테고리 id를 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 이름순")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByName(
+            @PathVariable("cate_id") int cate_id){
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategoryOrderByName(cate_id, false);
+        return ResponseEntity.ok(responseDtoList);
+    }
+    @GetMapping("/restaurant/category/{cate_id}/name-order/reverse")
+    @ApiOperation(value="카테고리 id를 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 이름 역순")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByNameRev(
+            @PathVariable("cate_id") int cate_id){
+        return ResponseEntity.ok(restaurantService.findByCategoryOrderByName(cate_id, true));
+    }
+    @GetMapping("/restaurant/category/{cate_id}/score-order")
+    @ApiOperation(value="카테고리 id를 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 점수순")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByScore(
+            @PathVariable int cate_id){
+        return ResponseEntity.ok(restaurantService.findByCategoryOrderByScore(cate_id,false));
+    }
+    @GetMapping("/restaurant/category/{cate_id}/score-order")
+    @ApiOperation(value="카테고리 id를 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 점수 역순")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByScoreReverse(
+            @PathVariable int cate_id){
+        return ResponseEntity.ok(restaurantService.findByCategoryOrderByScore(cate_id,true));
+    }
     @GetMapping("/restaurant/category/n/{cate_name}")
     @ApiOperation(value= "카테고리 이름을 통한 음식점 검색", notes="cate_name을 포함하는 카테고리에 속한 음식점 리스트를 반환한다.")
     public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryName(@PathVariable("cate_name") String name) throws UnsupportedEncodingException {
@@ -119,19 +144,33 @@ public class RestaurantController {
         List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategory(name);
         return ResponseEntity.ok().body(responseDtoList);
     }
-    @GetMapping("/restaurant/category/{cate_id}")
-    @ApiOperation(value="카테고리 이름을 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 이름순")
-    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByName(
-            @PathVariable("cate_id") int cate_id){
-        List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategoryOrderByName(cate_id, false);
-        return ResponseEntity.ok(responseDtoList);
+    @GetMapping("/restaurant/category/n/{cate_name}/name-order")
+    @ApiOperation(value= "카테고리 이름을 통한 음식점 검색", notes="cate_name을 포함하는 카테고리에 속한 음식점 리스트를 반환한다.")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryNameOrderByName(@PathVariable("cate_name") String name) throws UnsupportedEncodingException {
+        LOGGER.info("[searchByCategoryNameOrderByName] cate_name = {}", name);
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategoryOrderByName(name, false);
+        return ResponseEntity.ok().body(responseDtoList);
     }
-
-    @GetMapping("/restaurant/category/{cate_id}/reverse")
-    @ApiOperation(value="카테고리 이름을 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 이름 역순")
-    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByNameRev(
-            @PathVariable("cate_id") int cate_id){
-        return ResponseEntity.ok(restaurantService.findByCategoryOrderByName(cate_id, true));
+    @GetMapping("/restaurant/category/n/{cate_name}/name-order/reverse")
+    @ApiOperation(value= "카테고리 이름을 통한 음식점 검색", notes="cate_name을 포함하는 카테고리에 속한 음식점 리스트를 반환한다.")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryNameOrderByNameRev(@PathVariable("cate_name") String name) throws UnsupportedEncodingException {
+        LOGGER.info("[searchByCategoryNameOrderByNameRev] cate_name = {}", name);
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategoryOrderByName(name, true);
+        return ResponseEntity.ok().body(responseDtoList);
+    }
+    @GetMapping("/restaurant/category/n/{cate_name}/score-order")
+    @ApiOperation(value= "카테고리 이름을 통한 음식점 검색", notes="cate_name을 포함하는 카테고리에 속한 음식점 리스트를 반환한다.")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryNameOrderByScore(@PathVariable("cate_name") String name) throws UnsupportedEncodingException {
+        LOGGER.info("[searchByCategoryNameOrderByScore] cate_name = {}", name);
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategoryOrderByScore(name, false);
+        return ResponseEntity.ok().body(responseDtoList);
+    }
+    @GetMapping("/restaurant/category/n/{cate_name}/score-order/reverse")
+    @ApiOperation(value= "카테고리 이름을 통한 음식점 검색", notes="cate_name을 포함하는 카테고리에 속한 음식점 리스트를 반환한다.")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryNameOrderByScoreRev(@PathVariable("cate_name") String name) throws UnsupportedEncodingException {
+        LOGGER.info("[searchByCategoryName] cate_name = {}", name);
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategoryOrderByScore(name,true);
+        return ResponseEntity.ok().body(responseDtoList);
     }
 
     @GetMapping("/search/restaurant/{name}")
@@ -141,6 +180,34 @@ public class RestaurantController {
         List<RestaurantResponseDto> responseDtoList = restaurantService.findByRestaurantName(rname);
         return ResponseEntity.ok().body(responseDtoList);
     }
+    @GetMapping("/search/restaurant/{name}/name-order")
+    @ApiOperation(value= "이름을 통한 음식점 검색", notes="name을 포함한 이름을 가진 음식점 리스트를 반환한다.")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByRestaurantNameOrderByName(@PathVariable("name") String rname) throws UnsupportedEncodingException {
+        LOGGER.info("[searchByRestaurantName] rname = {}",rname);
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByRestaurantNameOrderByName(rname, false);
+        return ResponseEntity.ok().body(responseDtoList);
+    }@GetMapping("/search/restaurant/{name}/name-order/reverse")
+    @ApiOperation(value= "이름을 통한 음식점 검색", notes="name을 포함한 이름을 가진 음식점 리스트를 반환한다.")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByRestaurantNameOrderByNameRev(@PathVariable("name") String rname) throws UnsupportedEncodingException {
+        LOGGER.info("[searchByRestaurantName] rname = {}",rname);
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByRestaurantNameOrderByName(rname,true);
+        return ResponseEntity.ok().body(responseDtoList);
+    }
+    @GetMapping("/search/restaurant/{name}/score-order")
+    @ApiOperation(value= "이름을 통한 음식점 검색", notes="name을 포함한 이름을 가진 음식점 리스트를 반환한다.")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByRestaurantNameOrderByScore(@PathVariable("name") String rname) throws UnsupportedEncodingException {
+        LOGGER.info("[searchByRestaurantName] rname = {}",rname);
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByRestaurantNameOrderByScore(rname,false);
+        return ResponseEntity.ok().body(responseDtoList);
+    }
+    @GetMapping("/search/restaurant/{name}/score-order/reverse")
+    @ApiOperation(value= "이름을 통한 음식점 검색", notes="name을 포함한 이름을 가진 음식점 리스트를 반환한다.")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByRestaurantNameOrerByScoreRev(@PathVariable("name") String rname) throws UnsupportedEncodingException {
+        LOGGER.info("[searchByRestaurantName] rname = {}",rname);
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByRestaurantNameOrderByScore(rname, true);
+        return ResponseEntity.ok().body(responseDtoList);
+    }
+
     @GetMapping("/search/restaurant/menu/{name}")
     @ApiOperation(value= "메뉴 이름을 통한 음식점 검색", notes="name라는 메뉴를 가진 음식점 리스트를 반환한다. 메뉴이름에 포함되어 있으면 해당됨.")
     public ResponseEntity<List<RestaurantResponseDto>> searchByMenuName(@PathVariable("name") String mname) throws UnsupportedEncodingException {
@@ -153,7 +220,7 @@ public class RestaurantController {
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access_token",
                     required = true, dataType = "String", paramType = "header")
     })
-    @ApiOperation(value= "프랜차이즈 삭제", notes="프랜차이즈 정보를 삭제한다.")
+    @ApiOperation(value= "모든 점수 합산")
     public ResponseEntity sumScore(){
         restaurantService.sumScore();
         return ResponseEntity.ok().build();

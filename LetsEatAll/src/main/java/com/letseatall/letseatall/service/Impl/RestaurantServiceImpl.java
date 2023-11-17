@@ -360,11 +360,20 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public List<RestaurantResponseDto> findByCategoryOrderByName(int category, boolean reverse) {
         List<Restaurant> restaurants = reverse ?
-                restaurantRepository.findAllByCategoryIdOrderByNameDesc() :
-                restaurantRepository.findAllByCategoryIdOrderByNameAsc();
+                restaurantRepository.findAllByCategoryIdOrderByNameDesc(category) :
+                restaurantRepository.findAllByCategoryIdOrderByNameAsc(category);
         List<RestaurantResponseDto> responseDtoList = makeRRDList(restaurants);
         return responseDtoList;
     }
+
+    @Override
+    public List<RestaurantResponseDto> findByCategoryOrderByScore(int category, boolean reverse) {
+        List<Restaurant> restaurants = reverse ?
+                restaurantRepository.findAllByCategoryIdOrderByScoreDesc(category):
+                restaurantRepository.findAllByCategoryIdOrderByScoreAsc(category);
+        return makeRRDList(restaurants);
+    }
+
     private List<RestaurantResponseDto> makeRRDList(List<Restaurant> restaurants){
         List<RestaurantResponseDto> rrds=new ArrayList<>();
         restaurants.forEach(restaurant -> {
@@ -372,6 +381,80 @@ public class RestaurantServiceImpl implements RestaurantService {
             rrds.add(rrd);
         });
         return rrds;
+    }
+
+    @Override
+    public List<RestaurantResponseDto> findByCategoryOrderByName(String categoryName, boolean reverse) throws UnsupportedEncodingException {
+        String decode_name = URLDecoder.decode(categoryName, "UTF-8");
+        LOGGER.info("[findByCategoryOrderByName] 찾을 카테고리: {}", decode_name);
+        Optional<Category> option = categoryRepository.findByNameLike("%" + decode_name + "%");
+        Category category = option.orElse(null);
+        if (category != null) {
+            LOGGER.info("[findByCategoryOrderByName] 카테고리 발견: id={}, name={}", category.getId(), category.getName());
+            List<RestaurantResponseDto> responseDtoList = makeRRDList(
+                    reverse ?
+                            restaurantRepository.findAllByCategoryIdOrderByNameDesc(category.getId()):
+                            restaurantRepository.findAllByCategoryIdOrderByNameAsc(category.getId())
+            );
+            LOGGER.info("[findByCategoryOrderByName] : 카테고리에 해당하는 음식점 리스트 불러오기 완료");
+            return responseDtoList;
+        } else {
+            LOGGER.info("[findByCategoryOrderByName] 카테고리 찾을 수 없음...: {}", decode_name);
+            return null;
+        }
+    }
+
+    @Override
+    public List<RestaurantResponseDto> findByCategoryOrderByScore(String categoryName, boolean reverse) throws UnsupportedEncodingException {
+        String decode_name = URLDecoder.decode(categoryName, "UTF-8");
+        LOGGER.info("[findByCategoryOrderByScore] 찾을 카테고리: {}", decode_name);
+        Optional<Category> option = categoryRepository.findByNameLike("%" + decode_name + "%");
+        Category category = option.orElse(null);
+        if (category != null) {
+            LOGGER.info("[findByCategoryOrderByScore] 카테고리 발견: id={}, name={}", category.getId(), category.getName());
+            List<RestaurantResponseDto> responseDtoList = makeRRDList(
+                    reverse ?
+                            restaurantRepository.findAllByCategoryIdOrderByScoreDesc(category.getId()):
+                            restaurantRepository.findAllByCategoryIdOrderByScoreAsc(category.getId())
+            );
+            LOGGER.info("[findByCategoryOrderByScore] : 카테고리에 해당하는 음식점 리스트 불러오기 완료");
+            return responseDtoList;
+        } else {
+            LOGGER.info("[findByCategoryOrderByScore] 카테고리 찾을 수 없음...: {}", decode_name);
+            return null;
+        }
+    }
+
+    @Override
+    public List<RestaurantResponseDto> findByRestaurantNameOrderByName(String name, boolean reverse) throws UnsupportedEncodingException {
+        String dec_name = URLDecoder.decode(name, "UTF-8");
+        LOGGER.info("[findByRestaurantNameOrderByName] 찾을 음식점: {}", dec_name);
+        List<Restaurant> restaurants = reverse ?
+                restaurantRepository.findAllByNameLikeOrderByNameDesc("%" + dec_name + "%"):
+                restaurantRepository.findAllByNameLikeOrderByNameAsc("%"+dec_name+"%");
+        LOGGER.info("[findByRestaurantNameOrderByName] 찾은 대상 수: {}", restaurants.size());
+        List<RestaurantResponseDto> responseDtoList = new ArrayList<>();
+        restaurants.forEach(restaurant -> {
+            responseDtoList.add(makeDto(restaurant));
+        });
+        LOGGER.info("[findByRestaurantNameOrderByName] 리스트 완성");
+        return responseDtoList;
+    }
+
+    @Override
+    public List<RestaurantResponseDto> findByRestaurantNameOrderByScore(String name, boolean reverse) throws UnsupportedEncodingException {
+        String dec_name = URLDecoder.decode(name, "UTF-8");
+        LOGGER.info("[findByRestaurantNameOrderByScore] 찾을 음식점: {}", dec_name);
+        List<Restaurant> restaurants = reverse ?
+                restaurantRepository.findAllByNameLikeOrderByScoreDesc("%" + dec_name + "%"):
+                restaurantRepository.findAllByNameLikeOrderByScoreAsc("%"+dec_name+"%");
+        LOGGER.info("[findByRestaurantNameOrderByScore] 찾은 대상 수: {}", restaurants.size());
+        List<RestaurantResponseDto> responseDtoList = new ArrayList<>();
+        restaurants.forEach(restaurant -> {
+            responseDtoList.add(makeDto(restaurant));
+        });
+        LOGGER.info("[findByRestaurantNameOrderByScore] 리스트 완성");
+        return responseDtoList;
     }
 
     public void sumScore() {

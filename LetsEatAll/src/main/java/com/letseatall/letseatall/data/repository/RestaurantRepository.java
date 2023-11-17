@@ -17,15 +17,21 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     List<Long> findIdAllByFranchiseId(Long id);
     List<Restaurant> findAllByCategoryId(int id);
     List<Restaurant> findAllByNameLike(String name);
-    List<Restaurant> findAllByCategoryIdOrderByNameAsc();
-    List<Restaurant> findAllByCategoryIdOrderByNameDesc();
+    List<Restaurant> findAllByCategoryIdOrderByNameAsc(int id);
+    List<Restaurant> findAllByCategoryIdOrderByNameDesc(int id);
+    List<Restaurant> findAllByCategoryIdOrderByScoreDesc(int id);
+    List<Restaurant> findAllByCategoryIdOrderByScoreAsc(int id);
+    List<Restaurant> findAllByNameLikeOrderByNameAsc(String name);
+    List<Restaurant> findAllByNameLikeOrderByNameDesc(String name);
+    List<Restaurant> findAllByNameLikeOrderByScoreDesc(String name);
+    List<Restaurant> findAllByNameLikeOrderByScoreAsc(String name);
 
     Page<Restaurant> findAllByCategoryId(int id, Pageable pageable);
     Page<Restaurant> findAllByNameContainingIgnoreCase(String name, Pageable pageable);
 
 
     Page<Restaurant> findAllByCategoryIdOrderByScore(int id, Pageable pageable);
-    Page<Restaurant> findAllByNameLikeOrderByScore(String name, Pageable pageable);
+    Page<Restaurant> findAllByNameLikeOrderByScoreAsc(String name, Pageable pageable);
 
 
 }
