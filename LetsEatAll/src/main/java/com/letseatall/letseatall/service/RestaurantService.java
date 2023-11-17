@@ -21,11 +21,12 @@ public interface RestaurantService {
     List<RestaurantResponseDto> findByCategory(String cate_name) throws UnsupportedEncodingException;
     List<RestaurantResponseDto> findByRestaurantName(String name) throws UnsupportedEncodingException;
     List<RestaurantResponseDto> findByMenuName(String menuName) throws UnsupportedEncodingException;
-    public List<RestaurantResponseDto> getAll(int start, int size);
-    public List<RestaurantResponseDto> getAll();
-    public List<RestaurantResponseDto> findAllInCategory(int category, int start);
-    public List<RestaurantResponseDto> searchName(String name, int start) throws UnsupportedEncodingException;
+    List<RestaurantResponseDto> getAll(int start, int size);
+    List<RestaurantResponseDto> getAll();
+    List<RestaurantResponseDto> findAllInCategory(int category, int start);
+    List<RestaurantResponseDto> searchName(String name, int start) throws UnsupportedEncodingException;
 
+    List<RestaurantResponseDto> findByCategoryOrderByName(int category, boolean reverse);
 
     void sumScore();
 }

@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.controller;
 
+import com.letseatall.letseatall.data.dto.Menu.MenuModifyDto;
 import com.letseatall.letseatall.data.dto.common.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
@@ -118,5 +119,13 @@ public class MenuController {
         menuService.uploadMenuImage(id, file);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/modify")
+    public ResponseEntity<MenuResponseDto> modify(@RequestPart MenuModifyDto modifyDto,
+                                                  @RequestPart MultipartFile file) throws IOException {
+        MenuResponseDto responseDto = menuService.modify(modifyDto, file);
+        return ResponseEntity.ok(responseDto);
+    }
+
 
 }

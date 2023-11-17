@@ -1,8 +1,10 @@
 package com.letseatall.letseatall.service.Impl;
 
 import com.letseatall.letseatall.data.Entity.*;
+import com.letseatall.letseatall.data.Entity.Review.ImageFile;
 import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.Entity.menu.MenuImageFile;
+import com.letseatall.letseatall.data.dto.Menu.MenuModifyDto;
 import com.letseatall.letseatall.data.dto.common.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
@@ -297,5 +299,40 @@ public class MenuServiceImpl implements MenuService {
             menu.setImg(mimg);
             menuRepository.save(menu);
         }
+    }
+    public MenuResponseDto modify(MenuModifyDto menuDto, MultipartFile file) throws IOException {
+        Menu menu = menuRepository.findById(menuDto.getMenu_id()).orElse(null);
+        if(menu!=null){
+            if(menu.getImg()!=null){
+                LOGGER.info("[modify] 기존 이미지 정보 삭제");
+                MenuImageFile imgData = menu.getImg();
+                try {
+                    imgRepository.deleteById(menu.getImg().getId());
+                }catch (RuntimeException e){
+                    throw e;
+                }
+            }
+            if(file!=null && !file.isEmpty()){
+                LOGGER.info("[modify] 새로운 이미지 저장 시도");
+                String[] imgRes = s3UploadService.uploadFileToS3(file, "Images/Menu");
+                LOGGER.info("[modify] 새로운 이미지 S3에 저장 완료. 데이터 생성 시작");
+                MenuImageFile imgData = new MenuImageFile();
+                imgData.setUrl(imgRes[0]);
+                imgData.setStoredName(imgRes[1]);
+                imgData.setMenu(menu);
+                menu.setImg(imgData);
+                LOGGER.info("[modify] 새로운 이미지에 대한 정보 생성 완료");
+            }
+            menu.setName(menuDto.getName());
+            menu.setPrice(menu.getPrice());
+            menu.setInfo(menuDto.getInfo());
+
+            LOGGER.info("[modify] 메뉴 정보 저장");
+            Menu savedMenu =menuRepository.save(menu);
+            LOGGER.info("[modify] 메뉴 정보 저장 완료 -> {}", savedMenu.toString());
+
+            return makeDto(savedMenu);
+        }
+        return null;
     }
 }

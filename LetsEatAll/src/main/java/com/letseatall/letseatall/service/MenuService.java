@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.service;
 
+import com.letseatall.letseatall.data.dto.Menu.MenuModifyDto;
 import com.letseatall.letseatall.data.dto.common.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
@@ -29,4 +30,5 @@ public interface MenuService {
 
     void sum();
     void uploadMenuImage(long menu_id, MultipartFile file);
+    MenuResponseDto modify(MenuModifyDto menuDto, MultipartFile file) throws IOException;
 }

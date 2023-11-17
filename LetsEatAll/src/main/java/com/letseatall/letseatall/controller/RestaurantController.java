@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -112,12 +113,27 @@ public class RestaurantController {
         return ResponseEntity.ok().body(responseDtoList);
     }
     @GetMapping("/restaurant/category/n/{cate_name}")
-    @ApiOperation(value= "카테고리 이름을 통한 음식점 검색", notes="cate_id를 포함하는 카테고리에 속한 음식점 리스트를 반환한다.")
+    @ApiOperation(value= "카테고리 이름을 통한 음식점 검색", notes="cate_name을 포함하는 카테고리에 속한 음식점 리스트를 반환한다.")
     public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryName(@PathVariable("cate_name") String name) throws UnsupportedEncodingException {
         LOGGER.info("[searchByCategoryName] cate_name = {}", name);
         List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategory(name);
         return ResponseEntity.ok().body(responseDtoList);
     }
+    @GetMapping("/restaurant/category/{cate_id}")
+    @ApiOperation(value="카테고리 이름을 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 이름순")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByName(
+            @PathVariable("cate_id") int cate_id){
+        List<RestaurantResponseDto> responseDtoList = restaurantService.findByCategoryOrderByName(cate_id, false);
+        return ResponseEntity.ok(responseDtoList);
+    }
+
+    @GetMapping("/restaurant/category/{cate_id}/reverse")
+    @ApiOperation(value="카테고리 이름을 통한 음식점 검색", notes="cate_id에 해당하는 카테고리에 포함된 음식점 리스트를 반환한다. 이름 역순")
+    public ResponseEntity<List<RestaurantResponseDto>> searchByCategoryOrderByNameRev(
+            @PathVariable("cate_id") int cate_id){
+        return ResponseEntity.ok(restaurantService.findByCategoryOrderByName(cate_id, true));
+    }
+
     @GetMapping("/search/restaurant/{name}")
     @ApiOperation(value= "이름을 통한 음식점 검색", notes="name을 포함한 이름을 가진 음식점 리스트를 반환한다.")
     public ResponseEntity<List<RestaurantResponseDto>> searchByRestaurantName(@PathVariable("name") String rname) throws UnsupportedEncodingException {

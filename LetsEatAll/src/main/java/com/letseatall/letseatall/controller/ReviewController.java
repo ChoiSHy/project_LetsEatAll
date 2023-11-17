@@ -5,6 +5,7 @@ import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
 import com.letseatall.letseatall.service.ReviewService;
 import com.letseatall.letseatall.service.awsS3.S3UploadService;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +41,16 @@ public class ReviewController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value="리뷰 정보 요청",
+    notes="id에 해당하는 리뷰 반환. id는 review의 고유 id")
     public ResponseEntity<ReviewResponseDto> getReview(@PathVariable("id") Long id) {
         ReviewResponseDto responseDto = reviewService.getReview(id);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @PostMapping("/create")
+    @ApiOperation(value = "리뷰 저장 기능",
+            notes = "reviewDto: json, file: img-file")
     public ResponseEntity saveReview(@RequestPart ReviewDto reviewDto,
                                      @RequestPart MultipartFile file) throws IOException {
         ReviewResponseDto responseDto = reviewService.saveReview(reviewDto, file);
@@ -53,6 +58,7 @@ public class ReviewController {
     }
 
     @PutMapping("/modify")
+    @ApiOperation(value="리뷰 수정", notes = "리뷰 수정 기능")
     public ResponseEntity<ReviewResponseDto> modifyReview(@RequestPart ReviewModifyDto rmd,
                                                           @RequestPart MultipartFile file) throws IOException {
         try {
@@ -64,6 +70,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @ApiOperation(value = "리뷰 삭제 기능")
     public ResponseEntity<String> deleteReview(@PathVariable("id") Long id) {
         try {
             Long del_id = reviewService.deleteReview(id);
@@ -74,36 +81,42 @@ public class ReviewController {
     }
 
     @GetMapping("/menu/reviews")
-    public ResponseEntity<List<ReviewResponseDto>> getAllReviewsAboutMenu(Long mid) {
+    @ApiOperation(value = "메뉴의 리뷰들 불러오기",notes="mid에 해당하는 menu에 관한 모든 리뷰 불러오기")
+    public ResponseEntity<List<ReviewResponseDto>> getAllReviewsAboutMenu(@RequestParam Long mid) {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsInMenu(mid);
         return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
     }
 
     @GetMapping("/restaurant/reviews")
-    public ResponseEntity<List<ReviewResponseDto>> getAllReviewsAboutRestaurant(Long rid) {
+    @ApiOperation(value = "식당의 리뷰들 불러오기", notes="rid에 해당하는 restaurant에 관한 모든 리뷰 불러오기")
+    public ResponseEntity<List<ReviewResponseDto>> getAllReviewsAboutRestaurant(@RequestParam Long rid) {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsInRestaurant(rid);
         return ResponseEntity.status(HttpStatus.OK).body(responseDtoList);
     }
 
     @GetMapping("/all")
+    @ApiOperation(value="모든 리뷰를 불러오기")
     public ResponseEntity getAllReviews() {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviews();
         return ResponseEntity.ok().body(responseDtoList);
     }
 
     @GetMapping("/user/me")
+    @ApiOperation(value= "자신의 리뷰 불러오기" ,notes="자신이 작성한 모든 리뷰 불러오기")
     public ResponseEntity findAllOfMyReviews() {
         List<ReviewResponseDto> responseDtoList = reviewService.findAllReviewsWrittenByYou();
         return ResponseEntity.ok().body(responseDtoList);
     }
 
     @GetMapping("/user/{user_id}")
+    @ApiOperation(value="사용자의 리뷰 불러오기",notes = "사용자가 작성한 모든 리뷰 불러오기")
     public ResponseEntity findAllReviewsOfUser(@PathVariable("user_id") long user_id) {
         List<ReviewResponseDto> responseDtoList = reviewService.getAllReviewsWrittenByUser(user_id);
         return ResponseEntity.ok().body(responseDtoList);
     }
 
     @GetMapping("user/like/{review_id}")
+    @ApiOperation(value="좋아요 누르기", notes = "리뷰의 좋아요")
     public ResponseEntity likeReview(@PathVariable("review_id") long review_id) {
         LOGGER.info("[likeReview] 좋아요 누르기 review-id = {}", review_id);
         try {
@@ -117,6 +130,7 @@ public class ReviewController {
         }
     }
     @GetMapping("user/unlike/{review_id}")
+    @ApiOperation(value="싫어요 누르기")
     public ResponseEntity unlikeReview(@PathVariable("review_id") long review_id) {
         LOGGER.info("[likeReview] 좋아요 누르기 review-id = {}", review_id);
         try {

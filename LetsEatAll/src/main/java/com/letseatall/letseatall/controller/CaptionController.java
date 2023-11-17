@@ -4,6 +4,7 @@ import com.letseatall.letseatall.data.dto.Youtube.CaptionDto;
 import com.letseatall.letseatall.data.dto.Youtube.YoutubeDto;
 import com.letseatall.letseatall.service.MenuService;
 import com.letseatall.letseatall.service.YoutubeService;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ public class CaptionController {
 
     private final Logger log= LoggerFactory.getLogger(CaptionController.class);
 
+    @ApiOperation(value="유튜브 영상 요약 기능", 
+            notes="유튜브 영상 요약 기능. url은 전체 url 혹은 뒤쪽에 v=~ 부터 입력")
     @RequestMapping(value = "youtube/summary", method = RequestMethod.POST)
     public ResponseEntity<String> summaryVideo(@RequestBody YoutubeDto youtubeDto){
         String videoUrl = youtubeDto.getVideoUrl();

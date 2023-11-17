@@ -100,18 +100,18 @@ public class RestaurantServiceImpl implements RestaurantService {
         for (Menu fMenu : fMenus) {
             Menu newMenu = new Menu(fMenu.getName(), fMenu.getPrice(), fMenu.getScore(), fMenu.getCategory());
             newMenu.setRestaurant(restaurant);
-            if(fMenu.getUrl() != null) {
+            if (fMenu.getUrl() != null) {
                 newMenu.setUrl(fMenu.getUrl());
                 LOGGER.info("[addFranchiseMenus] url 처리");
             }
-            if(fMenu.getImg() != null){
-                MenuImageFile fimg = imageFileRepository.findByMenuId(fMenu.getId()).orElseThrow(()->new NotFoundException("대상 찾지 못함"));
+            if (fMenu.getImg() != null) {
+                MenuImageFile fimg = imageFileRepository.findByMenuId(fMenu.getId()).orElseThrow(() -> new NotFoundException("대상 찾지 못함"));
                 MenuImageFile img = new MenuImageFile();
                 img.setUrl(fimg.getUrl());
                 img.setStoredName(fimg.getStoredName());
                 newMenu.setImg(img);
                 LOGGER.info("[addFranchiseMenus] 이미지 처리");
-                
+
             }
             saveMenus.add(newMenu);
         }
@@ -138,10 +138,10 @@ public class RestaurantServiceImpl implements RestaurantService {
                             .menu_price(menu.getPrice())
                             .menu_category(menu.getCategory().getName())
                             .build();
-                    if(menu.getScore() != 0)
+                    if (menu.getScore() != 0)
                         mrd.setMenu_score(menu.getScore() / menu.getReviewList().size());
                     else mrd.setMenu_score(0);
-                    if(menu.getImg() != null){
+                    if (menu.getImg() != null) {
                         mrd.setImg_url(menu.getImg().getUrl());
                     }
                     menuList.add(mrd);
@@ -149,7 +149,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             });
             rrd.setMenuDtoList(menuList);
             LOGGER.info("[getRestaurant] 메뉴 정보 주입 완료");
-            
+
             return rrd;
         }
         return null;
@@ -216,7 +216,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             }
         }
 
-        if (!mids.isEmpty()){
+        if (!mids.isEmpty()) {
             mids.forEach(mid -> menuService.deleteMenu(mid));
         }
         restaurantRepository.deleteById(id);
@@ -260,7 +260,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public List<RestaurantResponseDto> searchName(String keyword, int start) throws UnsupportedEncodingException {
-        String name = URLEncoder.encode(keyword,"utf8");
+        String name = URLEncoder.encode(keyword, "utf8");
         List<RestaurantResponseDto> responseDtoList = new ArrayList<>();
         List<Restaurant> restaurantList = restaurantRepository.findAllByNameContainingIgnoreCase(name, PageRequest.of(start, 10)).getContent();
         for (Restaurant restaurant : restaurantList) {
@@ -304,7 +304,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     public List<RestaurantResponseDto> findByCategory(String cate_name) throws UnsupportedEncodingException {
         String decode_name = URLDecoder.decode(cate_name, "UTF-8");
         LOGGER.info("[findByCategory] 찾을 카테고리: {}", decode_name);
-        Optional<Category> option = categoryRepository.findByNameLike("%"+decode_name+"%");
+        Optional<Category> option = categoryRepository.findByNameLike("%" + decode_name + "%");
         Category category = option.orElse(null);
         if (category != null) {
             LOGGER.info("[findByCategory] 카테고리 발견: id={}, name={}", category.getId(), category.getName());
@@ -339,16 +339,16 @@ public class RestaurantServiceImpl implements RestaurantService {
     public List<RestaurantResponseDto> findByMenuName(String menuName) throws UnsupportedEncodingException {
         String dec_menuName = URLDecoder.decode(menuName, "UTF-8");
         LOGGER.info("[findByMenuName] 찾을 음식 이름: {}", dec_menuName);
-        List<Menu> menus = menuRepository.findAllByNameLike("%"+dec_menuName+"%");
+        List<Menu> menus = menuRepository.findAllByNameLike("%" + dec_menuName + "%");
         LOGGER.info("[findByMenuName] 찾은 대상 수: {}", menus.size());
-        
+
         Map<Long, RestaurantResponseDto> map = new HashMap<>();
         LOGGER.info("[findByMenuName] 음식점 리스트 채우기");
-        for(Menu menu : menus){
-            LOGGER.info("[findByMenuName] 찾은 메뉴: {}" ,menu.getName());
+        for (Menu menu : menus) {
+            LOGGER.info("[findByMenuName] 찾은 메뉴: {}", menu.getName());
             Restaurant restaurant = menu.getRestaurant();
-            if(restaurant!=null)
-                if(!map.containsKey(restaurant.getId()))
+            if (restaurant != null)
+                if (!map.containsKey(restaurant.getId()))
                     map.put(restaurant.getId(), makeDto(restaurant));
 
         }
@@ -357,6 +357,23 @@ public class RestaurantServiceImpl implements RestaurantService {
         return new ArrayList<>(map.values());
     }
 
-    public void sumScore(){
+    @Override
+    public List<RestaurantResponseDto> findByCategoryOrderByName(int category, boolean reverse) {
+        List<Restaurant> restaurants = reverse ?
+                restaurantRepository.findAllByCategoryIdOrderByNameDesc() :
+                restaurantRepository.findAllByCategoryIdOrderByNameAsc();
+        List<RestaurantResponseDto> responseDtoList = makeRRDList(restaurants);
+        return responseDtoList;
+    }
+    private List<RestaurantResponseDto> makeRRDList(List<Restaurant> restaurants){
+        List<RestaurantResponseDto> rrds=new ArrayList<>();
+        restaurants.forEach(restaurant -> {
+            RestaurantResponseDto rrd= makeDto(restaurant);
+            rrds.add(rrd);
+        });
+        return rrds;
+    }
+
+    public void sumScore() {
     }
 }
