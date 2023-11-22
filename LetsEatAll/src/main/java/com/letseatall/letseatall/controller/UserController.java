@@ -3,6 +3,7 @@ package com.letseatall.letseatall.controller;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.dto.User.*;
+import com.letseatall.letseatall.service.Impl.PreferenceService;
 import com.letseatall.letseatall.service.LoginService;
 import com.letseatall.letseatall.service.UserService;
 import io.jsonwebtoken.Claims;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiParam;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,19 +36,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final LoginService loginService;
 
     private final UserService userService;
-
-    @Autowired
-    /* 생성자 */
-    public UserController(UserService userService,
-                          LoginService loginService) {
-        this.userService = userService;
-        this.loginService = loginService;
-    }
+    private final PreferenceService preferenceService;
 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 받은 access_token",
@@ -146,17 +142,20 @@ public class UserController {
     /* 회원 가입 */
     public ResponseEntity signUp(@RequestBody SignUpRequestDto req) {
         String role = "USER";
+        SignUpResultDto signUpResultDto;
         LOGGER.info("[signUp] 회원가입을 수행합니다. id : {}, password : ****, name : {}, role : {}", req.getId(), req.getName(),
                 role);
         try {
-            SignUpResultDto signUpResultDto = loginService.signUp(req.getId(), req.getPassword(), req.getName(), req.getBirthDate(), role);
-            LOGGER.info("[signUp] 회원가입을 완료했습니다. id : {}", req.getId());
-            return ResponseEntity.status(HttpStatus.OK).body(signUpResultDto);
+            signUpResultDto = loginService.signUp(req.getId(), req.getPassword(), req.getName(), req.getBirthDate(), role);
+            LOGGER.info("[signUp] 회원가입 정보 저장완료");
         } catch (Exception e) {
             LOGGER.info("[signUp] 회원가입 실패하였습니다. id : {}", req.getId());
             throw new BadRequestException("회원가입 실패");
         }
+
+        return ResponseEntity.status(HttpStatus.OK).body(signUpResultDto);
     }
+
 
     @PostMapping("/sign-in")
     /* 로그인 시도 */

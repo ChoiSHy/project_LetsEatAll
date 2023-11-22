@@ -26,5 +26,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long>, MenuBulkRepos
     List<Menu> findAllByNameLike(String name);
 
     Page<Menu> findAllByRestaurantIdOrderByScore(Long rest_id, Pageable pageable);
+    int countAllByRestaurantId(Long id);
 
 }

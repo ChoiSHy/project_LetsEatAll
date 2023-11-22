@@ -2,15 +2,20 @@ package com.letseatall.letseatall.service.Impl;
 
 import com.letseatall.letseatall.common.CommonResponse;
 import com.letseatall.letseatall.config.security.JwtTokenProvider;
+import com.letseatall.letseatall.data.Entity.Category;
+import com.letseatall.letseatall.data.Entity.Preference;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.dto.User.BadRequestException;
 import com.letseatall.letseatall.data.dto.User.SignInResultDto;
 import com.letseatall.letseatall.data.dto.User.SignUpResultDto;
 import com.letseatall.letseatall.data.dto.User.UserResponseDto;
+import com.letseatall.letseatall.data.repository.CategoryRepository;
+import com.letseatall.letseatall.data.repository.PreferenceRepository;
 import com.letseatall.letseatall.data.repository.UserRepository;
 import com.letseatall.letseatall.service.LoginService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,25 +30,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
     private final Logger LOGGER = LoggerFactory.getLogger(LoginServiceImpl.class);
 
-    private RedisTemplate redisTemplate;
-    private UserRepository userRepository;
-    private JwtTokenProvider jwtTokenProvider;
-    private PasswordEncoder passwordEncoder;
+    private final RedisTemplate redisTemplate;
+    private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
+    private final PreferenceRepository preferenceRepository;
+    private final CategoryRepository categoryRepository;
 
-    @Autowired
-    public LoginServiceImpl(UserRepository userRepository, JwtTokenProvider jwtTokenProvider,
-                            PasswordEncoder passwordEncoder,
-                            RedisTemplate redisTemplate) {
-        this.userRepository = userRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.passwordEncoder = passwordEncoder;
-        this.redisTemplate = redisTemplate;
-    }
 
     @Override
     public SignUpResultDto signUp(String id, String password, String name, LocalDate birthDate, String role)
@@ -66,11 +66,13 @@ public class LoginServiceImpl implements LoginService {
                     .birthDate(birthDate)
                     .roles(Collections.singletonList("ROLE_USER"))
                     .build();
+
         }
         try {
+            LOGGER.info("[signUp] 회원정보 저장중");
             User savedUser = userRepository.save(user);
+            LOGGER.info("[signUp] 회원정보 저장 완료");
             SignUpResultDto signUpResultDto = new SignInResultDto();
-
             LOGGER.info("[getSignUpResult] userEntity 값이 들어왔는지 확인 후 결과값 주입");
             if (!savedUser.getName().isEmpty()) {
                 LOGGER.info("[getSignUpResult] 정상 처리 완료");
@@ -109,7 +111,7 @@ public class LoginServiceImpl implements LoginService {
         LOGGER.info("[getSignInResult] SignInResultDto 객체에 값 주입");
         setSuccessResult(signInResultDto);
         LOGGER.info("[getSignInResult] redisTemplate에 id, token 저장 시도");
-        redisTemplate.opsForValue().set("JWT_TOKEN:"+id, token);
+        redisTemplate.opsForValue().set("JWT_TOKEN:" + id, token);
         LOGGER.info("[getSignInResult] redisTemplate에 id, token 저장 완료");
 
         return signInResultDto;
@@ -148,11 +150,11 @@ public class LoginServiceImpl implements LoginService {
                 throw e;
             }*/
 
-            if (!user.getName().equals(name) ){
+            if (!user.getName().equals(name)) {
                 LOGGER.info("[changeUserPassword_check] : User 정보 불일치. name: {} vs {}", user.getName(), name);
                 return false;
             }
-            if(!user.getBirthDate().isEqual(birthDate)){
+            if (!user.getBirthDate().isEqual(birthDate)) {
                 LOGGER.info("[changeUserPassword_check] : User 정보 불일치. birthDate: {} vs {}", user.getBirthDate().toString(), birthDate.toString());
                 return false;
             }
@@ -169,12 +171,12 @@ public class LoginServiceImpl implements LoginService {
         if (user != null && newPassword != null) {
             LOGGER.info("[changeUserPassword] : User 정보 불러오기 성공. id: {}", id);
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            try{
+            try {
                 identityVerification(userDetails.getUsername(), user.getUsername());
-            }catch (BadRequestException e){
+            } catch (BadRequestException e) {
                 throw e;
             }
-            
+
             user.setPassword(passwordEncoder.encode(newPassword));
             try {
                 LOGGER.info("[changeUserPassword] : User 정보 저장 시도.");
@@ -191,21 +193,23 @@ public class LoginServiceImpl implements LoginService {
     public void logout(HttpServletRequest request) {
         LOGGER.info("[ LOG-OUT ] 현재 요청자 정보 불러오는 중");
         UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        LOGGER.info("[ LOG-OUT ] 현재 요청자 정보 불러오기 완료 id: {}",user.getUsername());
-        if(redisTemplate.opsForValue().get("JWT_TOKEN:"+user.getUsername())!=null){
+        LOGGER.info("[ LOG-OUT ] 현재 요청자 정보 불러오기 완료 id: {}", user.getUsername());
+        if (redisTemplate.opsForValue().get("JWT_TOKEN:" + user.getUsername()) != null) {
             LOGGER.info("[ LOG-OUT ] Redis에서 토큰 정보 삭제 시도");
             redisTemplate.delete("JWT_TOKEN:" + user.getUsername());
             LOGGER.info("[ LOG-OUT ] Redis에서 토큰 정보 삭제 완료");
         }
     }
 
-    private void identityVerification(String userName, String tokenName){
+    private void identityVerification(String userName, String tokenName) {
         LOGGER.info("[identityVerification] : token 정보와 검색 정보 일치 여부 검사");
-        if(!tokenName.equals(userName)){
+        if (!tokenName.equals(userName)) {
             LOGGER.info("[identityVerification] : token 정보 불일치");
             throw new BadRequestException("토큰 불일치");
         }
         LOGGER.info("[identityVerification] : token 정보와 검색 정보 일치");
     }
+
+
 
 }

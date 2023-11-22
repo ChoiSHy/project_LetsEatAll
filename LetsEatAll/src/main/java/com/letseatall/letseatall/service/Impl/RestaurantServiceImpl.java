@@ -457,6 +457,8 @@ public class RestaurantServiceImpl implements RestaurantService {
         return responseDtoList;
     }
 
+
+
     public void sumScore() {
     }
 }

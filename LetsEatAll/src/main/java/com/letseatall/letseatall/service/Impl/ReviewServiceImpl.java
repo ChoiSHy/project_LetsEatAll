@@ -14,6 +14,7 @@ import com.letseatall.letseatall.data.repository.review.ImagefileRepository;
 import com.letseatall.letseatall.data.repository.review.ReviewRepository;
 import com.letseatall.letseatall.service.ReviewService;
 import com.letseatall.letseatall.service.awsS3.S3UploadService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
     @Value("${spring.img.path}")
     private String imgPath;
@@ -42,29 +44,22 @@ public class ReviewServiceImpl implements ReviewService {
     private final ImagefileRepository imgRepository;
     private final LikeHistoryRepository historyRepository;
     private final S3UploadService s3UploadService;
+    private final ScoreService scoreService;
+
+    private final PreferenceService preferenceService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(ReviewServiceImpl.class);
 
-    @Autowired
-    public ReviewServiceImpl(ReviewRepository reviewRepository,
-                             MenuRepository menuRepository,
-                             UserRepository userRepository,
-                             ImagefileRepository imgRepository,
-                             LikeHistoryRepository historyRepository,
-                             S3UploadService s3UploadService) {
-        this.reviewRepository = reviewRepository;
-        this.menuRepository = menuRepository;
-        this.userRepository = userRepository;
-        this.imgRepository = imgRepository;
-        this.historyRepository = historyRepository;
-        this.s3UploadService = s3UploadService;
-    }
 
     public ReviewResponseDto saveReview(ReviewDto reviewDto, MultipartFile file) throws IOException {
         Menu menu = null;
+        int score = reviewDto.getScore();
+        int cid=0;
+        long uid;
         LOGGER.info("[saveReview] 시작");
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.getByUid(userDetails.getUsername());
+        uid = user.getId();
         LOGGER.info("[saveReview] 작성자: {}", user.getName());
 
         Optional<Menu> oMenu = menuRepository.findById(reviewDto.getMid());
@@ -72,10 +67,9 @@ public class ReviewServiceImpl implements ReviewService {
         if (oMenu.isPresent()) {
             menu = oMenu.get();
             LOGGER.info("[saveReview] 불러온 메뉴: {}", menu);
-            int review_size = reviewRepository.countAllByMenuId(menu.getId());
-            double total = menu.getScore() * review_size + reviewDto.getScore();
-            menu.setScore(total / (review_size + 1));
+            cid = menu.getCategory().getId();
         }
+
         LOGGER.info("[saveReview] Review 객체 생성 시작");
         ImageFile img = null;
         if (file != null && !file.isEmpty()) {
@@ -96,11 +90,16 @@ public class ReviewServiceImpl implements ReviewService {
         newReview.setMenu(menu);
         newReview.setWriter(user);
         newReview.setImg(img);
-
         LOGGER.info("[saveReview] Review 객체 생성 완료: {}", newReview);
 
-        Review savedReview = reviewRepository.save(newReview);
         LOGGER.info("[saveReview] Review 저장 완료");
+
+        Review savedReview = reviewRepository.save(newReview);
+
+        savedReview = scoreService.plusScore(savedReview);
+
+        preferenceService.recordUserPrefer(score-5, cid, uid);
+        LOGGER.info("saveReview] 사용자의 선호도 조정");
         return getReviewResponseDto(savedReview);
     }
 

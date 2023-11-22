@@ -62,6 +62,11 @@ public class User implements UserDetails {
         return this.roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL)
+    private List<Preference> preferences= new ArrayList<>();
+
+    public void addPrefer(Preference prefer){preferences.add(prefer);}
+    public void removePrefer(Preference prefer){preferences.remove(prefer);}
     @JsonProperty(access = Access.WRITE_ONLY)
     @Override
     public String getUsername() {
