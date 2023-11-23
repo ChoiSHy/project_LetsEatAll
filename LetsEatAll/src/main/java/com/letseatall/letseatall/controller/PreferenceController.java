@@ -27,4 +27,12 @@ public class PreferenceController {
         LOGGER.info("[getPreference] 사용자의 선호도 정보 불러오기 완료");
         return ResponseEntity.ok(map);
     }
+
+    @GetMapping("/{user_id}/top-3")
+    public ResponseEntity<String[] > getTop3(@PathVariable long user_id){
+        LOGGER.info("[getTop3] 상위 3개의 분야 가져오기");
+        String[] res = preferenceService.getTop3OfUser(user_id);
+        LOGGER.info("[getTop3] 정보 불러오기 완료");
+        return ResponseEntity.ok(res);
+    }
 }

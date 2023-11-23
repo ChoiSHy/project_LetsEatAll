@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -97,5 +98,28 @@ public class PreferenceService {
         LOGGER.info("[getPreferenceOfUser] map 데이터 주입 완료");
         
         return map;
+    }
+
+    public String[] getTop3OfUser(long user_id){
+        LOGGER.info("[getTop3OfUser]");
+        Map<String, Integer> map = new HashMap<>();
+
+        categoryRepository.findAll().forEach( c -> {
+            map.put(c.getName(), 0);
+        });
+        LOGGER.info("[getPreferenceOfUser] map 초기화");
+
+        preferenceRepository.findAllByUserIdOrderByScore(user_id).forEach(preference -> {
+            map.put(preference.getCategory().getName(), preference.getScore());
+        });
+        LOGGER.info("[getPreferenceOfUser] map 데이터 주입 완료");
+
+        List<Map.Entry<String, Integer>>entries = new LinkedList<>(map.entrySet());
+        entries.sort(Map.Entry.comparingByValue((o1, o2) -> o2-o1));
+        String[] res= new String[3];
+        for (int i = 0; i< 3; i++){
+            res[i]=entries.get(i).getKey();
+        }
+        return res;
     }
 }

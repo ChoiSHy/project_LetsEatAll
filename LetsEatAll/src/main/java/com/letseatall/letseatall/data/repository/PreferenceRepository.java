@@ -11,4 +11,6 @@ public interface PreferenceRepository extends JpaRepository<Preference,Preferenc
     List<Preference> findAllByUserId(long uid);
     boolean existsByUserIdAndCategoryId(long userId, int categoryId);
     Optional<Preference> findByUserIdAndCategoryId(long uid, int cid);
+
+    List<Preference> findAllByUserIdOrderByScore(long uid);
 }
