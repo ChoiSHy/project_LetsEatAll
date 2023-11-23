@@ -14,7 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -78,5 +80,22 @@ public class PreferenceService {
             throw e;
         }
         LOGGER.info("[signUp] 테이블 저장완료");
+    }
+
+    public Map<String, Integer> getPreferenceOfUser(long user_id){
+        LOGGER.info("[getPreferenceOfUser]");
+        Map<String, Integer> map = new HashMap<>();
+
+        categoryRepository.findAll().forEach( c -> {
+            map.put(c.getName(), 0);
+        });
+        LOGGER.info("[getPreferenceOfUser] map 초기화");
+        
+        preferenceRepository.findAllByUserId(user_id).forEach(preference -> {
+            map.put(preference.getCategory().getName(), preference.getScore());
+        });
+        LOGGER.info("[getPreferenceOfUser] map 데이터 주입 완료");
+        
+        return map;
     }
 }

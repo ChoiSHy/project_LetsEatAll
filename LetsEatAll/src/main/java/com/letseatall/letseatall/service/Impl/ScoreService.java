@@ -25,15 +25,16 @@ public class ScoreService {
         Menu menu = review.getMenu();
         Restaurant restaurant = menu.getRestaurant();
 
-        int review_cnt = reviewRepository.countAllByMenuId(menu.getId());
-        int menu_cnt = menuRepository.countAllByRestaurantId(restaurant.getId());
-        LOGGER.info("[plusScore] review_cnt = {}, menu_cnt = {}", review_cnt, menu_cnt);
+        int review_cnt1 = reviewRepository.countAllByMenuId(menu.getId());
+        int review_cnt2 = reviewRepository.countReviewsByRestaurantId(restaurant.getId());
+        LOGGER.info("[plusScore] review_cnt = {}, menu_cnt = {}", review_cnt1, review_cnt2);
 
-        double menu_score= menu.getScore() * review_cnt + review.getScore();
-        double restaurant_score = restaurant.getScore() * menu_cnt - menu.getScore() + menu_score;
-
-        menu.setScore(menu_score/(review_cnt == 0 ? 1 : review_cnt));
-        restaurant.setScore(restaurant_score / (menu_cnt == 0 ? 1: menu_cnt));
+        double menu_score= menu.getScore() * (review_cnt1-1) + review.getScore();
+        menu_score = menu_score/(review_cnt1 == 0 ? 1 : review_cnt1);
+        double restaurant_score = restaurant.getScore() * (review_cnt2-1) + menu_score;
+        restaurant_score = restaurant_score / (review_cnt2 == 0 ? 1: review_cnt2);
+        menu.setScore(menu_score);
+        restaurant.setScore(restaurant_score);
         LOGGER.info("[plusScore] 점수 수정 대입");
 
         menuRepository.save(menu);

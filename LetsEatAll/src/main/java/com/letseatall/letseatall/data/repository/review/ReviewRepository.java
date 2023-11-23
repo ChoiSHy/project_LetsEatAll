@@ -25,4 +25,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     int countAllByWriterId(Long id);
     int countAllByMenuId(Long menu_id);
+    @Query(value="select count(rv) from Review rv left join rv.menu m where m.restaurant.id=?1")
+    int countReviewsByRestaurantId(Long rest_id);
 }
