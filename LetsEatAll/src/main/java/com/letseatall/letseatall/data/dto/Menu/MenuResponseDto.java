@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.data.dto.Menu;
 
+import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.dto.Review.ReviewPageDto;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +20,5 @@ public class MenuResponseDto {
     private String url;
     private String img_url;
     private String info;
+
 }
