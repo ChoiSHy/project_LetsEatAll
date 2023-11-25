@@ -1,5 +1,6 @@
 package com.letseatall.letseatall.service.Impl;
 
+import com.letseatall.letseatall.common.Seeker;
 import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.Entity.Review.LikeHistory;
 import com.letseatall.letseatall.data.Entity.Review.Review;
@@ -8,6 +9,7 @@ import com.letseatall.letseatall.data.Entity.Review.ImageFile;
 import com.letseatall.letseatall.data.dto.Review.ReviewDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewModifyDto;
 import com.letseatall.letseatall.data.dto.Review.ReviewResponseDto;
+import com.letseatall.letseatall.data.dto.User.BadRequestException;
 import com.letseatall.letseatall.data.repository.*;
 import com.letseatall.letseatall.data.repository.Menu.MenuRepository;
 import com.letseatall.letseatall.data.repository.review.ImagefileRepository;
@@ -29,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +48,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final LikeHistoryRepository historyRepository;
     private final S3UploadService s3UploadService;
     private final ScoreService scoreService;
-
+    private final Seeker seeker;
     private final PreferenceService preferenceService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(ReviewServiceImpl.class);
@@ -54,7 +57,7 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewResponseDto saveReview(ReviewDto reviewDto, MultipartFile file) throws IOException {
         Menu menu = null;
         int score = reviewDto.getScore();
-        int cid=0;
+        int cid = 0;
         long uid;
         LOGGER.info("[saveReview] 시작");
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -91,14 +94,20 @@ public class ReviewServiceImpl implements ReviewService {
         newReview.setWriter(user);
         newReview.setImg(img);
         LOGGER.info("[saveReview] Review 객체 생성 완료: {}", newReview);
-
-        LOGGER.info("[saveReview] Review 저장 완료");
-
+        try {
+            if(!seeker.run(newReview))
+                throw new BadRequestException("혐오표현 감지!");
+        } catch (RemoteException e) {
+            throw e;
+        } catch (BadRequestException e) {
+            throw e;
+        }
         Review savedReview = reviewRepository.save(newReview);
+        LOGGER.info("[saveReview] Review 저장 완료");
 
         savedReview = scoreService.plusScore(savedReview);
 
-        preferenceService.recordUserPrefer(score-5, cid, uid);
+        preferenceService.recordUserPrefer(score - 5, cid, uid);
         LOGGER.info("saveReview] 사용자의 선호도 조정");
         return getReviewResponseDto(savedReview);
     }
@@ -309,8 +318,8 @@ public class ReviewServiceImpl implements ReviewService {
                 User writer = review.getWriter();
                 if (score > 0) {
                     review.setLike_cnt(review.getLike_cnt() + score);
-                }else {
-                    review.setUnlike_cnt(review.getUnlike_cnt()-score);
+                } else {
+                    review.setUnlike_cnt(review.getUnlike_cnt() - score);
                 }
                 writer.setScore(writer.getScore() + score);
 
