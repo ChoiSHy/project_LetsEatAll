@@ -253,7 +253,7 @@ public class MenuServiceImpl implements MenuService {
         return responseDtoList;
     }
 
-    private MenuResponseDto makeDto(Menu menu) throws IOException {
+    public MenuResponseDto makeDto(Menu menu) throws IOException {
         LOGGER.info("[makeDto] DTO 생성 시작 : {}", menu);
 
         MenuResponseDto mrd = MenuResponseDto.builder()

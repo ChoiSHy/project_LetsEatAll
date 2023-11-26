@@ -2,6 +2,7 @@ package com.letseatall.letseatall.controller;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.letseatall.letseatall.data.Entity.User;
+import com.letseatall.letseatall.data.dto.Menu.MenuListDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.data.dto.User.*;
 import com.letseatall.letseatall.service.Impl.PreferenceService;
@@ -31,6 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -234,11 +236,13 @@ public class UserController {
     }
 
     @GetMapping("/recommend/{user_id}")
-    public ResponseEntity<List<MenuResponseDto>> recommend_menu(@PathVariable long user_id) {
+    public ResponseEntity<List<MenuListDto>> recommend_menu(@PathVariable long user_id) throws IOException {
         try {
-            List<MenuResponseDto> mlist = recommender.run(user_id);
+            List<MenuListDto> mlist = recommender.run(user_id);
             return ResponseEntity.ok().body(mlist);
         } catch (BadRequestException e) {
+            throw e;
+        }catch (IOException e){
             throw e;
         }
     }

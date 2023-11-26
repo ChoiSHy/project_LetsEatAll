@@ -4,32 +4,38 @@ package com.letseatall.letseatall.service.recommender;
 import com.letseatall.letseatall.data.Entity.Review.Review;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.Entity.menu.Menu;
+import com.letseatall.letseatall.data.dto.Menu.MenuListDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.data.dto.User.BadRequestException;
 import com.letseatall.letseatall.data.repository.Menu.MenuRepository;
 import com.letseatall.letseatall.data.repository.UserRepository;
+import com.letseatall.letseatall.data.repository.review.ReviewRepository;
+import com.letseatall.letseatall.service.MenuService;
+import com.letseatall.letseatall.service.awsS3.S3UploadService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class Recommender {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private MenuRepository menuRepository;
-
+    private final UserRepository userRepository;
+    private final MenuRepository menuRepository;
+    private final MenuService menuService;
+    private final ReviewRepository reviewRepository;
     private final Logger LOGGER = LoggerFactory.getLogger(Recommender.class);
 
-    public List<MenuResponseDto> run(long user_id) {
+    public List<MenuListDto> run(long user_id) throws IOException {
         LOGGER.info("[추천 시스템] 시작");
         HashMap<Long, Double> similarities = new HashMap<>();
         HashMap<Long, Set<Long>> menuMap = new HashMap<>();
         User targetUser = userRepository.getById(user_id);
-        if (targetUser == null){
+        if (targetUser == null) {
             throw new BadRequestException("사용자 찾을 수 없음");
         }
         Set<Long> target_menuSet = get_menuSet(targetUser);
@@ -40,11 +46,13 @@ public class Recommender {
         LOGGER.info("[Recommender] 유사도 계산");
 
         for (User user : userList) {
+            if (user.equals(targetUser)) continue;
             Set<Long> menuSet = get_menuSet(user);
             double similarity = get_similarity(target_menuSet, menuSet);
+            LOGGER.info("[추천 시스템] user: {}, similar: {}", user.getId(), similarity);
 
-            similarities.put(user_id, similarity);
-            menuMap.put(user_id, menuSet);
+            similarities.put(user.getId(), similarity);
+            menuMap.put(user.getId(), menuSet);
         }
         LOGGER.info("[추천 시스템] 유사도 계산 완료");
 
@@ -53,26 +61,28 @@ public class Recommender {
                 (int) (o2.getValue() - o1.getValue())
         );
         LOGGER.info("[추천 시스템] 유사도 순으로 정렬 완료");
+        System.out.println(entryList);
+        List<MenuListDto> retList = new ArrayList<>();
 
-        List<MenuResponseDto> retList = new ArrayList<>();
-        for (int i = 0; i < 3 && retList.size() < 10; i++) {
-            for (long menu_id : new ArrayList<Long>(menuMap.get(entryList.get(0)))) {
+        int uidx=0;
+        while (retList.size() < 10 && uidx < entryList.size()){
+            for( long menu_id : new ArrayList<>(menuMap.get(entryList.get(uidx++).getKey()))){
+                if (target_menuSet.contains(menu_id))
+                    continue;
                 Menu menu = menuRepository.findById(menu_id).orElse(null);
-                if (menu != null) {
-                    MenuResponseDto menuResponseDto = MenuResponseDto.builder()
-                            .rid(menu.getRestaurant().getId())
-                            .r_name(menu.getRestaurant().getName())
-                            .name(menu.getName())
-                            .price(menu.getPrice())
-                            .category(menu.getCategory().getName())
-                            .score(menu.getScore())
-                            .url(menu.getUrl())
-                            .img_url(menu.getImg().getUrl())
-                            .info(menu.getInfo())
+                if (menu != null){
+                    MenuListDto mrd = MenuListDto.builder()
+                            .menu_id(menu.getId())
+                            .menu_name(menu.getName())
+                            .menu_category(menu.getCategory().getName())
+                            .menu_price(menu.getPrice())
+                            .menu_score(menu.getScore())
+                            .youtube_url(menu.getUrl())
                             .build();
-                    retList.add(menuResponseDto);
+                    if (menu.getImg()!= null)
+                        mrd.setImg_url(menu.getImg().getUrl());
+                    retList.add(mrd);
                 }
-
             }
 
         }
@@ -84,12 +94,11 @@ public class Recommender {
 
     private Set<Long> get_menuSet(User user) {
         Set<Long> menuSet = new LinkedHashSet<>();
-
         for (Review review : user.getReviewList()) {
+            Menu menu = review.getMenu();
             int score = review.getScore();
-
             if (score >= 5) {
-                long menu_id = review.getMenu().getId();
+                long menu_id = menu.getId();
                 menuSet.add(menu_id);
             }
         }
@@ -105,4 +114,5 @@ public class Recommender {
 
         return (double) inter.size() / (double) union.size();
     }
+
 }

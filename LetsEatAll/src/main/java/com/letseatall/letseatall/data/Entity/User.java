@@ -39,7 +39,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     @ToString.Exclude
     private String password;
-    @OneToMany(mappedBy = "writer",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "writer",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude                                   // 리뷰 리스트
     private List<Review> reviewList = new ArrayList<>();
 
@@ -63,6 +63,7 @@ public class User implements UserDetails {
     }
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Preference> preferences= new ArrayList<>();
 
     public void addPrefer(Preference prefer){preferences.add(prefer);}
