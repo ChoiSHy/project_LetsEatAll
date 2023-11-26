@@ -5,6 +5,7 @@ import com.letseatall.letseatall.data.Entity.Review.Review;
 import com.letseatall.letseatall.data.Entity.User;
 import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
+import com.letseatall.letseatall.data.dto.User.BadRequestException;
 import com.letseatall.letseatall.data.repository.Menu.MenuRepository;
 import com.letseatall.letseatall.data.repository.UserRepository;
 import org.slf4j.Logger;
@@ -23,19 +24,22 @@ public class Recommender {
 
     private final Logger LOGGER = LoggerFactory.getLogger(Recommender.class);
 
-    public List<MenuResponseDto> run(long user_id){
+    public List<MenuResponseDto> run(long user_id) {
         LOGGER.info("[추천 시스템] 시작");
-        HashMap<Long, Double> similarities= new HashMap<>();
+        HashMap<Long, Double> similarities = new HashMap<>();
         HashMap<Long, Set<Long>> menuMap = new HashMap<>();
-
         User targetUser = userRepository.getById(user_id);
+        if (targetUser == null){
+            throw new BadRequestException("사용자 찾을 수 없음");
+        }
         Set<Long> target_menuSet = get_menuSet(targetUser);
         LOGGER.info("[추천 시스템] 불러온 사용자 = {}", targetUser);
-
         List<User> userList = userRepository.findAll();
         LOGGER.info("[추천 시스템] 모든 사용자 불러오기 완료");
 
-        for (User user : userList){
+        LOGGER.info("[Recommender] 유사도 계산");
+
+        for (User user : userList) {
             Set<Long> menuSet = get_menuSet(user);
             double similarity = get_similarity(target_menuSet, menuSet);
 
@@ -46,15 +50,15 @@ public class Recommender {
 
         List<Map.Entry<Long, Double>> entryList = new LinkedList<>(similarities.entrySet());
         entryList.sort((o1, o2) ->
-            (int) (o2.getValue()-o1.getValue())
+                (int) (o2.getValue() - o1.getValue())
         );
         LOGGER.info("[추천 시스템] 유사도 순으로 정렬 완료");
-        
-        List<MenuResponseDto> retList=new ArrayList<>();
-        for (int i =0; i< 3 && retList.size() < 10; i++){
-            for (long menu_id : menuMap.get(entryList.get(0))){
+
+        List<MenuResponseDto> retList = new ArrayList<>();
+        for (int i = 0; i < 3 && retList.size() < 10; i++) {
+            for (long menu_id : new ArrayList<Long>(menuMap.get(entryList.get(0)))) {
                 Menu menu = menuRepository.findById(menu_id).orElse(null);
-                if(menu!= null) {
+                if (menu != null) {
                     MenuResponseDto menuResponseDto = MenuResponseDto.builder()
                             .rid(menu.getRestaurant().getId())
                             .r_name(menu.getRestaurant().getName())
@@ -74,16 +78,17 @@ public class Recommender {
         }
         LOGGER.info("[추천 시스템] 전달 객체 리스트 생성 완료");
         LOGGER.info("[추천 시스템] 추천 메뉴 선정 완료");
-        
+
         return retList;
     }
-    private Set<Long> get_menuSet(User user){
+
+    private Set<Long> get_menuSet(User user) {
         Set<Long> menuSet = new LinkedHashSet<>();
 
-        for (Review review : user.getReviewList()){
+        for (Review review : user.getReviewList()) {
             int score = review.getScore();
 
-            if(score >= 5 ){
+            if (score >= 5) {
                 long menu_id = review.getMenu().getId();
                 menuSet.add(menu_id);
             }
@@ -91,7 +96,7 @@ public class Recommender {
         return menuSet;
     }
 
-    private double get_similarity(Set<Long> A, Set<Long> B){
+    private double get_similarity(Set<Long> A, Set<Long> B) {
         Set<Long> union = new HashSet<>(A);
         Set<Long> inter = new HashSet<>(A);
 

@@ -2,10 +2,12 @@ package com.letseatall.letseatall.controller;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.letseatall.letseatall.data.Entity.User;
+import com.letseatall.letseatall.data.dto.Menu.MenuResponseDto;
 import com.letseatall.letseatall.data.dto.User.*;
 import com.letseatall.letseatall.service.Impl.PreferenceService;
 import com.letseatall.letseatall.service.LoginService;
 import com.letseatall.letseatall.service.UserService;
+import com.letseatall.letseatall.service.recommender.Recommender;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.ApiImplicitParam;
@@ -32,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,6 +46,8 @@ public class UserController {
 
     private final UserService userService;
     private final PreferenceService preferenceService;
+
+    private final Recommender recommender;
 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 받은 access_token",
@@ -226,6 +231,16 @@ public class UserController {
         LOGGER.info("[ LOG-OUT ] 로그아웃 완료");
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/recommend/{user_id}")
+    public ResponseEntity<List<MenuResponseDto>> recommend_menu(@PathVariable long user_id) {
+        try {
+            List<MenuResponseDto> mlist = recommender.run(user_id);
+            return ResponseEntity.ok().body(mlist);
+        } catch (BadRequestException e) {
+            throw e;
+        }
     }
 
 }
