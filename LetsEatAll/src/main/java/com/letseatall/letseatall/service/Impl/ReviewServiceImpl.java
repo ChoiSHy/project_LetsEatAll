@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -95,9 +96,9 @@ public class ReviewServiceImpl implements ReviewService {
         newReview.setImg(img);
         LOGGER.info("[saveReview] Review 객체 생성 완료: {}", newReview);
         try {
-            if(!seeker.run(newReview))
+            if(!seeker.predict(newReview))
                 throw new BadRequestException("혐오표현 감지!");
-        } catch (RemoteException e) {
+        } catch (RestClientException e) {
             throw e;
         } catch (BadRequestException e) {
             throw e;
