@@ -16,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -44,6 +47,16 @@ public class Recommender {
         LOGGER.info("[추천 시스템] 모든 사용자 불러오기 완료");
 
         LOGGER.info("[Recommender] 유사도 계산");
+        if(target_menuSet.size()==0){
+            LOGGER.info("[Recommender] 사용자의 이용 내역이 없어 비교 불가. 9점 이상의 메뉴 전달");
+            Page<Menu> menus = menuRepository.findByScoreIsGreaterThan(9, PageRequest.of(0,10));
+            List<MenuListDto> retList = new ArrayList<>();
+
+            menus.forEach(menu->{
+                    retList.add(menuService.makeListDto(menu));
+            });
+            return retList;
+        }
 
         for (User user : userList) {
             if (user.equals(targetUser)) continue;
@@ -70,19 +83,7 @@ public class Recommender {
                 if (target_menuSet.contains(menu_id))
                     continue;
                 Menu menu = menuRepository.findById(menu_id).orElse(null);
-                if (menu != null){
-                    MenuListDto mrd = MenuListDto.builder()
-                            .menu_id(menu.getId())
-                            .menu_name(menu.getName())
-                            .menu_category(menu.getCategory().getName())
-                            .menu_price(menu.getPrice())
-                            .menu_score(menu.getScore())
-                            .youtube_url(menu.getUrl())
-                            .build();
-                    if (menu.getImg()!= null)
-                        mrd.setImg_url(menu.getImg().getUrl());
-                    retList.add(mrd);
-                }
+                retList.add(menuService.makeListDto(menu));
             }
 
         }
@@ -114,5 +115,4 @@ public class Recommender {
 
         return (double) inter.size() / (double) union.size();
     }
-
 }

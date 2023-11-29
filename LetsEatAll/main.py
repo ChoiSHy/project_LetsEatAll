@@ -1,5 +1,4 @@
 import torch
-import sys
 import os
 import uvicorn
 import signal
@@ -18,9 +17,9 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
 # 모델 불러오기
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
-#model.load_state_dict(torch.load('C:/Users/HOME/Desktop/2023/working/Seeker/HaterSeeker_model.pth', map_location=device))
-#model.to(device)
-#model.eval()
+model.load_state_dict(torch.load('HaterSeeker_model.pth', map_location=device))
+model.to(device)
+model.eval()
 
 def sentence_predict(sent):
     tokenized_sent = tokenizer(
@@ -53,19 +52,10 @@ def sentence_predict(sent):
 class Item(BaseModel):
     content: str
 
-def set(args):  # model param set
-    model_path = args[1]
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    model.to(device)
-    model.eval()
-
 # --- main ---
 if __name__  ==  "__main__":
-    args = sys.argv
-    set(args)
     print("Fast API is set")
     app = FastAPI()
-
     @app.post("/")
     async def predict(item : Item):
         dicted_item = dict(item)
@@ -80,4 +70,4 @@ if __name__  ==  "__main__":
         print('Server shutting down...')
 
     app.add_api_route('/shutdown', shutdown, methods=['GET'])
-    uvicorn.run(app)
+    uvicorn.run(app, host='0.0.0.0', port=8000)

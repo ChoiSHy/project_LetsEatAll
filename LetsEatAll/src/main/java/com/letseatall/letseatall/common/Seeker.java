@@ -23,8 +23,9 @@ import java.rmi.RemoteException;
 @Component
 public class Seeker {
     private final static Logger LOGGER = LoggerFactory.getLogger(Seeker.class);
+    @Value("${seeker.address}")
+    private String url = "";
 
-    private String url = "http://localhost:8000";
 
     public boolean predict(Review review) {
         RestTemplate restTemplate = new RestTemplate();
@@ -32,11 +33,13 @@ public class Seeker {
         LOGGER.info("[Seeker - predict] start");
         SeekerResponseDto responseDto;
         try {
+            LOGGER.info("[Seeker - predict] send to {}",url);
             responseDto = restTemplate.postForObject(
                     url,
                     requestDto,
                     SeekerResponseDto.class
             );
+
         }catch (RestClientException e){
             throw e;
         }

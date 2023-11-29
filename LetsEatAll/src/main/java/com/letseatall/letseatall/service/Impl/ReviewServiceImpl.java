@@ -15,6 +15,7 @@ import com.letseatall.letseatall.data.repository.Menu.MenuRepository;
 import com.letseatall.letseatall.data.repository.review.ImagefileRepository;
 import com.letseatall.letseatall.data.repository.review.ReviewRepository;
 import com.letseatall.letseatall.service.ReviewService;
+import com.letseatall.letseatall.service.WriterClock;
 import com.letseatall.letseatall.service.awsS3.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ScoreService scoreService;
     private final Seeker seeker;
     private final PreferenceService preferenceService;
+    private final WriterClock clock;
 
     private final Logger LOGGER = LoggerFactory.getLogger(ReviewServiceImpl.class);
 
@@ -74,6 +76,10 @@ public class ReviewServiceImpl implements ReviewService {
             cid = menu.getCategory().getId();
         }
 
+        if (!clock.check(menu, user)){
+            LOGGER.error("[WriterClock] 최근 작성 후 24시간이 지나지 않음");
+            throw new BadRequestException("최근 리뷰 작성 후, 24시간이 지나야 합니다.");
+        }
         LOGGER.info("[saveReview] Review 객체 생성 시작");
         ImageFile img = null;
         if (file != null && !file.isEmpty()) {
@@ -105,7 +111,8 @@ public class ReviewServiceImpl implements ReviewService {
         }
         Review savedReview = reviewRepository.save(newReview);
         LOGGER.info("[saveReview] Review 저장 완료");
-
+        user.setScore(user.getScore()+5);
+        userRepository.save(user);
         savedReview = scoreService.plusScore(savedReview);
 
         preferenceService.recordUserPrefer(score - 5, cid, uid);

@@ -1,6 +1,7 @@
 package com.letseatall.letseatall.service;
 
 import com.letseatall.letseatall.data.Entity.menu.Menu;
+import com.letseatall.letseatall.data.dto.Menu.MenuListDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuModifyDto;
 import com.letseatall.letseatall.data.dto.common.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
@@ -34,4 +35,5 @@ public interface MenuService {
     MenuResponseDto modify(MenuModifyDto menuDto, MultipartFile file) throws IOException;
 
     MenuResponseDto makeDto(Menu menu) throws IOException;
+    MenuListDto makeListDto(Menu menu);
 }

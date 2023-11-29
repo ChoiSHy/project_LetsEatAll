@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("select r from Review r where r.menu.id = ?1")
@@ -27,4 +28,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     int countAllByMenuId(Long menu_id);
     @Query(value="select count(rv) from Review rv left join rv.menu m where m.restaurant.id=?1")
     int countReviewsByRestaurantId(Long rest_id);
+
+    Optional<Review> findByWriterIdAndMenuIdOrderByUpdatedAt(long writerId, long menuId);
 }

@@ -200,7 +200,7 @@ public class RestaurantController {
         List<RestaurantResponseDto> responseDtoList = restaurantService.findByRestaurantNameOrderByScore(rname,false);
         return ResponseEntity.ok().body(responseDtoList);
     }
-    @GetMapping("/search/restaurant/name{name}/score-order/reverse")
+    @GetMapping("/search/restaurant/name/{name}/score-order/reverse")
     @ApiOperation(value= "이름을 통한 음식점 검색", notes="name을 포함한 이름을 가진 음식점 리스트를 반환한다.")
     public ResponseEntity<List<RestaurantResponseDto>> searchByRestaurantNameOrerByScoreRev(@PathVariable("name") String rname) throws UnsupportedEncodingException {
         LOGGER.info("[searchByRestaurantName] rname = {}",rname);
@@ -208,23 +208,10 @@ public class RestaurantController {
         return ResponseEntity.ok().body(responseDtoList);
     }
 
-    @GetMapping("/search/restaurant/menu/{name}")
+    @GetMapping("/search/restaurant-menu/name/{name}")
     @ApiOperation(value= "메뉴 이름을 통한 음식점 검색", notes="name라는 메뉴를 가진 음식점 리스트를 반환한다. 메뉴이름에 포함되어 있으면 해당됨.")
     public ResponseEntity<List<RestaurantResponseDto>> searchByMenuName(@PathVariable("name") String mname) throws UnsupportedEncodingException {
         List<RestaurantResponseDto> responseDtoList = restaurantService.findByMenuName(mname);
         return ResponseEntity.ok().body(responseDtoList);
-    }
-
-
-    @GetMapping("/score/sum")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "access_token",
-                    required = true, dataType = "String", paramType = "header")
-    })
-
-    @ApiOperation(value= "모든 점수 합산")
-    public ResponseEntity sumScore(){
-        restaurantService.sumScore();
-        return ResponseEntity.ok().build();
     }
 }

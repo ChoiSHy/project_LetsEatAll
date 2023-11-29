@@ -4,6 +4,7 @@ import com.letseatall.letseatall.data.Entity.*;
 import com.letseatall.letseatall.data.Entity.Review.ImageFile;
 import com.letseatall.letseatall.data.Entity.menu.Menu;
 import com.letseatall.letseatall.data.Entity.menu.MenuImageFile;
+import com.letseatall.letseatall.data.dto.Menu.MenuListDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuModifyDto;
 import com.letseatall.letseatall.data.dto.common.IntChangeDto;
 import com.letseatall.letseatall.data.dto.Menu.MenuDto;
@@ -334,5 +335,24 @@ public class MenuServiceImpl implements MenuService {
             return makeDto(savedMenu);
         }
         return null;
+    }
+
+    @Override
+    public MenuListDto makeListDto(Menu menu) {
+        if (menu == null)
+            return null;
+        MenuListDto menuListDto = MenuListDto.builder()
+                .menu_id(menu.getId())
+                .menu_score(menu.getScore())
+                .menu_price(menu.getPrice())
+                .menu_category(menu.getCategory().getName())
+                .menu_name(menu.getName())
+                .youtube_url(menu.getUrl())
+                .build();
+        if(menu.getImg()!= null){
+            menuListDto.setImg_url(menu.getImg().getUrl());
+        }
+
+        return menuListDto;
     }
 }

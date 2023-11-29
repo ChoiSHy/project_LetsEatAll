@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MenuRepository extends JpaRepository<Menu, Long>, MenuBulkRepository {
     @Query("select m from Menu as m where m.franchise.id = ?1 and m.restaurant.id = null ")
@@ -27,5 +28,7 @@ public interface MenuRepository extends JpaRepository<Menu, Long>, MenuBulkRepos
 
     Page<Menu> findAllByRestaurantIdOrderByScore(Long rest_id, Pageable pageable);
     int countAllByRestaurantId(Long id);
+
+    Page<Menu> findByScoreIsGreaterThan(double score, Pageable pageable);
 
 }

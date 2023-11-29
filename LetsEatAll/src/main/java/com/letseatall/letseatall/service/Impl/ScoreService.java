@@ -23,10 +23,12 @@ public class ScoreService {
     public Review plusScore(Review review){
         LOGGER.info("[plusScore] 점수 조정 시작");
         Menu menu = review.getMenu();
+        LOGGER.info("[plusScore] menu = {}", menu);
         Restaurant restaurant = menu.getRestaurant();
-
+        LOGGER.info("[plusScore] restaurant = {}", restaurant);
+        long rest_id= restaurant.getId();
         int review_cnt1 = reviewRepository.countAllByMenuId(menu.getId());
-        int review_cnt2 = reviewRepository.countReviewsByRestaurantId(restaurant.getId());
+        int review_cnt2 = reviewRepository.countReviewsByRestaurantId(rest_id);
         LOGGER.info("[plusScore] review_cnt = {}, menu_cnt = {}", review_cnt1, review_cnt2);
 
         double menu_score= menu.getScore() * (review_cnt1-1) + review.getScore();

@@ -100,6 +100,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         for (Menu fMenu : fMenus) {
             Menu newMenu = new Menu(fMenu.getName(), fMenu.getPrice(), fMenu.getScore(), fMenu.getCategory());
             newMenu.setRestaurant(restaurant);
+            newMenu.setInfo(fMenu.getInfo());
             if (fMenu.getUrl() != null) {
                 newMenu.setUrl(fMenu.getUrl());
                 LOGGER.info("[addFranchiseMenus] url 처리");
