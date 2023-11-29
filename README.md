@@ -16,9 +16,9 @@
          Spring api server(AWS EC2)
              -->
                Fast api server (Local, 리뷰 혐오표현 판단)
-             <--
+             -->
          Spring api server(AWS EC2, 데이터 저장)
-       <--
+       -->
    Client(결과 전달)
 
 
