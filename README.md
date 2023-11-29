@@ -9,7 +9,9 @@
 1. 혐오표현 감지
  - PyTorch를 통해 Deep-Learning 모델을 만들어 혐오표현을 감지해 리뷰 생성에 제한을 둠
  - beomi/KcELECTRA-base-v2022 모델을 이용해 학습함
- - Client
+ - 관련 파일은 https://github.com/ChoiSHy/Hating-word-Seeker.git 에서 확인할 수 있습니다.
+ - 과정
+   Client(Review 저장 요청)
        -->
          Spring api server(AWS EC2)
              -->
@@ -17,7 +19,8 @@
              <--
          Spring api server(AWS EC2, 데이터 저장)
        <--
-   Client(결과 전달) 
+   Client(결과 전달)
+
 
 2. 포인트 제도
  - 리뷰 작성시 5포인트씩 적립
