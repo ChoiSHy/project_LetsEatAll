@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
 <head>
     <meta charset="UTF-8">
     <title>회원가입</title>
 </head>
 <body>
+    <th:block th:if="${msg} != null">
+        <script>
+            alert(${msg})
+        </script>
+    </th:block>
     <div align="center">
-        <form action="/user/sign-up" method="post">
+        <form action="/page/sign-up" method="post" onsubmit="translate()">
             <table>
                 <tr>
                     <td>ID: </td>
@@ -22,9 +27,8 @@
                 </tr>
                 <tr>
                     <td>생년월일: </td>
-                    <td><input type="date" name="birthDate"></td>
+                    <td><input type="text" name="birthDate" placeholder="yyyy-mm-dd"></td>
                 </tr>
-                <input type="hidden" name="role">
                 <tr>
                     <td colspan="2">
                         <input type="submit" value="가입">
@@ -35,5 +39,6 @@
             </table>
         </form>
     </div>
+
 </body>
 </html>

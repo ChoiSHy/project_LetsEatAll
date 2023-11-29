@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" >
+    <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
@@ -11,11 +11,13 @@
     <input id="word" type="text" name="word" placeholder="음식점 이름">
     <input type="button" onclick="search()">
 </div>
-<ul th:each="list:${categories}">
-    <li>
-        <a th:text="${list.name}", th:href="${list.url}"></a>
-    </li>
-</ul>
+<div align="left">
+    <ul th:each="list:${categories}">
+        <li>
+            <a th:text="${list.name}" , th:href="${list.url}"></a>
+        </li>
+    </ul>
+</div>
 <script src="/js/restaurantList.js"></script>
 </body>
 </html>
